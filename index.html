@@ -1,0 +1,3577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MrrCode · v0.1.0</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-400-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-600-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-800-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/latin-400-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/cyrillic-400-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/cyrillic-700-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/latin-400-normal.css">
+<style>
+:root{
+  --bg:#0a0e1a; --panel:#10162a; --panel2:#0d1426; --border:#1e2a45; --border2:#2b3a5e;
+  --text:#dbe4f5; --muted:#7b8bad; --accent:#7c6cff; --cyan:#38d6ff; --orange:#ff9354;
+  --green:#3ddc84; --red:#ff5f6d; --yellow:#ffd166;
+  --font-ui:'Inter',system-ui,-apple-system,sans-serif;
+  --font-code:'JetBrains Mono',ui-monospace,'Cascadia Code',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:radial-gradient(1200px 700px at 80% -10%,#16204a 0%,var(--bg) 55%);color:var(--text);
+  font-family:var(--font-ui);font-size:15px;overscroll-behavior:none}
+button{font-family:var(--font-ui);touch-action:manipulation;user-select:none;-webkit-user-select:none}
+input,select,textarea{font-size:16px}
+code,pre{font-family:var(--font-code)}
+.hidden{display:none!important}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top));
+  background:rgba(10,14,26,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.logo{font-weight:800;font-size:16px;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+.logo small{color:var(--muted);font-weight:500;font-size:11px}
+.tabs{display:flex;gap:4px;background:var(--panel2);padding:4px;border-radius:12px;border:1px solid var(--border);
+  overflow-x:auto;max-width:100%;flex:1;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{border:0;background:transparent;color:var(--muted);padding:10px 13px;border-radius:9px;cursor:pointer;
+  font:600 13.5px var(--font-ui);transition:.15s;white-space:nowrap}
+.tab-btn.active{background:linear-gradient(135deg,#6c5cff,#38a9ff);color:#fff;box-shadow:0 4px 14px rgba(80,120,255,.35)}
+.run-controls{display:flex;gap:6px;align-items:center;width:100%}
+.btn{border:1px solid var(--border2);background:#16203a;color:var(--text);padding:10px 14px;border-radius:11px;
+  font:600 13.5px var(--font-ui);cursor:pointer;transition:.12s;white-space:nowrap}
+.btn:active{transform:scale(.96);background:#22305a}
+.btn.primary{background:linear-gradient(135deg,#28c96b,#199e56);border-color:transparent;color:#04150c}
+.btn.stop{background:linear-gradient(135deg,#ff5f6d,#c93644);border-color:transparent;color:#fff}
+.btn.ai{background:linear-gradient(135deg,#6c5cff,#a05cff);border-color:transparent;color:#fff}
+.btn.ghost{background:transparent}
+.btn.mini{padding:7px 11px;font-size:12.5px;border-radius:9px}
+.btn.danger{color:#ff8b95;border-color:#4a2530}
+.btn:disabled{opacity:.4;pointer-events:none}
+#runStatus{font-size:12px;color:var(--muted);min-width:0;flex:1;text-align:right;white-space:nowrap;overflow:hidden}
+#runStatus.running{color:var(--green)}
+#runStatus.error{color:var(--red)}
+
+/* ---------- layout ---------- */
+main{max-width:1180px;margin:0 auto;padding:12px 12px calc(50px + env(safe-area-inset-bottom))}
+.tab{display:none}
+.tab.active{display:block;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:11px 14px;border-bottom:1px solid var(--border);background:var(--panel2);font-size:13.5px}
+.panel-head span{color:var(--muted);font-size:12px}
+.spacer{flex:1}
+
+/* ---------- game tab + fullscreen ---------- */
+.canvas-wrap{padding:10px;position:relative}
+#gameCanvas{display:block;width:100%;aspect-ratio:16/9;border-radius:10px;
+  background:#0f172a;touch-action:none;box-shadow:0 0 0 1px #22304f,0 14px 40px rgba(0,0,0,.45)}
+.canvas-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;
+  color:var(--muted);font-size:11.5px;flex-wrap:wrap}
+.cb-right{display:flex;align-items:center;gap:8px}
+.fs-controls{display:none;position:absolute;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:60;gap:8px}
+.fs-controls button{background:rgba(10,14,26,.85);color:#fff;border:1px solid #2b3a5e;border-radius:12px;
+  padding:12px 16px;cursor:pointer;font:700 14px var(--font-ui);touch-action:manipulation}
+#gameStage:fullscreen{display:flex;align-items:center;justify-content:center;background:#04060d;
+  border-radius:0;padding:0;width:100%;height:100%}
+#gameStage:-webkit-full-screen{display:flex;align-items:center;justify-content:center;background:#04060d;
+  padding:0;width:100%;height:100%}
+#gameStage:fullscreen #gameCanvas{width:min(100vw,177.78vh);max-width:none;max-height:100vh;border-radius:0}
+#gameStage:-webkit-full-screen #gameCanvas{width:min(100vw,177.78vh);max-width:none;max-height:100vh;border-radius:0}
+#gameStage:fullscreen .canvas-bar{display:none}
+#gameStage:fullscreen .fs-controls{display:flex}
+#gameStage:-webkit-full-screen .fs-controls{display:flex}
+.console-panel{margin-top:12px}
+#consoleOut{height:140px;overflow:auto;padding:10px 14px;background:#0b1120;font:12.5px/1.6 var(--font-code);
+  -webkit-overflow-scrolling:touch}
+#consoleOut .ts{color:#41527a;margin-right:8px}
+.line-log{color:#c7d3ec}.line-error{color:#ff8088}.line-sys{color:#7fa8ff}.line-warn{color:#ffcf7a}
+
+/* ---------- code tab ---------- */
+.code-toolbar{display:flex;align-items:center;gap:7px;margin-bottom:10px;
+  overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:3px}
+.code-toolbar::-webkit-scrollbar{display:none}
+.code-toolbar>*{flex:none}
+.code-toolbar .spacer{flex:1 1 auto;min-width:8px}
+.file-chip{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:8px 11px;font-size:13px;white-space:nowrap}
+.file-chip b{font-family:var(--font-code);color:var(--cyan)}
+.chip{background:var(--panel2);border:1px solid var(--border);border-radius:999px;padding:6px 11px;font-size:11.5px;color:var(--muted)}
+.chip.accent{color:var(--accent);border-color:#3a3570;font-weight:700}
+select.sel{background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:10px;
+  padding:10px 11px;font:600 13.5px var(--font-ui);cursor:pointer;font-size:16px;max-width:190px}
+.palette{display:flex;gap:6px;overflow-x:auto;padding:8px;background:var(--panel);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.palette::-webkit-scrollbar{display:none}
+.pal-btn{flex:none;min-width:40px;height:40px;padding:0 10px;background:#16203a;border:1px solid var(--border2);
+  color:var(--text);border-radius:10px;font:600 13.5px var(--font-code);cursor:pointer;touch-action:manipulation}
+.pal-btn:active{background:#2a3a68;border-color:var(--accent)}
+.pal-sep{flex:none;width:2px;background:var(--border);margin:4px 3px;border-radius:2px}
+.color-tool{display:flex;align-items:center;gap:7px;flex:none}
+.color-swatch{width:22px;height:22px;border-radius:7px;border:1px solid var(--border2);background:linear-gradient(135deg,#ff4d4d,#4d7cff);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.color-picker-input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.editor-wrap{display:flex;height:clamp(300px,46vh,600px);position:relative}
+.gutter{flex:0 0 44px;width:44px;overflow:hidden;background:#0c1222;border-right:1px solid var(--border);position:relative}
+.gutter-inner{position:absolute;top:0;left:0;right:0;padding:12px 7px 40px 0;text-align:right;
+  font:13px/24px var(--font-code);color:#42537a;white-space:pre;will-change:transform;user-select:none}
+.editor-area{position:relative;flex:1;min-width:0;background:#0e1526}
+.hl,#codeInput{font:16px/24px var(--font-code);padding:12px 14px 40px;white-space:pre;tab-size:4}
+.hl{position:absolute;inset:0;overflow:auto;pointer-events:none;color:var(--text);scrollbar-width:none}
+.hl::-webkit-scrollbar{display:none}
+#codeInput{position:absolute;inset:0;width:100%;height:100%;border:0;outline:0;resize:none;overflow:auto;
+  background:transparent;color:transparent;caret-color:var(--cyan);font-size:16px}
+#codeInput::selection{background:rgba(124,108,255,.35)}
+.c-com{color:#5b6b8c;font-style:italic}
+.c-str{color:#8bdb72}
+.c-num{color:#ff9d6e}
+.c-color{color:#fff;font-weight:700;text-shadow:0 0 0 transparent;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border-radius:3px;padding:0 1px}
+.c-kw{color:#b78cff;font-weight:700}
+.c-lit{color:#ff9d6e}
+.c-bi{color:var(--cyan)}
+.c-ev{color:#ffb35c;font-weight:700}
+.c-fn{color:var(--yellow)}
+.c-id{color:#dbe4f5}
+.c-op{color:#8496b8}
+.c-punc{color:#6b7a99}
+
+/* autocomplete */
+.ac-popup{position:absolute;z-index:80;width:min(94%,480px);background:#141c33;border:1px solid var(--border2);
+  border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.55);overflow:hidden}
+#acClose{position:absolute;top:6px;right:6px;z-index:5;width:32px;height:32px;border-radius:8px;
+  background:#1c2745;border:1px solid var(--border2);color:var(--muted);font-size:14px;cursor:pointer}
+#acList{max-height:240px;overflow:auto;-webkit-overflow-scrolling:touch}
+.ac-item{display:flex;gap:8px;align-items:center;padding:11px 40px 11px 10px;cursor:pointer;font-size:14px;
+  border-bottom:1px solid rgba(30,42,69,.5)}
+.ac-item.sel{background:linear-gradient(90deg,rgba(124,108,255,.28),rgba(56,214,255,.08))}
+.ac-kind{font:700 10px var(--font-ui);padding:3px 6px;border-radius:6px;min-width:32px;text-align:center;flex:none}
+.k-fn{background:#0e3a4a;color:var(--cyan)} .k-kw{background:#2e2650;color:#b78cff}
+.k-ev{background:#40300f;color:#ffb35c} .k-my{background:#123a26;color:var(--green)}
+.k-var{background:#3d3413;color:var(--yellow)} .k-prop{background:#1c2c4d;color:#8fb7ff}
+.k-obj{background:#3d1c34;color:#ff8bd2} .k-spr{background:#123c3a;color:#5ce6d8}
+.k-snip{background:#241f4d;color:#a5b4ff} .k-mod{background:#33264d;color:#c9a8ff}
+.k-imp{background:#123c3a;color:#5ce6d8}
+.ac-name{font-weight:600;color:#eaf0ff;font-family:var(--font-code);flex:none}
+.ac-sig{color:var(--muted);font-size:11px;margin-left:auto;font-family:var(--font-code);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%}
+.ac-doc{padding:9px 12px;border-top:1px solid #23314f;color:#9fb0d0;font-size:12.5px;background:#0f1730;
+  max-height:80px;overflow:auto;line-height:1.45}
+.code-status{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 14px;font-size:13px;flex-wrap:wrap}
+.code-status .status-sep{width:1px;height:16px;background:var(--border)}
+#caretPos{color:var(--muted);white-space:nowrap;font-family:var(--font-code);font-size:12px}
+#hintBar{color:#9fb0d0;flex:1;min-width:180px;line-height:1.4}
+#hintBar .h-sig{color:var(--cyan);font-family:var(--font-code);font-size:13px}
+#hintBar .h-doc{color:#93a4c6}
+
+/* ---------- bottom sheets ---------- */
+.sheet-backdrop{position:fixed;inset:0;background:rgba(4,6,13,.72);z-index:300;display:flex;
+  align-items:flex-end;justify-content:center}
+.sheet{background:#10162a;border:1px solid var(--border2);border-radius:18px 18px 0 0;width:100%;max-width:720px;
+  max-height:86vh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom);
+  animation:sheetUp .2s ease}
+@keyframes sheetUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:13px 14px;
+  border-bottom:1px solid var(--border);font-size:15.5px}
+.sheet-head .sh-btns{display:flex;gap:6px;align-items:center}
+#sheetSearch{margin:12px 14px 4px;padding:12px 14px;background:#0b1120;border:1px solid var(--border);
+  border-radius:12px;color:var(--text);outline:none;font-size:16px}
+#sheetSearch:focus{border-color:var(--accent)}
+.sheet-list{overflow:auto;padding:10px 14px 20px;-webkit-overflow-scrolling:touch}
+.sheet-item{border:1px solid var(--border);border-radius:12px;padding:11px 12px;margin-bottom:9px;background:var(--panel2)}
+.si-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.si-kind{font:700 10px var(--font-ui);padding:3px 7px;border-radius:6px;background:#0e3a4a;color:var(--cyan)}
+.si-kind.ev{background:#40300f;color:#ffb35c}
+.si-sig{font:600 13px var(--font-code);color:var(--cyan);flex:1;min-width:130px}
+.si-doc{color:#93a4c6;font-size:12.5px;margin-top:6px;line-height:1.45}
+
+/* ---------- ИИ-агент ---------- */
+.ai-settings{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:9px;background:#0d1426}
+.ai-settings label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.ai-settings input{background:#0b1120;border:1px solid var(--border);border-radius:10px;color:var(--text);
+  padding:11px;font:14px var(--font-code);font-size:16px;outline:none;width:100%}
+.ai-settings input:focus{border-color:var(--accent)}
+.ai-status{font-size:12px;color:var(--green);align-self:center}
+.ai-hint{font-size:11.5px;color:var(--muted);line-height:1.45}
+.ai-chat{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px;min-height:200px;
+  -webkit-overflow-scrolling:touch}
+.ai-msg{max-width:94%;padding:10px 12px;border-radius:14px;font-size:13.5px;line-height:1.5;
+  white-space:pre-wrap;word-break:break-word}
+.ai-msg.user{align-self:flex-end;background:linear-gradient(135deg,#4c5cff,#38a9ff);color:#fff;border-bottom-right-radius:4px}
+.ai-msg.bot{align-self:flex-start;background:#16203a;border:1px solid var(--border);border-bottom-left-radius:4px}
+.ai-msg.sys{align-self:center;background:transparent;color:var(--muted);font-size:12px;text-align:center;padding:4px 8px}
+.ai-msg.err{align-self:flex-start;background:#33161c;border:1px solid #5a2530;color:#ffb3b9}
+.ai-applied{margin-top:7px;display:flex;flex-wrap:wrap;gap:6px}
+.ai-tag{background:#123a26;color:#3ddc84;border-radius:7px;padding:3px 8px;font-size:11.5px;font-weight:600}
+.ai-tag.img{background:#40300f;color:#ffb35c}
+.ai-img-note{margin-top:6px;color:#ffcf7a;font-size:12px;line-height:1.45}
+.ai-insert{margin-top:8px}
+.typing{display:inline-flex;gap:4px;vertical-align:middle;margin-right:6px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.1s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.ai-input{display:flex;gap:8px;padding:10px 12px calc(12px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--border);align-items:flex-end}
+.ai-input textarea{flex:1;background:#0b1120;border:1px solid var(--border);border-radius:12px;color:var(--text);
+  padding:11px 12px;font:14px var(--font-ui);font-size:16px;resize:none;outline:none;max-height:120px}
+.ai-input textarea:focus{border-color:var(--accent)}
+.ai-send{width:52px;height:46px;flex:none;font-size:18px;padding:0}
+
+/* ---------- scene tab ---------- */
+.scene-layout{display:flex;flex-direction:column;gap:12px}
+.scene-side{padding:12px;display:flex;flex-direction:column;gap:9px}
+.scene-side h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.add-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.add-btns .btn{text-align:center;padding:12px 4px;font-size:13px}
+.obj-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow:auto;-webkit-overflow-scrolling:touch}
+.obj-row{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--border);border-radius:11px;
+  cursor:pointer;background:var(--panel2)}
+.obj-row.selected{border-color:var(--accent);background:rgba(124,108,255,.12)}
+.obj-row .oicon{width:22px;text-align:center;font-size:16px}
+.obj-row .oname{font-family:var(--font-code);font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis}
+.obj-row .otype{color:var(--muted);font-size:11px}
+.row-btns{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.row-btns .btn{flex:1;min-width:0;text-align:center;padding:10px 6px;font-size:12.5px}
+.scene-main .preview-wrap{padding:10px}
+#sceneCanvas{display:block;width:100%;aspect-ratio:16/9;border-radius:10px;background:#0d1424;touch-action:none}
+.props{border-top:1px solid var(--border);padding:12px}
+.props-empty{color:var(--muted);font-size:13px;line-height:1.5}
+.props-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap}
+.type-badge{font:700 12px var(--font-ui);padding:5px 10px;border-radius:999px}
+.t-rect{background:#40250f;color:var(--orange)} .t-circle{background:#0e3a4a;color:var(--cyan)} .t-text{background:#2e2650;color:#b78cff}
+.props-tip{color:var(--muted);font-size:11px}
+.props-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;margin-bottom:11px}
+.pf{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--muted)}
+.pf input{background:#0b1120;border:1px solid var(--border);border-radius:10px;color:var(--text);
+  padding:10px;font:16px var(--font-code);width:100%;outline:none}
+.pf input:focus{border-color:var(--accent)}
+.pf input[type=color]{padding:4px;height:46px;cursor:pointer}
+.code-ref{color:var(--muted);font-size:11.5px}
+.code-ref code{color:var(--cyan);background:#0b1120;padding:2px 6px;border-radius:6px}
+
+/* ---------- files tab ---------- */
+.files-layout{display:flex;flex-direction:column;gap:12px}
+.files-main{padding:12px;display:flex;flex-direction:column;gap:9px}
+.files-main h4{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.files-main>.btn{text-align:center}
+.file-row{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--border);
+  border-radius:12px;background:var(--panel2);flex-wrap:nowrap}
+.file-row.active{border-color:var(--accent);background:rgba(124,108,255,.1)}
+.file-row .fr-icon{width:22px;text-align:center;font-size:15px;flex:none}
+.fr-thumb{width:40px;height:40px;object-fit:contain;background:#0b1120;border-radius:8px;border:1px solid var(--border);flex:none}
+.fr-name{font-family:var(--font-code);font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:90px}
+.fr-meta{color:var(--muted);font-size:11px;white-space:nowrap;flex:none}
+.empty-note{color:var(--muted);font-size:12.5px;padding:10px;border:1px dashed var(--border);border-radius:10px;line-height:1.5}
+.note{margin-top:6px;padding:10px 12px;background:#0b1120;border:1px solid var(--border);border-radius:10px;
+  color:#9fb0d0;font-size:12.5px;line-height:1.5;min-height:38px}
+.files-info{padding:14px;display:flex;flex-direction:column;gap:10px;color:var(--muted);font-size:13px;line-height:1.55}
+.files-info b{color:var(--text)}
+.files-info code{color:var(--cyan);font-size:12px}
+
+/* ---------- help tab ---------- */
+.help-wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.doc-section{padding:16px}
+.doc-section h2{font-size:16.5px;margin-bottom:10px;color:#fff}
+.doc-section h2 .num{color:var(--accent);margin-right:6px}
+.doc-section p{color:#a9b8d8;line-height:1.6;margin-bottom:10px;font-size:13.5px}
+.doc-section p code{color:var(--cyan);font-size:12.5px}
+.doc-code{background:#0b1120;border:1px solid var(--border);border-radius:10px;padding:12px 14px;
+  font:12.5px/1.6 var(--font-code);color:#c9d6f0;overflow:auto;margin-bottom:10px;white-space:pre;
+  -webkit-overflow-scrolling:touch}
+.doc-code .k{color:#b78cff}.doc-code .s{color:#8bdb72}.doc-code .c{color:#5b6b8c;font-style:italic}
+.doc-code .f{color:var(--cyan)}.doc-code .n{color:#ff9d6e}
+.new-badge{display:inline-block;background:linear-gradient(135deg,#6c5cff,#a05cff);color:#fff;
+  font:800 11px var(--font-ui);padding:3px 9px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.changelog li{margin:8px 0 8px 18px;color:#a9b8d8;line-height:1.55;font-size:13.5px}
+.api-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.api-chips code{background:#0b1120;border:1px solid var(--border);border-radius:8px;padding:6px 9px;
+  font-size:11.5px;color:var(--cyan)}
+.examples-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.ex-btn{display:flex;flex-direction:column;gap:6px;text-align:left;background:var(--panel2);
+  border:1px solid var(--border);border-radius:14px;padding:13px;cursor:pointer;color:var(--text);
+  font:600 13.5px var(--font-ui);transition:.12s}
+.ex-btn:active{transform:scale(.97);border-color:var(--accent)}
+.ex-btn .ex-icon{font-size:21px}
+.ex-btn small{color:var(--muted);font-weight:400;font-size:12px;line-height:1.45}
+
+/* ---------- компактная мобильная адаптация ---------- */
+@media (max-width:640px){
+  header{padding:6px 9px;padding-top:calc(6px + env(safe-area-inset-top));gap:7px}
+  .logo{font-size:13.5px}
+  .logo small{display:none}
+  .tabs{order:3;flex:1 1 100%}
+  .tab-btn{padding:9px 10px;font-size:12.5px}
+  .run-controls{order:2;width:auto;flex:1;justify-content:flex-end}
+  #btnRun,#btnStop{padding:9px 11px;font-size:12.5px}
+  #btnAI{padding:9px 10px}
+  #runStatus{display:none}
+  main{padding:9px 9px calc(40px + env(safe-area-inset-bottom))}
+  .btn{padding:9px 11px;font-size:12.5px;border-radius:10px}
+  .btn.mini{padding:6px 9px;font-size:12px}
+  .chip{display:none}
+  .file-chip{padding:7px 9px;font-size:12px}
+  select.sel{padding:8px 9px;max-width:150px;font-size:14px}
+  .editor-wrap{height:clamp(240px,40vh,460px)}
+  .pal-btn{height:38px;min-width:38px;font-size:12.5px;padding:0 8px}
+  .palette{padding:6px;gap:5px}
+  #consoleOut{height:110px;font-size:12px}
+  .canvas-wrap{padding:7px}
+  .canvas-bar{font-size:10.5px}
+  .fs-controls button{padding:10px 13px;font-size:13px}
+  .doc-section{padding:13px}
+  .doc-section h2{font-size:15px}
+  .sheet{max-height:90vh}
+  .ai-chat{min-height:160px}
+  .props-grid{grid-template-columns:1fr 1fr}
+}
+@media (min-width:920px){
+  .scene-layout{display:grid;grid-template-columns:320px 1fr;align-items:start}
+  .files-layout{display:grid;grid-template-columns:1fr 330px;align-items:start}
+  .run-controls{width:auto;margin-left:auto;flex:none}
+  #runStatus{min-width:110px;flex:none}
+  header{padding:10px 18px}
+  main{padding:18px 16px 60px}
+  .row-btns .btn{flex:none;padding:10px 14px;font-size:13.5px}
+}
+
+/* MrrCode app-like window + in-engine game overlay */
+html.mrr-app-mode, html.mrr-app-mode body {
+  width:100%; height:100%; overflow:hidden;
+}
+body.mrr-app-mode { margin:0; }
+#mrrGameOverlay {
+  position:fixed; inset:0; z-index:99999; display:none;
+  background:#000;
+}
+#mrrGameOverlay.active { display:block; }
+#mrrGameFrame {
+  position:absolute; inset:0; width:100%; height:100%;
+  border:0; display:block; background:#000;
+}
+#mrrGameBack {
+  position:absolute;
+  top:max(12px, env(safe-area-inset-top));
+  left:max(12px, env(safe-area-inset-left));
+  z-index:100001;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:12px;
+  padding:9px 13px;
+  background:rgba(20,25,35,.88);
+  color:#fff;
+  font:600 14px system-ui,sans-serif;
+  box-shadow:0 2px 14px rgba(0,0,0,.4);
+  backdrop-filter:blur(8px);
+}
+
+
+/* Close-site control */
+#mrrCloseSite {
+  position:fixed;
+  right:max(12px, env(safe-area-inset-right));
+  top:max(12px, env(safe-area-inset-top));
+  z-index:100010;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:12px;
+  padding:9px 12px;
+  background:rgba(20,25,35,.88);
+  color:#fff;
+  font:600 14px system-ui,sans-serif;
+  box-shadow:0 2px 14px rgba(0,0,0,.35);
+  backdrop-filter:blur(8px);
+}
+#mrrCloseSite:active { transform:scale(.97); }
+
+</style>
+
+<style id="mrr-cat-decor">
+  /* MrrCode: subtle decorative cat details; existing theme is untouched. */
+  .mrr-cat {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-52%);
+    font-size: 17px;
+    line-height: 1;
+    opacity: .72;
+    pointer-events: none;
+    user-select: none;
+    filter: saturate(.9);
+  }
+  .mrr-cat-corner {
+    position: absolute;
+    right: 10px;
+    bottom: 7px;
+    font-size: 14px;
+    opacity: .5;
+    pointer-events: none;
+    user-select: none;
+  }
+  .mrr-cat-paw {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: .85em;
+    opacity: .62;
+    pointer-events: none;
+    user-select: none;
+  }
+</style>
+</head>
+
+<button id="mrrCloseSite" type="button" aria-label="Закрыть MrrCode">✕ Закрыть</button>
+
+<body>
+
+<header>
+  <div class="logo">🎮 MrrCode <small>MrrCode Studio · v0.1.0 · сенсор + ИИ <span class="mrr-cat">ฅ^•ﻌ•^ฅ</span></small></div>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="game">▶ Игра</button>
+    <button class="tab-btn" data-tab="code">⌘ Код</button>
+    <button class="tab-btn" data-tab="scene">▦ Сцена</button>
+    <button class="tab-btn" data-tab="files">📁 Файлы</button>
+    <button class="tab-btn" data-tab="help">? Справка</button>
+  </nav>
+  <div class="run-controls">
+    <button class="btn ai" id="btnAI" title="ИИ-агент">🤖 ИИ</button>
+    <button class="btn primary" id="btnRun" title="Запуск main.mrr на весь экран">▶ Запуск</button>
+    <button class="btn stop" id="btnStop" disabled>■ Стоп</button>
+    <span id="runStatus">Готов к запуску</span>
+  </div>
+</header>
+
+<main>
+  <!-- ================= GAME ================= -->
+  <section class="tab active" id="tab-game">
+    <div class="panel canvas-wrap" id="gameStage">
+      <div class="fs-controls">
+        <button id="btnFsStop">■ Стоп</button>
+        <button id="btnExitFs">✕ Выйти</button>
+      </div>
+      <canvas id="gameCanvas" width="800" height="450"></canvas>
+      <div class="canvas-bar">
+        <span>Поле 800×450 · только касания (мультитач) · «назад» — выход из полного экрана</span>
+        <span class="cb-right">
+          <button class="btn mini ghost" id="btnFullscreen">⛶ Во весь экран</button>
+          <span id="fpsLabel"></span>
+        </span>
+      </div>
+    </div>
+    <div class="panel console-panel">
+      <div class="panel-head"><b>Консоль</b><button class="btn mini ghost" id="btnClearConsole">Очистить</button></div>
+      <div id="consoleOut"></div>
+    </div>
+  </section>
+
+  <!-- ================= CODE ================= -->
+  <section class="tab" id="tab-code">
+    <div class="code-toolbar">
+      <span class="file-chip">📄 <b id="codeFileName">main.mrr</b></span>
+      <span class="chip accent">MrrCode</span>
+      <span class="chip">Точка входа: main.mrr</span>
+      <span class="spacer"></span>
+      <select class="sel" id="examplesSelect" title="Примеры"><option value="">Примеры…</option></select>
+      <button class="btn" id="btnSheet" title="Шпаргалка по языку">📖</button>
+      <button class="btn ai" id="btnAiCode" title="ИИ-агент">🤖</button>
+      <button class="btn primary" id="btnRunCode" title="Запуск main.mrr">▶</button>
+      <button class="btn ghost" id="btnExportPxl" title="Экспорт текущего файла .mrr">⬇ .mrr</button>
+      <button class="btn ghost" id="btnImportPxl" title="Импорт .mrr">⬆ .mrr</button>
+      <button class="btn" id="btnColorPicker" title="Выбрать цвет для HEX-кода">🎨 Цвет</button>
+      <span class="color-tool" title="Текущий цвет в коде"><span class="color-swatch" id="codeColorSwatch"></span><span id="codeColorValue" style="font:12px var(--font-code);color:var(--muted)">—</span></span>
+      <input class="color-picker-input" id="codeColorInput" type="color" value="#70d6ff" aria-label="Выбор цвета">
+    </div>
+    <div class="palette" id="touchPalette"></div>
+    <div class="panel editor-wrap" id="editorWrap">
+      <div class="gutter"><div class="gutter-inner" id="gutterInner">1</div></div>
+      <div class="editor-area" id="editorArea">
+        <pre class="hl" id="hlLayer" aria-hidden="true"><code id="hlCode"></code></pre>
+        <textarea id="codeInput" spellcheck="false" wrap="off" autocomplete="off" autocorrect="off" autocapitalize="off" enterkeyhint="next"></textarea>
+        <div class="ac-popup hidden" id="acPopup">
+          <button id="acClose">✕</button>
+          <div id="acList"></div>
+          <div class="ac-doc" id="acDoc"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel code-status">
+      <span id="caretPos">Строка 1, столбец 1</span>
+      <span class="status-sep"></span>
+      <span id="hintBar"></span>
+    </div>
+  </section>
+
+  <!-- ================= SCENE ================= -->
+  <section class="tab" id="tab-scene">
+    <div class="scene-layout">
+      <div class="panel scene-main">
+        <div class="panel-head"><b>Редактор сцены</b><span>Перетаскивай объекты пальцем</span></div>
+        <div class="preview-wrap"><canvas id="sceneCanvas" width="800" height="450"></canvas></div>
+        <div class="props" id="propsPanel"></div>
+      </div>
+      <div class="panel scene-side">
+        <h3>Добавить объект</h3>
+        <div class="add-btns">
+          <button class="btn" data-add="rect">▰ Прямоуг.</button>
+          <button class="btn" data-add="circle">● Круг</button>
+          <button class="btn" data-add="text">T Текст</button>
+        </div>
+        <h3>Объекты сцены <span id="sceneCount"></span></h3>
+        <div class="obj-list" id="objList"></div>
+        <div class="row-btns">
+          <button class="btn ghost danger" id="btnSceneClear">Очистить</button>
+          <button class="btn ghost" id="btnSceneExport">⬇ Сцена</button>
+          <button class="btn ghost" id="btnSceneImport">⬆ Сцена</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FILES ================= -->
+  <section class="tab" id="tab-files">
+    <div class="files-layout">
+      <div class="panel files-main">
+        <div class="panel-head" style="margin:-12px -12px 4px"><b>Файлы проекта</b><span>Локальные ресурсы</span></div>
+        <h4>Исходники</h4>
+        <div id="codeFilesList" style="display:flex;flex-direction:column;gap:6px"></div>
+        <button class="btn" id="btnNewPxl">＋ Новый .mrr</button>
+        <h4>Спрайты</h4>
+        <div id="spriteList" style="display:flex;flex-direction:column;gap:6px"></div>
+        <button class="btn" id="btnImportPng">＋ Импорт PNG-спрайта</button>
+        <div class="row-btns" style="margin-top:6px">
+          <button class="btn ghost" id="btnExportProject">⬇ Проект</button>
+          <button class="btn ghost" id="btnImportProject">⬆ Проект</button>
+        </div>
+        <div class="note" id="filesNote">Выбери файл</div>
+      </div>
+      <div class="panel files-info">
+        <p><b>Как это работает</b></p>
+        <p><b>main.mrr — точка входа:</b> «Запуск» всегда выполняет его и открывает игру на весь экран.</p>
+        <p><b>Связывай файлы импортами:</b> создай <code>player.mrr</code> с функцией <code>spawnPlayer()</code>, а в main.mrr напиши <code>from "player" import spawnPlayer;</code></p>
+        <p><b>🤖 ИИ-агент</b> умеет сам создавать файлы и менять сцену — кнопка «🤖 ИИ» в шапке.</p>
+        <p>Имя PNG без расширения = имя ресурса для <code>sprite("имя", x, y, w, h)</code>. Повторный импорт того же файла заменяет спрайт (без дубликатов).</p>
+        <p>Данные хранятся в памяти страницы — экспортируй проект (.json), чтобы не потерять их.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HELP ================= -->
+  <section class="tab" id="tab-help">
+    <div class="help-wrap">
+<div class="panel doc-section">
+        <h2><span class="num">1</span>Как устроен проект <span class="mrr-cat-paw">🐾</span></h2>
+        <p><b>Игра</b> — запущенный на весь экран устройства экран. <b>Код</b> — логика на MrrCode. <b>Сцена</b> — прямоугольники, круги и текстовые объекты. <b>Файлы</b> — код и PNG-спрайты. <b>🤖 ИИ</b> — агент, который пишет код за тебя. Точка входа — <code>main.mrr</code>. Координаты игрового поля всегда <b>800×450</b> — движок сам масштабирует картинку под любой экран.</p>
+      </div>
+
+      <div class="panel doc-section">
+        <h2><span class="num">2</span>Переменные и типы <span class="mrr-cat-paw">🐾</span></h2>
+        <pre class="doc-code"><span class="k">let</span> health = <span class="n">100</span>;
+<span class="k">let</span> title = <span class="s">"Моя игра"</span>;
+<span class="k">let</span> alive = <span class="k">true</span>;
+<span class="k">let</span> inventory = [<span class="s">"ключ"</span>, <span class="s">"зелье"</span>];
+<span class="k">let</span> stats = {speed: <span class="n">120</span>, score: <span class="n">0</span>};
+<span class="k">const</span> maxHealth = <span class="n">100</span>;</pre>
+        <p>Используй <code>let</code> для изменяемого значения и <code>const</code> для постоянного. Поддерживаются числа, строки, boolean, null, массивы и объекты.</p>
+      </div>
+
+      <div class="panel doc-section">
+        <h2><span class="num">3</span>Условия, циклы и функции <span class="mrr-cat-paw">🐾</span></h2>
+        <pre class="doc-code"><span class="k">if</span> (health &lt;= <span class="n">0</span>) {
+    <span class="f">print</span>(<span class="s">"Игра окончена"</span>);
+} <span class="k">else if</span> (health &lt; <span class="n">30</span>) {
+    <span class="f">print</span>(<span class="s">"Опасно!"</span>);
+}
+
+<span class="k">let</span> i = <span class="n">0</span>;
+<span class="k">while</span> (i &lt; <span class="n">5</span>) { i += <span class="n">1</span>; }
+
+<span class="k">for</span> (<span class="k">let</span> n = <span class="n">0</span>; n &lt; <span class="n">3</span>; n++) { <span class="f">print</span>(n); }
+<span class="k">for</span> (<span class="k">let</span> item <span class="k">of</span> inventory) { <span class="f">print</span>(item); }
+
+<span class="k">function</span> <span class="f">damage</span>(amount) {
+    health -= amount;
+    <span class="k">return</span> health;
+}</pre>
+        <p>Операторы: <code>+ - * / % **</code>, сравнения <code>== != &lt; &gt; &lt;= &gt;=</code>, логические <code>&amp;&amp; || !</code>, присваивания <code>= += -= *= /= %=</code>, инкремент <code>++ --</code>. Вставлять их удобно кнопками на панели над редактором.</p>
+      </div>
+
+      <div class="panel doc-section">
+        <h2><span class="num">4</span>Игровые события и управление касаниями <span class="mrr-cat-paw">🐾</span></h2>
+        <pre class="doc-code"><span class="k">function</span> <span class="f">start</span>() {
+    <span class="c">// один раз при старте</span>
+}
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="c">// каждый кадр; dt — секунды с прошлого кадра</span>
+}
+<span class="k">function</span> <span class="f">pointerDown</span>(x, y) { <span class="f">print</span>(<span class="s">"Палец коснулся"</span>, x, y); }
+<span class="k">function</span> <span class="f">pointerMove</span>(x, y) { <span class="c">// палец движется по полю</span> }
+<span class="k">function</span> <span class="f">pointerUp</span>(x, y)   { <span class="c">// палец отпущен</span> }</pre>
+        <p>Состояние касаний прямо в <code>update</code>:</p>
+        <pre class="doc-code"><span class="f">pointerX</span>()        <span class="c">// X последнего касания (0..800)</span>
+<span class="f">pointerY</span>()        <span class="c">// Y последнего касания (0..450)</span>
+<span class="f">pointerDownNow</span>()  <span class="c">// true, пока палец держит поле</span>
+<span class="f">touchCount</span>()      <span class="c">// сколько пальцев сейчас на поле</span>
+<span class="f">touchX</span>(i)         <span class="c">// X i-го пальца (0 … touchCount()-1)</span>
+<span class="f">touchY</span>(i)         <span class="c">// Y i-го пальца</span></pre>
+        <p>Мультитач — кружок под каждым пальцем:</p>
+        <pre class="doc-code"><span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="f">clear</span>(<span class="s">"#101827"</span>);
+    <span class="k">let</span> i = <span class="n">0</span>;
+    <span class="k">while</span> (i &lt; <span class="f">touchCount</span>()) {
+        <span class="f">circle</span>(<span class="f">touchX</span>(i), <span class="f">touchY</span>(i), <span class="n">30</span>, <span class="s">"#70d6ff"</span>);
+        i += <span class="n">1</span>;
+    }
+}</pre>
+        <p>Клавиатуры и мыши в движке нет — только касания. Типичная схема: зоны экрана (левая треть — влево, правая — вправо, тап в центре — прыжок).</p>
+      </div>
+
+      <div class="panel doc-section">
+        <h2><span class="num">5</span>Рисование</h2>
+        <pre class="doc-code"><span class="f">clear</span>(<span class="s">"#101827"</span>);
+<span class="f">rect</span>(<span class="n">20</span>, <span class="n">30</span>, <span class="n">120</span>, <span class="n">60</span>, <span class="s">"#ff8844"</span>);
+<span class="f">circle</span>(<span class="n">220</span>, <span class="n">100</span>, <span class="n">30</span>, <span class="s">"#70d6ff"</span>);
+<span class="f">line</span>(<span class="n">10</span>, <span class="n">10</span>, <span class="n">300</span>, <span class="n">200</span>, <span class="s">"#ffffff"</span>, <span class="n">2</span>);
+<span class="f">text</span>(<span class="s">"Привет!"</span>, <span class="n">20</span>, <span class="n">140</span>, <span class="s">"#ffffff"</span>, <span class="n">20</span>);</pre>
+        <p>Движок <b>сам очищает экран в начале каждого кадра</b> — старая графика не наслаивается. Вызови <code>clear(color)</code> в начале <code>update</code> для цвета фона. Для «следа» от пальца копи точки в массив и перерисовывай их каждый кадр.</p>
+      </div>
+
+      <div class="panel doc-section">
+        <h2><span class="num">6</span>Объекты вкладки «Сцена»</h2>
+        <p>Выбери объект и задай уникальное имя <code>name</code>, например <code>hero</code>:</p>
+        <pre class="doc-code"><span class="k">let</span> hero = <span class="f">object</span>(<span class="s">"hero"</span>);
+
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="k">if</span> (<span class="f">pointerDownNow</span>()) {
+        hero.x = <span class="f">pointerX</span>() - <span class="n">32</span>;   <span class="c">// объект идёт за пальцем</span>
+        hero.y = <span class="f">pointerY</span>() - <span class="n">32</span>;
+    }
+}</pre>
+        <p>Прямоугольник: <code>x, y, w, h, color</code>; круг: <code>x, y, r, color</code>; текст: <code>x, y, text, size, color</code>. Объекты сцены рисуются поверх игрового кадра. Сцену может создавать и ИИ-агент.</p>
+      </div>
+
+      <div class="panel doc-section">
+        <h2><span class="num">7</span>PNG-спрайты</h2>
+        <p>Открой «Файлы» → «Импорт PNG-спрайта» и используй имя ресурса в <code>sprite(name, x, y, width, height)</code>:</p>
+        <pre class="doc-code"><span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="f">clear</span>(<span class="s">"#182235"</span>);
+    <span class="f">sprite</span>(<span class="s">"heroSprite"</span>, <span class="n">100</span>, <span class="n">120</span>, <span class="n">64</span>, <span class="n">64</span>);
+}</pre>
+        <p>Имя спрайта — имя файла без расширения. Повторный импорт того же файла <b>заменяет</b> спрайт. Если игру делает ИИ, он напишет в чат список изображений, которые нужно импортировать, и их имена.</p>
+      </div>
+
+      <div class="panel doc-section">
+        <h2><span class="num">8</span>Импорт из других файлов (модули)</h2>
+        <p>Создай <code>player.mrr</code> («Файлы» → «Новый .mrr»):</p>
+        <pre class="doc-code"><span class="c">// файл player.mrr</span>
+<span class="k">function</span> <span class="f">spawnPlayer</span>() {
+    <span class="f">print</span>(<span class="s">"Игрок появился!"</span>);
+}</pre>
+        <p>В <code>main.mrr</code> импортируй имена:</p>
+        <pre class="doc-code"><span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> spawnPlayer;
+<span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> spawnPlayer, movePlayer;
+<span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> spawnPlayer <span class="k">as</span> spawn;
+<span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> *;
+
+<span class="k">function</span> <span class="f">start</span>() {
+    spawnPlayer();
+}</pre>
+        <p>«Запуск» всегда выполняет <b>main.mrr</b>. Имя файла можно писать без <code>.mrr</code> и без кавычек. Код модуля выполняется один раз при первом импорте; циклические импорты запрещены. События (<code>update</code>, <code>pointerDown</code>…) должны быть в main.mrr или импортированы в него.</p>
+      </div>
+
+      <div class="panel doc-section">
+        <h2><span class="num">9</span>Полезные встроенные функции</h2>
+        <div class="api-chips" id="apiChips"></div>
+        <p>Полный список с описаниями и кнопкой «Вставить» — в «📖 Шпаргалке» на вкладке «Код».</p>
+      </div>
+
+      <div class="panel doc-section">
+        <h2><span class="num">10</span>Редактор на сенсоре, сохранение и ограничения</h2>
+        <p><b>Всё делается пальцем:</b> панель над редактором вставляет скобки, операторы, шаблоны и функции; пока печатаешь имя — всплывает список дополнений (тапни вариант); после <code>from "</code> подсказываются файлы, после <code>import</code> — функции из файла, после <code>object("</code> и <code>sprite("</code> — имена сцены и спрайтов. «📖 Шпаргалка» — поиск по функциям с кнопкой «Вставить».</p>
+        <p>Используй «⬇ .mrr» для кода и «⬇ Проект» для пакета исходников и ресурсов. Данные хранятся в памяти страницы — экспортируй проект, чтобы не потерять. MrrCode — ограниченный собственный язык, а не полный JavaScript. Выполнение имеет лимит операций для защиты от зависания.</p>
+      </div>
+
+      <div class="panel doc-section">
+        <h2><span class="num">11</span>Визуальный выбор цвета</h2>
+        <p>В редакторе кода можно менять HEX-цвета без ручного ввода. Установи курсор внутри значения вида <code>#70d6ff</code> и нажми <b>🎨 Цвет</b>. Выбери нужный оттенок — редактор заменит HEX-код прямо в текущем месте.</p>
+        <p>Поддерживаются цвета <code>#RGB</code>, <code>#RGBA</code>, <code>#RRGGBB</code> и <code>#RRGGBBAA</code>. Также можно дважды тапнуть по HEX-цвету в коде, чтобы открыть выбор цвета.</p>
+        <pre class="doc-code"><span class="f">clear</span>(<span class="s">"#101827"</span>);
+<span class="f">rect</span>(<span class="n">20</span>, <span class="n">30</span>, <span class="n">120</span>, <span class="n">60</span>, <span class="s">"#ff8844"</span>);</pre>
+      </div>
+
+      <div class="panel doc-section">
+        <h2><span class="num">12</span>ИИ-агент</h2>
+        <p>Кнопка <b>«🤖 ИИ»</b> в шапке открывает агента. Подключение — на тебе:</p>
+        <p>1. Нажми «⚙ Подключение».<br>
+        2. <b>Base URL</b> — адрес OpenAI-совместимого API без завершающего <code>/chat/completions</code> (например <code>https://api.openai.com/v1</code>, OpenRouter, Together, локальный LM Studio и т.п.).<br>
+        3. <b>API-ключ</b> и <b>имя модели</b> (например <code>gpt-4o-mini</code>).<br>
+        4. «💾 Сохранить» — ключ хранится только в твоём браузере (localStorage), запросы идут напрямую провайдеру.</p>
+        <p>Напиши задачу, например: «Сделай игру: зелёный квадрат бегает за пальцем и собирает жёлтые монеты, со счётом». ИИ получит <b>контекст проекта</b>: код всех файлов, список спрайтов и сцену. Он может:</p>
+        <p>• создавать и перезаписывать <b>файлы кода</b> (.mrr), включая модули с импортами;<br>
+        • работать <b>со сценой как агент</b> — создавать/заменять объекты (прямоугольники, круги, текст);<br>
+        • сообщать, <b>какие изображения нужно импортировать</b> (имя PNG + описание) — картинки ИИ не генерирует, их импортируешь ты во вкладке «Файлы».</p>
+        <p>Все изменения применяются сразу и помечаются в чате тегами. Провайдер должен разрешать запросы из браузера (CORS); при ошибке сообщение появится в чате.</p>
+      </div>
+
+      <div class="panel doc-section">
+        <h2>Примеры</h2>
+        <div class="examples-grid" id="examplesGrid"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- шпаргалка -->
+<div class="sheet-backdrop hidden" id="sheetBackdrop">
+  <div class="sheet">
+    <div class="sheet-head"><b>📖 Шпаргалка MrrCode</b>
+      <div class="sh-btns"><button class="btn mini" id="btnCloseSheet">✕ Закрыть</button></div>
+    </div>
+    <input id="sheetSearch" placeholder="Поиск функции… (print, rect, touch)">
+    <div class="sheet-list" id="sheetList"></div>
+  </div>
+</div>
+
+<!-- ИИ-агент -->
+<div class="sheet-backdrop hidden" id="aiBackdrop">
+  <div class="sheet ai-sheet">
+    <div class="sheet-head"><b>🤖 ИИ-агент проекта</b>
+      <div class="sh-btns">
+        <button class="btn mini ghost" id="btnAiSettings">⚙ Подключение</button>
+        <button class="btn mini ghost" id="btnAiClear">Очистить</button>
+        <button class="btn mini" id="btnAiClose">✕</button>
+      </div>
+    </div>
+    <div class="ai-settings hidden" id="aiSettingsPanel">
+      <label>Base URL (OpenAI-совместимый, без /chat/completions)
+        <input id="aiBaseUrl" placeholder="https://api.openai.com/v1" autocomplete="off">
+      </label>
+      <label>API-ключ
+        <input id="aiApiKey" type="password" placeholder="sk-…" autocomplete="off">
+      </label>
+      <label>Имя модели
+        <input id="aiModel" placeholder="например: gpt-4o-mini" autocomplete="off">
+      </label>
+      <div class="row-btns">
+        <button class="btn mini primary" id="btnAiSave">💾 Сохранить</button>
+        <span class="ai-status" id="aiStatus"></span>
+      </div>
+      <div class="ai-hint">Ключ хранится только в этом браузере (localStorage) и отправляется напрямую твоему провайдеру. Провайдер должен разрешать запросы из браузера (CORS).</div>
+    </div>
+    <div class="ai-chat" id="aiChat"></div>
+    <div class="ai-input">
+      <textarea id="aiPrompt" rows="2" placeholder="Опиши игру или изменение… Например: «Сделай платформер: персонаж бегает за пальцем и прыгает по тапу, добавь монеты и счёт»"></textarea>
+      <button class="btn primary ai-send" id="btnAiSend">➤</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="pngInput" accept="image/png,image/*" multiple hidden>
+<input type="file" id="mrrInput" accept=".mrr,.txt,text/plain" hidden>
+<input type="file" id="projInput" accept=".json,application/json" hidden>
+<input type="file" id="sceneInput" accept=".json,application/json" hidden>
+
+<script>
+
+"use strict";
+/* =====================================================================
+   MrrCode v0.1.0 — сенсор + ИИ-агент
+   - компактная мобильная раскладка (тулбары в одну скроллируемую строку)
+   - ИИ-агент: OpenAI-совместимый API (Base URL + ключ + модель),
+     получает контекст проекта, пишет код/файлы, меняет сцену,
+     сообщает какие PNG импортировать
+   - только касания (мультитач); полный экран; «назад» — выход
+   - модули from "файл" import имя; автоочистка кадра; PNG без дубликатов
+===================================================================== */
+const ENTRY_FILE='main.mrr';
+
+/* ---------------- утилиты ---------------- */
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escapeRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+let uidCounter=0;
+function uid(){return 'o'+(++uidCounter)+'_'+Math.random().toString(36).slice(2,7);}
+function download(name,content,mime){
+  const blob=new Blob([content],{type:mime||'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+function fmtNum(v){
+  if(!isFinite(v))return String(v);
+  if(Number.isInteger(v))return String(v);
+  return String(Math.round(v*1e6)/1e6);
+}
+function fmtValue(v,depth){
+  depth=depth||0;
+  if(v===null||v===undefined)return 'null';
+  if(typeof v==='boolean')return v?'true':'false';
+  if(typeof v==='number')return fmtNum(v);
+  if(typeof v==='string')return v;
+  if(typeof v==='object'&&v.__pf)return '<функция '+(v.name||'анонимная')+'>';
+  if(depth>3)return '…';
+  if(Array.isArray(v))return '['+v.map(x=>fmtValue(x,depth+1)).join(', ')+']';
+  return '{'+Object.keys(v).map(k=>k+': '+fmtValue(v[k],depth+1)).join(', ')+'}';
+}
+function numArg(v,def){
+  if(typeof v==='number'&&isFinite(v))return v;
+  if(typeof v==='string'){const n=parseFloat(v);if(!isNaN(n))return n;}
+  return def===undefined?0:def;
+}
+
+/* ---------------- справочник API ---------------- */
+const API={
+  start:{kind:'ev',sig:'function start()',doc:'Вызывается один раз при нажатии «Запуск».',insert:'function start() {\n    §print("Старт!");§\n}'},
+  update:{kind:'ev',sig:'function update(dt)',doc:'Вызывается каждый кадр. dt — секунды с прошлого кадра.',insert:'function update(dt) {\n    clear("#101827");\n    §\n}'},
+  pointerDown:{kind:'ev',sig:'function pointerDown(x, y)',doc:'Событие: палец коснулся игрового поля. x, y — координаты 0..800 / 0..450. Срабатывает для каждого пальца (мультитач).',insert:'function pointerDown(x, y) {\n    §\n}'},
+  pointerMove:{kind:'ev',sig:'function pointerMove(x, y)',doc:'Событие: палец движется по игровому полю.',insert:'function pointerMove(x, y) {\n    §\n}'},
+  pointerUp:{kind:'ev',sig:'function pointerUp(x, y)',doc:'Событие: палец отпущен.',insert:'function pointerUp(x, y) {\n    §\n}'},
+  pointerX:{kind:'fn',sig:'pointerX()',doc:'X-координата последнего касания (0..800).'},
+  pointerY:{kind:'fn',sig:'pointerY()',doc:'Y-координата последнего касания (0..450).'},
+  pointerDownNow:{kind:'fn',sig:'pointerDownNow()',doc:'true, пока хоть один палец удерживает игровое поле.'},
+  touchCount:{kind:'fn',sig:'touchCount()',doc:'Сколько пальцев сейчас касается поля (мультитач).'},
+  touchX:{kind:'fn',sig:'touchX(i)',doc:'X-координата i-го пальца (0 … touchCount()-1), диапазон 0..800.'},
+  touchY:{kind:'fn',sig:'touchY(i)',doc:'Y-координата i-го пальца (0 … touchCount()-1), диапазон 0..450.'},
+  clear:{kind:'fn',sig:'clear(color?)',doc:'Очищает экран и заливает его цветом color (по умолчанию "#0f172a"). Движок и сам очищает экран в начале каждого кадра — старые кадры не накладываются.'},
+  rect:{kind:'fn',sig:'rect(x, y, w, h, color)',doc:'Прямоугольник: левый верхний угол (x, y), размер w×h.'},
+  circle:{kind:'fn',sig:'circle(x, y, r, color)',doc:'Круг с центром (x, y) и радиусом r.'},
+  line:{kind:'fn',sig:'line(x1, y1, x2, y2, color, width?)',doc:'Линия из (x1, y1) в (x2, y2). width — толщина, по умолчанию 2.'},
+  text:{kind:'fn',sig:'text(str, x, y, color, size?)',doc:'Текст в точке (x, y). size — размер шрифта, по умолчанию 16.'},
+  sprite:{kind:'fn',sig:'sprite(name, x, y, w?, h?)',doc:'Рисует PNG-спрайт по имени из вкладки «Файлы». w и h необязательны — иначе берётся исходный размер.'},
+  object:{kind:'fn',sig:'object(name)',doc:'Возвращает объект сцены по имени (вкладка «Сцена»). Свойства можно менять из кода: x, y, w, h, r, color, text, size.'},
+  random:{kind:'fn',sig:'random()',doc:'Случайное число от 0 до 1.'},
+  rand:{kind:'fn',sig:'rand(min, max)',doc:'Случайное число от min до max.'},
+  abs:{kind:'fn',sig:'abs(x)',doc:'Модуль числа.'},
+  sqrt:{kind:'fn',sig:'sqrt(x)',doc:'Квадратный корень.'},
+  sin:{kind:'fn',sig:'sin(a)',doc:'Синус угла в радианах.'},
+  cos:{kind:'fn',sig:'cos(a)',doc:'Косинус угла в радианах.'},
+  floor:{kind:'fn',sig:'floor(x)',doc:'Округление вниз.'},
+  ceil:{kind:'fn',sig:'ceil(x)',doc:'Округление вверх.'},
+  round:{kind:'fn',sig:'round(x)',doc:'Округление до ближайшего целого.'},
+  min:{kind:'fn',sig:'min(a, b)',doc:'Меньшее из двух чисел.'},
+  max:{kind:'fn',sig:'max(a, b)',doc:'Большее из двух чисел.'},
+  clamp:{kind:'fn',sig:'clamp(value, min, max)',doc:'Ограничивает значение рамками min..max.'},
+  length:{kind:'fn',sig:'length(value)',doc:'Длина строки или массива, число ключей объекта.'},
+  push:{kind:'fn',sig:'push(array, value)',doc:'Добавляет элемент в конец массива.'},
+  pop:{kind:'fn',sig:'pop(array)',doc:'Убирает и возвращает последний элемент массива.'},
+  time:{kind:'fn',sig:'time()',doc:'Число секунд с момента запуска игры.'},
+  dt:{kind:'fn',sig:'dt()',doc:'Секунды с прошлого кадра (то же, что аргумент update).'},
+  print:{kind:'fn',sig:'print(...values)',doc:'Выводит значения в консоль.'}
+};
+const KEYWORDS=['let','const','if','else','while','for','of','function','return','break','continue','true','false','null','from','import','as'];
+const KEYWORD_DOCS={
+  let:'Объявить изменяемую переменную: let health = 100;',
+  const:'Объявить постоянную: const maxHealth = 100;',
+  if:'Условие: if (health <= 0) { … } else { … }',
+  else:'Ветка «иначе» для if.',
+  while:'Цикл с условием: while (i < 10) { i += 1; }',
+  for:'Цикл: for (let i = 0; i < 10; i++) { … } или for (let item of array) { … }',
+  of:'Итерация по массиву в цикле for.',
+  function:'Объявление функции: function jump(power) { … }',
+  return:'Вернуть значение из функции.',
+  break:'Прервать цикл.',
+  continue:'Перейти к следующей итерации цикла.',
+  true:'Логическое «истина».',
+  false:'Логическое «ложь».',
+  null:'Пустое значение.',
+  from:'Импорт из другого файла: from "player" import spawnPlayer;',
+  import:'Часть конструкции from … import …; можно импортировать всё: from "player" import *;',
+  as:'Псевдоним при импорте: from "player" import spawnPlayer as spawn;'
+};
+const KEYWORDS_SET=new Set(KEYWORDS);
+
+/* ---------------- MrrCode: лексер ---------------- */
+class PFError extends Error{constructor(msg,line){super(msg);this.line=line||0;}}
+class Signal{constructor(kind,value){this.kind=kind;this.value=value;}}
+
+function tokenize(src){
+  const T=[];let i=0,line=1;
+  const idStart=/[A-Za-z_А-Яа-яЁё$]/, idPart=/[\wА-Яа-яЁё$]/;
+  const TWO_OPS=['==','!=','<=','>=','&&','||','+=','-=','*=','/=','%=','**','++','--'];
+  while(i<src.length){
+    const c=src[i];
+    if(c==='\n'){line++;i++;continue;}
+    if(c===' '||c==='\t'||c==='\r'||c==='\f'||c==='\v'){i++;continue;}
+    if(c==='/'&&src[i+1]==='/'){i+=2;while(i<src.length&&src[i]!=='\n')i++;continue;}
+    if(c==='/'&&src[i+1]==='*'){
+      i+=2;let closed=false;
+      while(i<src.length){
+        if(src[i]==='\n'){line++;i++;continue;}
+        if(src[i]==='*'&&src[i+1]==='/'){i+=2;closed=true;break;}
+        i++;
+      }
+      if(!closed)throw new PFError('Незакрытый комментарий /* … */',line);
+      continue;
+    }
+    if(c==='"'||c==="'"){
+      const q=c;i++;let s='',closed=false;
+      const ESC={n:'\n',t:'\t',r:'\r','\\':'\\','"':'"',"'":"'"};
+      while(i<src.length){
+        const ch=src[i];
+        if(ch==='\n')break;
+        if(ch==='\\'){const nx=src[i+1];s+=(ESC[nx]!==undefined?ESC[nx]:nx);i+=2;continue;}
+        if(ch===q){closed=true;i++;break;}
+        s+=ch;i++;
+      }
+      if(!closed)throw new PFError('Незакрытая строка',line);
+      T.push({t:'str',v:s,line});continue;
+    }
+    if(/[0-9]/.test(c)){
+      let s='';
+      while(i<src.length&&/[0-9]/.test(src[i]))s+=src[i++];
+      if(src[i]==='.'&&/[0-9]/.test(src[i+1]||'')){s+='.';i++;while(i<src.length&&/[0-9]/.test(src[i]))s+=src[i++];}
+      if(src[i]==='e'||src[i]==='E'){
+        let j=i+1;if(src[j]==='+'||src[j]==='-')j++;
+        if(/[0-9]/.test(src[j]||'')){s+=src.slice(i,j);i=j;while(i<src.length&&/[0-9]/.test(src[i]))s+=src[i++];}
+      }
+      T.push({t:'num',v:Number(s),line});continue;
+    }
+    if(idStart.test(c)){
+      let s='';while(i<src.length&&idPart.test(src[i]))s+=src[i++];
+      T.push({t:KEYWORDS_SET.has(s)?'kw':'id',v:s,line});continue;
+    }
+    if(src.substr(i,3)==='**='){T.push({t:'op',v:'**=',line});i+=3;continue;}
+    const two=src.substr(i,2);
+    if(TWO_OPS.includes(two)){T.push({t:'op',v:two,line});i+=2;continue;}
+    if('(){}[],;.:'.includes(c)){T.push({t:'punc',v:c,line});i++;continue;}
+    if('+-*/%=<>!'.includes(c)){T.push({t:'op',v:c,line});i++;continue;}
+    throw new PFError('Неизвестный символ «'+c+'»',line);
+  }
+  T.push({t:'eof',v:'',line});
+  return T;
+}
+
+/* ---------------- MrrCode: парсер ---------------- */
+function parse(tokens){
+  let p=0;
+  const peek=()=>tokens[p];
+  const next=()=>tokens[p++];
+  const is=(t,v)=>{const tk=tokens[p];return tk.t===t&&(v===undefined||tk.v===v);};
+  const eat=(t,v)=>{
+    if(is(t,v))return next();
+    const tk=tokens[p];
+    throw new PFError('Ожидалось «'+(v!==undefined?v:t)+'», найдено «'+(tk.t==='eof'?'конец файла':tk.v)+'»',tk.line);
+  };
+  function parseProgram(){
+    const body=[];
+    while(!is('eof'))body.push(parseStmt());
+    return {n:'Program',body,line:1};
+  }
+  function semi(){if(is('punc',';'))next();}
+  function parseBlock(){
+    const tk=eat('punc','{');const body=[];
+    while(!is('punc','}')){
+      if(is('eof'))throw new PFError('Ожидалась закрывающая }',tk.line);
+      body.push(parseStmt());
+    }
+    next();
+    return {n:'Block',body,line:tk.line};
+  }
+  function parseStmt(){
+    const tk=peek();
+    if(tk.t==='kw'){
+      if(tk.v==='from')return parseImport();
+      if(tk.v==='import')throw new PFError('Используй конструкцию: from "файл" import имя;',tk.line);
+      if(tk.v==='let'||tk.v==='const')return parseVarStmt();
+      if(tk.v==='if'){
+        next();eat('punc','(');const test=parseExpr();eat('punc',')');
+        const cons=parseStmt();let alt=null;
+        if(is('kw','else')){next();alt=parseStmt();}
+        return {n:'If',test,cons,alt,line:tk.line};
+      }
+      if(tk.v==='while'){
+        next();eat('punc','(');const test=parseExpr();eat('punc',')');const body=parseStmt();
+        return {n:'While',test,body,line:tk.line};
+      }
+      if(tk.v==='for')return parseFor();
+      if(tk.v==='function')return parseFunc(true);
+      if(tk.v==='return'){
+        next();let arg=null;
+        if(!(is('punc',';')||is('punc','}')||is('eof')))arg=parseExpr();
+        semi();
+        return {n:'Return',arg,line:tk.line};
+      }
+      if(tk.v==='break'){next();semi();return {n:'Break',line:tk.line};}
+      if(tk.v==='continue'){next();semi();return {n:'Continue',line:tk.line};}
+    }
+    if(is('punc','{'))return parseBlock();
+    if(is('punc',';')){next();return {n:'Empty',line:tk.line};}
+    const e=parseExpr();semi();
+    return {n:'ExprStmt',e,line:e.line||tk.line};
+  }
+  function parseImport(){
+    const tk=eat('kw','from');
+    let source;
+    if(is('str'))source=next().v;
+    else if(is('id'))source=next().v;
+    else throw new PFError('После from укажи имя файла: from "player" import …',tk.line);
+    eat('kw','import');
+    let star=false;const names=[];
+    if(is('op','*')){next();star=true;}
+    else{
+      for(;;){
+        if(!is('id'))throw new PFError('Ожидалось имя для импорта (или * для всего файла)',peek().line);
+        const name=next().v;
+        let alias=null;
+        if(is('kw','as')){
+          next();
+          if(!is('id'))throw new PFError('Ожидался псевдоним после as',peek().line);
+          alias=next().v;
+        }
+        names.push({name,alias});
+        if(is('punc',',')){next();if(!is('id'))break;continue;}
+        break;
+      }
+    }
+    semi();
+    return {n:'Import',source,star,names,line:tk.line};
+  }
+  function parseVarStmt(){
+    const tk=next();const kind=tk.v;const decls=[];
+    for(;;){
+      const nameTk=eat('id');
+      let init=null;
+      if(is('op','=')){next();init=parseExpr();}
+      decls.push({name:nameTk.v,init});
+      if(is('punc',',')){next();continue;}
+      break;
+    }
+    semi();
+    return {n:'VarDecl',kind,decls,line:tk.line};
+  }
+  function parseFor(){
+    const tk=eat('kw','for');eat('punc','(');
+    let init=null,varInit=false;
+    if(is('kw','let')||is('kw','const')){init=parseVarStmt();varInit=true;}
+    else if(is('punc',';')){next();}
+    else{
+      init=parseExpr();
+      if(is('kw','of')){
+        next();const iter=parseExpr();eat('punc',')');const body=parseStmt();
+        return {n:'ForOf',assignTarget:init,iter,body,line:tk.line};
+      }
+      eat('punc',';');
+    }
+    if(varInit&&is('kw','of')){
+      next();const iter=parseExpr();eat('punc',')');const body=parseStmt();
+      return {n:'ForOf',name:init.decls[0].name,iter,body,line:tk.line};
+    }
+    let test=null;if(!is('punc',';'))test=parseExpr();eat('punc',';');
+    let upd=null;if(!is('punc',')'))upd=parseExpr();eat('punc',')');
+    const body=parseStmt();
+    return {n:'For',init,test,upd,body,line:tk.line};
+  }
+  function parseFunc(isDecl){
+    const tk=eat('kw','function');
+    let name=null;
+    if(is('id'))name=next().v;
+    else if(isDecl)throw new PFError('У функции должно быть имя',tk.line);
+    eat('punc','(');
+    const params=[];
+    while(!is('punc',')')){params.push(eat('id').v);if(is('punc',','))next();else break;}
+    eat('punc',')');
+    const body=parseBlock();
+    return {n:isDecl?'FuncDecl':'FuncExpr',name,params,body,line:tk.line};
+  }
+  function parseExpr(){return parseAssign();}
+  function parseAssign(){
+    const left=parseOr();
+    if(is('op')&&['=','+=','-=','*=','/=','%=','**='].includes(peek().v)){
+      const op=next().v;const right=parseAssign();
+      return {n:'Assign',target:left,op,right,line:left.line};
+    }
+    return left;
+  }
+  function parseOr(){let l=parseAnd();while(is('op','||')){next();const r=parseAnd();l={n:'Logical',op:'||',l,r,line:l.line};}return l;}
+  function parseAnd(){let l=parseEq();while(is('op','&&')){next();const r=parseEq();l={n:'Logical',op:'&&',l,r,line:l.line};}return l;}
+  function parseEq(){let l=parseCmp();while(is('op')&&(peek().v==='=='||peek().v==='!=')){const op=next().v;const r=parseCmp();l={n:'Binary',op,l,r,line:l.line};}return l;}
+  function parseCmp(){let l=parseAdd();while(is('op')&&['<','>','<=','>='].includes(peek().v)){const op=next().v;const r=parseAdd();l={n:'Binary',op,l,r,line:l.line};}return l;}
+  function parseAdd(){let l=parseMul();while(is('op')&&(peek().v==='+'||peek().v==='-')){const op=next().v;const r=parseMul();l={n:'Binary',op,l,r,line:l.line};}return l;}
+  function parseMul(){let l=parsePow();while(is('op')&&['*','/','%'].includes(peek().v)){const op=next().v;const r=parsePow();l={n:'Binary',op,l,r,line:l.line};}return l;}
+  function parsePow(){const l=parseUnary();if(is('op','**')){next();const r=parsePow();return {n:'Binary',op:'**',l,r,line:l.line};}return l;}
+  function parseUnary(){
+    const tk=peek();
+    if(tk.t==='op'&&(tk.v==='!'||tk.v==='-'||tk.v==='+')){next();const arg=parseUnary();return {n:'Unary',op:tk.v,arg,line:tk.line};}
+    if(tk.t==='op'&&(tk.v==='++'||tk.v==='--')){next();const arg=parseUnary();return {n:'Update',op:tk.v,pre:true,arg,line:tk.line};}
+    return parsePostfix();
+  }
+  function parsePostfix(){
+    let e=parseCallMember();
+    const tk=peek();
+    if(tk.t==='op'&&(tk.v==='++'||tk.v==='--')){next();e={n:'Update',op:tk.v,pre:false,arg:e,line:e.line};}
+    return e;
+  }
+  function parseCallMember(){
+    let e;
+    if(is('punc','(')){next();e=parseExpr();eat('punc',')');}
+    else e=parsePrimary();
+    for(;;){
+      if(is('punc','.')){
+        next();const pr=peek();
+        if(pr.t!=='id'&&pr.t!=='kw')throw new PFError('Ожидалось имя свойства после точки',pr.line);
+        next();e={n:'Member',obj:e,prop:pr.v,computed:false,line:e.line};
+      }else if(is('punc','[')){
+        next();const idx=parseExpr();eat('punc',']');
+        e={n:'Member',obj:e,prop:idx,computed:true,line:e.line};
+      }else if(is('punc','(')){
+        next();const args=[];
+        while(!is('punc',')')){args.push(parseExpr());if(is('punc',','))next();else break;}
+        eat('punc',')');
+        e={n:'Call',callee:e,args,line:e.line};
+      }else break;
+    }
+    return e;
+  }
+  function parsePrimary(){
+    const tk=peek();
+    if(tk.t==='num'){next();return {n:'Literal',v:tk.v,line:tk.line};}
+    if(tk.t==='str'){next();return {n:'Literal',v:tk.v,line:tk.line};}
+    if(tk.t==='kw'&&(tk.v==='true'||tk.v==='false')){next();return {n:'Literal',v:tk.v==='true',line:tk.line};}
+    if(tk.t==='kw'&&tk.v==='null'){next();return {n:'Literal',v:null,line:tk.line};}
+    if(tk.t==='kw'&&tk.v==='function')return parseFunc(false);
+    if(tk.t==='id'){next();return {n:'Ident',name:tk.v,line:tk.line};}
+    if(is('punc','[')){
+      next();const els=[];
+      while(!is('punc',']')){els.push(parseExpr());if(is('punc',','))next();else break;}
+      eat('punc',']');
+      return {n:'ArrayLit',els,line:tk.line};
+    }
+    if(is('punc','{'))return parseObjectLit();
+    throw new PFError('Неожиданное выражение: «'+(tk.t==='eof'?'конец файла':tk.v)+'»',tk.line);
+  }
+  function parseObjectLit(){
+    const tk=eat('punc','{');const props=[];
+    while(!is('punc','}')){
+      const keyTk=peek();let key;
+      if(keyTk.t==='id'||keyTk.t==='kw')key=next().v;
+      else if(keyTk.t==='str'||keyTk.t==='num')key=String(next().v);
+      else throw new PFError('Ожидалось имя поля объекта',keyTk.line);
+      eat('punc',':');
+      const value=parseExpr();
+      props.push({key,value});
+      if(is('punc',','))next();else break;
+    }
+    eat('punc','}');
+    return {n:'ObjectLit',props,line:tk.line};
+  }
+  return parseProgram();
+}
+
+/* ---------------- MrrCode: интерпретатор ---------------- */
+const LIMIT_TOTAL=5000000, LIMIT_FRAME=2000000, MAX_DEPTH=250;
+function createEnv(parent){return {vars:new Map(),parent:parent||null};}
+function envGet(env,name,line){
+  let e=env;while(e){if(e.vars.has(name))return e.vars.get(name);e=e.parent;}
+  throw new PFError('Неизвестная переменная: «'+name+'»',line);
+}
+function envSet(env,name,val,line){
+  let e=env;while(e){if(e.vars.has(name)){e.vars.set(name,val);return;}e=e.parent;}
+  throw new PFError('Переменная не объявлена: «'+name+'» (используй let)',line);
+}
+function truthy(v){return !!v;}
+function toNum(v,line){
+  if(typeof v==='number')return v;
+  if(typeof v==='boolean')return v?1:0;
+  if(typeof v==='string'){const n=Number(v);if(!isNaN(n))return n;}
+  throw new PFError('Ожидалось число, получено: '+fmtValue(v),line);
+}
+function toNumSafe(v){const n=Number(v);return isNaN(n)?NaN:n;}
+function looseEq(l,r){
+  if(l===r)return true;
+  if(l===null||r===null)return false;
+  if(typeof l==='number'&&typeof r==='string')return l===Number(r);
+  if(typeof l==='string'&&typeof r==='number')return Number(l)===r;
+  if(typeof l==='boolean')return (l?1:0)===toNumSafe(r);
+  if(typeof r==='boolean')return toNumSafe(l)===(r?1:0);
+  return false;
+}
+function cmpVals(l,r,line){
+  if(typeof l==='string'&&typeof r==='string')return l<r?-1:(l>r?1:0);
+  const a=toNum(l,line),b=toNum(r,line);
+  return a<b?-1:(a>b?1:0);
+}
+function applyBinary(op,l,r,line){
+  switch(op){
+    case '+':return (typeof l==='string'||typeof r==='string')?fmtValue(l)+fmtValue(r):toNum(l,line)+toNum(r,line);
+    case '-':return toNum(l,line)-toNum(r,line);
+    case '*':return toNum(l,line)*toNum(r,line);
+    case '/':return toNum(l,line)/toNum(r,line);
+    case '%':return toNum(l,line)%toNum(r,line);
+    case '**':return Math.pow(toNum(l,line),toNum(r,line));
+    case '==':return looseEq(l,r);
+    case '!=':return !looseEq(l,r);
+    case '<':return cmpVals(l,r,line)<0;
+    case '>':return cmpVals(l,r,line)>0;
+    case '<=':return cmpVals(l,r,line)<=0;
+    case '>=':return cmpVals(l,r,line)>=0;
+    default:throw new PFError('Неизвестный оператор: '+op,line);
+  }
+}
+function makeFunc(nd,env){return {__pf:'func',name:nd.name||'',params:nd.params,body:nd.body,closure:env};}
+
+function evalNode(nd,env,ctx){
+  if(++ctx.ops>ctx.limit)throw new PFError('Лимит операций превышен — возможен бесконечный цикл',nd.line);
+  switch(nd.n){
+    case 'Program':{let r=null;for(const s of nd.body)r=evalNode(s,env,ctx);return r;}
+    case 'Block':{const be=createEnv(env);let r=null;for(const s of nd.body)r=evalNode(s,be,ctx);return r;}
+    case 'Empty':return null;
+    case 'ExprStmt':return evalNode(nd.e,env,ctx);
+    case 'VarDecl':{
+      for(const d of nd.decls)env.vars.set(d.name,d.init?evalNode(d.init,env,ctx):null);
+      return null;
+    }
+    case 'Literal':return nd.v;
+    case 'Ident':return envGet(env,nd.name,nd.line);
+    case 'ArrayLit':return nd.els.map(e=>evalNode(e,env,ctx));
+    case 'ObjectLit':{const o={};for(const pr of nd.props)o[pr.key]=evalNode(pr.value,env,ctx);return o;}
+    case 'FuncDecl':{const f=makeFunc(nd,env);env.vars.set(nd.name,f);return f;}
+    case 'FuncExpr':return makeFunc(nd,env);
+    case 'Import':{
+      if(typeof ctx.loadModule!=='function')throw new PFError('Импорт недоступен в этом контексте',nd.line);
+      const modEnv=ctx.loadModule(nd.source,nd.line);
+      if(nd.star){
+        for(const [k,v] of modEnv.vars){if(!env.vars.has(k))env.vars.set(k,v);}
+      }else{
+        for(const spec of nd.names){
+          if(!modEnv.vars.has(spec.name))
+            throw new PFError('В файле «'+nd.source+'» нет имени «'+spec.name+'». Объяви его на верхнем уровне: function/let/const.',nd.line);
+          env.vars.set(spec.alias||spec.name,modEnv.vars.get(spec.name));
+        }
+      }
+      return null;
+    }
+    case 'If':return truthy(evalNode(nd.test,env,ctx))?evalNode(nd.cons,env,ctx):(nd.alt?evalNode(nd.alt,env,ctx):null);
+    case 'While':{
+      while(truthy(evalNode(nd.test,env,ctx))){
+        try{evalNode(nd.body,env,ctx);}
+        catch(s){
+          if(s instanceof Signal){
+            if(s.kind==='break')break;
+            if(s.kind==='continue')continue;
+            throw s;
+          }
+          throw s;
+        }
+      }
+      return null;
+    }
+    case 'For':{
+      const fe=createEnv(env);
+      if(nd.init)evalNode(nd.init,fe,ctx);
+      for(;;){
+        if(nd.test&&!truthy(evalNode(nd.test,fe,ctx)))break;
+        let doBreak=false;
+        try{evalNode(nd.body,fe,ctx);}
+        catch(s){
+          if(s instanceof Signal){
+            if(s.kind==='break')doBreak=true;
+            else if(s.kind==='continue'){if(nd.upd)evalNode(nd.upd,fe,ctx);continue;}
+            else throw s;
+          }else throw s;
+        }
+        if(doBreak)break;
+        if(nd.upd)evalNode(nd.upd,fe,ctx);
+      }
+      return null;
+    }
+    case 'ForOf':{
+      const srcVal=evalNode(nd.iter,env,ctx);
+      const items=Array.isArray(srcVal)?srcVal:(typeof srcVal==='string'?srcVal.split(''):(srcVal&&typeof srcVal==='object'?Object.values(srcVal):[]));
+      const fe=createEnv(env);
+      if(nd.name)fe.vars.set(nd.name,null);
+      for(const it of items){
+        if(nd.name)fe.vars.set(nd.name,it);else setTarget(nd.assignTarget,it,env,ctx,nd.line);
+        let doBreak=false;
+        try{evalNode(nd.body,fe,ctx);}
+        catch(s){
+          if(s instanceof Signal){
+            if(s.kind==='break')doBreak=true;
+            else if(s.kind==='continue')continue;
+            else throw s;
+          }else throw s;
+        }
+        if(doBreak)break;
+      }
+      return null;
+    }
+    case 'Return':throw new Signal('return',nd.arg?evalNode(nd.arg,env,ctx):null);
+    case 'Break':throw new Signal('break');
+    case 'Continue':throw new Signal('continue');
+    case 'Assign':{
+      let val=evalNode(nd.right,env,ctx);
+      if(nd.op!=='='){
+        const cur=evalNode(nd.target,env,ctx);
+        val=applyBinary(nd.op.slice(0,-1),cur,val,nd.line);
+      }
+      setTarget(nd.target,val,env,ctx,nd.line);
+      return val;
+    }
+    case 'Update':{
+      const cur=evalNode(nd.arg,env,ctx);
+      const n0=toNum(cur,nd.line);
+      const nv=nd.op==='++'?n0+1:n0-1;
+      setTarget(nd.arg,nv,env,ctx,nd.line);
+      return nd.pre?nv:n0;
+    }
+    case 'Unary':{
+      const v=evalNode(nd.arg,env,ctx);
+      if(nd.op==='!')return !truthy(v);
+      if(nd.op==='-')return -toNum(v,nd.line);
+      return toNum(v,nd.line);
+    }
+    case 'Logical':{
+      const l=evalNode(nd.l,env,ctx);
+      if(nd.op==='&&')return truthy(l)?evalNode(nd.r,env,ctx):l;
+      return truthy(l)?l:evalNode(nd.r,env,ctx);
+    }
+    case 'Binary':return applyBinary(nd.op,evalNode(nd.l,env,ctx),evalNode(nd.r,env,ctx),nd.line);
+    case 'Member':{
+      const obj=evalNode(nd.obj,env,ctx);
+      const key=nd.computed?evalNode(nd.prop,env,ctx):nd.prop;
+      if(obj===null||obj===undefined)throw new PFError('Нельзя прочитать свойство «'+key+'» у null',nd.line);
+      if((typeof obj==='string'||Array.isArray(obj))&&key==='length')return obj.length;
+      const v=obj[key];
+      return v===undefined?null:v;
+    }
+    case 'Call':return evalCall(nd,env,ctx);
+    default:throw new PFError('Внутренняя ошибка парсера: '+nd.n,nd.line);
+  }
+}
+function setTarget(t,val,env,ctx,line){
+  if(t.n==='Ident'){envSet(env,t.name,val,line);return;}
+  if(t.n==='Member'){
+    const obj=evalNode(t.obj,env,ctx);
+    const key=t.computed?evalNode(t.prop,env,ctx):t.prop;
+    if(obj===null||obj===undefined)throw new PFError('Нельзя записать свойство «'+key+'» у null',line);
+    if(!t.computed&&key==='length')throw new PFError('Свойство length — только для чтения',line);
+    obj[key]=val;return;
+  }
+  throw new PFError('Некорректная цель присваивания',line);
+}
+function evalCall(nd,env,ctx){
+  const args=nd.args.map(a=>evalNode(a,env,ctx));
+  let fn=null;
+  if(nd.callee.n==='Member'){
+    const obj=evalNode(nd.callee.obj,env,ctx);
+    const key=nd.callee.computed?evalNode(nd.callee.prop,env,ctx):nd.callee.prop;
+    if(obj!==null&&obj!==undefined){
+      const v=obj[key];
+      if(v&&(v.__pf==='native'||v.__pf==='func'))fn=v;
+    }
+    if(!fn){
+      if(Array.isArray(obj)&&key==='push'){for(const a of args)obj.push(a);return obj;}
+      if(Array.isArray(obj)&&key==='pop')return obj.length?obj.pop():null;
+      throw new PFError('Метод «.'+key+'()» не поддерживается. Используй push(array, x), pop(array), length(value).',nd.line);
+    }
+  }else{
+    fn=evalNode(nd.callee,env,ctx);
+  }
+  if(fn&&fn.__pf==='native')return fn.f(args,nd.line,ctx);
+  if(fn&&fn.__pf==='func')return callFunc(fn,args,ctx,nd.line);
+  throw new PFError('«'+(nd.callee.n==='Ident'?nd.callee.name:'выражение')+'» — не функция',nd.line);
+}
+function callFunc(f,args,ctx,line){
+  if(++ctx.depth>ctx.maxDepth)throw new PFError('Слишком глубокая рекурсия',line);
+  const fe=createEnv(f.closure);
+  for(let i=0;i<f.params.length;i++)fe.vars.set(f.params[i],args[i]===undefined?null:args[i]);
+  try{evalNode(f.body,fe,ctx);}
+  catch(s){
+    ctx.depth--;
+    if(s instanceof Signal){
+      if(s.kind==='return')return s.value;
+      throw new PFError('«'+s.kind+'» можно использовать только внутри цикла',line);
+    }
+    throw s;
+  }
+  ctx.depth--;
+  return null;
+}
+function newCtx(limit){return {ops:0,limit:limit||LIMIT_FRAME,depth:0,maxDepth:MAX_DEPTH};}
+function fmtError(err){
+  if(err instanceof PFError)return err.line?('Ошибка в строке '+err.line+': '+err.message):('Ошибка: '+err.message);
+  if(err&&err.message)return 'Ошибка: '+err.message;
+  return 'Ошибка: '+String(err);
+}
+
+/* ---------------- состояние проекта ---------------- */
+const DEFAULT_CODE=
+`// Добро пожаловать в MrrCode!
+// «Запуск» откроет игру на весь экран устройства.
+// На телефоне выход — системная кнопка «назад».
+// Управление только касаниями: коснись поля — появится круг.
+// 🤖 Кнопка «ИИ» в шапке — агент напишет игру за тебя.
+
+let title = "MrrCode";
+let t = 0;
+
+function start() {
+    print("Привет! Это твой первый скрипт.");
+}
+
+function update(dt) {
+    clear("#101827");
+    t += dt;
+
+    text(title, 290, 60, "#ffcc55", 34);
+
+    let x = 400 + cos(t * 2) * 150;
+    let y = 230 + sin(t * 3) * 80;
+    circle(x, y, 26, "#70d6ff");
+
+    if (pointerDownNow()) {
+        circle(pointerX(), pointerY(), 40, "#ff8844");
+    }
+
+    text("Коснись экрана пальцем", 300, 400, "#8899bb", 18);
+}`;
+
+const state={
+  files:{'main.mrr':DEFAULT_CODE},
+  activeFile:'main.mrr',
+  sprites:[],
+  scene:[{id:uid(),type:'rect',name:'hero',x:70,y:180,w:64,h:64,color:'#ff8844'}],
+  selectedId:null
+};
+
+const EXAMPLES=[
+{id:'modules',icon:'📦',title:'Модули: from … import',desc:'spawnPlayer() и movePlayer() живут в player.mrr; игрок идёт за пальцем.',
+ scene:[],
+ files:{'player.mrr':
+`// Файл player.mrr — модуль с кодом игрока.
+// В main.mrr: from "player" import spawnPlayer, movePlayer;
+
+let px = 100, py = 200;
+const speed = 340;
+
+function spawnPlayer() {
+    px = 100;
+    py = 200;
+    print("Игрок появился!");
+}
+
+function movePlayer(dt) {
+    if (pointerDownNow()) {
+        let dx = pointerX() - (px + 24);
+        let dy = pointerY() - (py + 24);
+        let dist = sqrt(dx * dx + dy * dy);
+        if (dist > 6) {
+            let step = min(speed * dt, dist);
+            px += dx / dist * step;
+            py += dy / dist * step;
+        }
+    }
+    px = clamp(px, 0, 800 - 48);
+    py = clamp(py, 0, 450 - 48);
+}
+
+function getPlayerX() { return px; }
+function getPlayerY() { return py; }`},
+ code:
+`// Файл main.mrr — точка входа: «Запуск» всегда выполняет его.
+from "player" import spawnPlayer, movePlayer, getPlayerX, getPlayerY;
+
+function start() {
+    spawnPlayer();
+}
+
+function update(dt) {
+    clear("#101827");
+    movePlayer(dt);
+    rect(getPlayerX(), getPlayerY(), 48, 48, "#3ddc84");
+    text("Веди пальцем — игрок идёт за касанием", 20, 30, "#8899bb", 16);
+    text("spawnPlayer() живёт в player.mrr", 20, 420, "#5f7099", 14);
+}`},
+{id:'touch-platformer',icon:'🧱',title:'Бег и прыжок касаниями',desc:'Зоны экрана: держи слева/справа — бег, тап в центре — прыжок. Мультитач!',
+ scene:[],
+ code:
+`// Управление только касаниями:
+// держи палец слева — бег влево, справа — бег вправо,
+// тап в центре — прыжок. Два пальца: беги и прыгай сразу.
+let px = 370, py = 340, pw = 60, ph = 20;
+let vy = 0;
+let onGround = true;
+
+function pointerDown(x, y) {
+    if (x >= 270 && x <= 530 && onGround) {
+        vy = -430;
+        onGround = false;
+    }
+}
+
+function update(dt) {
+    clear("#101827");
+
+    let dir = 0;
+    let i = 0;
+    while (i < touchCount()) {
+        let tx = touchX(i);
+        if (tx < 270) dir = -1;
+        if (tx > 530) dir = 1;
+        i += 1;
+    }
+
+    vy += 900 * dt;
+    px += dir * 280 * dt;
+    py += vy * dt;
+    if (py >= 340) { py = 340; vy = 0; onGround = true; }
+    px = clamp(px, 0, 800 - pw);
+
+    rect(0, 360, 800, 90, "#2a3a55");
+    rect(px, py, pw, ph, "#70d6ff");
+
+    text("◀ держать", 70, 400, "#4a5f88", 20);
+    text("тап = прыжок", 320, 400, "#4a5f88", 20);
+    text("держать ▶", 600, 400, "#4a5f88", 20);
+}`},
+{id:'scene-objects',icon:'🧩',title:'Объекты сцены из кода',desc:'Объект «hero» идёт за пальцем, а без касания летает сам.',
+ scene:[{type:'rect',name:'hero',x:60,y:180,w:64,h:64,color:'#ff8844'}],
+ code:
+`// Объекты сцены управляются кодом и касанием
+let hero = object("hero");
+
+function start() {
+    print("Игра началась! Объект hero найден:", hero != null);
+}
+
+function update(dt) {
+    clear("#101827");
+
+    if (pointerDownNow()) {
+        hero.x = pointerX() - 32;
+        hero.y = pointerY() - 32;
+        hero.color = "#70d6ff";
+    } else {
+        hero.x += 120 * dt;
+        if (hero.x > 800) hero.x = -70;
+        hero.y = 180 + sin(time() * 3) * 50;
+        hero.color = "#ffcc55";
+    }
+
+    text("Коснись — объект сцены «hero» прыгнет к пальцу", 20, 40, "#ffffff", 16);
+}`},
+{id:'touch-button',icon:'☝',title:'Своя сенсорная кнопка',desc:'Тап по нарисованной кнопке — счётчик очков.',
+ scene:[],
+ code:
+`// Кнопка, на которую нажимают пальцем
+let btnX = 300, btnY = 330, btnW = 200, btnH = 80;
+let score = 0;
+
+function pointerDown(x, y) {
+    if (x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH) {
+        score += 1;
+        print("Очко!", score);
+    }
+}
+
+function update(dt) {
+    clear("#182235");
+    text("Счёт: " + score, 30, 60, "#70d6ff", 32);
+    rect(btnX, btnY, btnW, btnH, "#ff8844");
+    text("НАЖМИ!", btnX + 52, btnY + 50, "#101827", 24);
+}`},
+{id:'ball-gravity',icon:'⚽',title:'Мяч и гравитация',desc:'Тап — подбросить мяч к месту касания.',
+ scene:[],
+ code:
+`let ballX = 400, ballY = 60;
+let vx = 180, vy = 0;
+const gravity = 620;
+const floorY = 400;
+
+function pointerDown(x, y) {
+    vy = -380;                 // тап — подбросить мяч
+    vx = (x - ballX) * 2;      // и толкнуть к месту касания
+}
+
+function update(dt) {
+    clear("#101827");
+
+    vy += gravity * dt;
+    ballX += vx * dt;
+    ballY += vy * dt;
+
+    if (ballY > floorY) { ballY = floorY; vy = -vy * 0.7; }
+    if (ballX < 20)  { ballX = 20;  vx = -vx; }
+    if (ballX > 780) { ballX = 780; vx = -vx; }
+
+    rect(0, floorY + 20, 800, 12, "#2a3a55");
+    circle(ballX, ballY, 20, "#ffcc55");
+    text("Касание — подбросить мяч", 20, 30, "#8899bb", 16);
+}`},
+{id:'orbit',icon:'🪐',title:'Орбита',desc:'Круговое движение через sin и cos.',
+ scene:[],
+ code:
+`let angle = 0;
+
+function update(dt) {
+    clear("#0b1020");
+    angle += dt * 1.4;
+
+    circle(400, 225, 40, "#ffcc55");            // звезда
+
+    let ox = 400 + cos(angle) * 150;             // планета
+    let oy = 225 + sin(angle) * 95;
+    circle(ox, oy, 16, "#70d6ff");
+
+    let mx = ox + cos(angle * 6) * 34;           // луна
+    let my = oy + sin(angle * 6) * 34;
+    circle(mx, my, 6, "#c0ff70");
+
+    text("angle = " + round(angle * 100) / 100, 20, 30, "#8899bb", 16);
+}`},
+{id:'paint',icon:'✍',title:'Рисование пальцем',desc:'Рисуй касанием; кнопка «Очистить» на самом холсте.',
+ scene:[],
+ code:
+`// Движок очищает экран каждый кадр, поэтому
+// храним все точки и перерисовываем их заново.
+let points = [];
+
+function pointerDown(x, y) {
+    if (x >= 630 && y <= 64) { points = []; return; }  // кнопка «Очистить»
+    push(points, {x: x, y: y});
+}
+
+function pointerMove(x, y) {
+    if (pointerDownNow()) push(points, {x: x, y: y});
+}
+
+function update(dt) {
+    clear("#131a2e");
+
+    let i = 1;
+    while (i < length(points)) {
+        let a = points[i - 1];
+        let b = points[i];
+        line(a.x, a.y, b.x, b.y, "#ff8844", 3);
+        i += 1;
+    }
+
+    rect(630, 16, 150, 48, "#2a3a55");
+    text("Очистить", 648, 30, "#dbe4f5", 18);
+    text("Рисуй пальцем", 20, 30, "#8899bb", 16);
+}`}
+];
+
+/* ---------------- движок игры (только сенсор) ---------------- */
+const gameCanvas=document.getElementById('gameCanvas');
+const gctx=gameCanvas.getContext('2d');
+const sceneCanvas=document.getElementById('sceneCanvas');
+const sctx=sceneCanvas.getContext('2d');
+const gameStage=document.getElementById('gameStage');
+
+const Engine={
+  running:false,raf:0,lastTs:0,startTime:0,curDt:0,frames:0,
+  pointer:{x:0,y:0,down:false},
+  touches:[],
+  runtimeScene:[],handlers:{},env:null,baseEnv:null,warnedSprites:new Set(),
+  modules:new Map(),loadingModules:new Set()
+};
+
+function spriteByName(name){return state.sprites.find(s=>s.name===name)||null;}
+
+function buildGlobalEnv(){
+  const env=createEnv(null);
+  const N=(name,fn)=>env.vars.set(name,{__pf:'native',f:fn});
+  N('print',(a)=>{logConsole(a.map(fmtValue).join(' '));return null;});
+  N('random',()=>Math.random());
+  N('rand',(a)=>{const mn=numArg(a[0],0),mx=numArg(a[1],1);return mn+Math.random()*(mx-mn);});
+  N('abs',(a)=>Math.abs(numArg(a[0])));
+  N('sqrt',(a)=>Math.sqrt(numArg(a[0])));
+  N('sin',(a)=>Math.sin(numArg(a[0])));
+  N('cos',(a)=>Math.cos(numArg(a[0])));
+  N('floor',(a)=>Math.floor(numArg(a[0])));
+  N('ceil',(a)=>Math.ceil(numArg(a[0])));
+  N('round',(a)=>Math.round(numArg(a[0])));
+  N('min',(a)=>Math.min(numArg(a[0]),numArg(a[1])));
+  N('max',(a)=>Math.max(numArg(a[0]),numArg(a[1])));
+  N('clamp',(a)=>Math.min(Math.max(numArg(a[0]),numArg(a[1])),numArg(a[2])));
+  N('length',(a)=>{const v=a[0];if(v==null)return 0;if(typeof v==='string'||Array.isArray(v))return v.length;if(typeof v==='object')return Object.keys(v).length;return 0;});
+  N('push',(a,line)=>{if(!Array.isArray(a[0]))throw new PFError('push() ожидает массив первым аргументом',line);a[0].push(a[1]);return a[0];});
+  N('pop',(a,line)=>{if(!Array.isArray(a[0]))throw new PFError('pop() ожидает массив первым аргументом',line);return a[0].length?a[0].pop():null;});
+  N('time',()=>(performance.now()-Engine.startTime)/1000);
+  N('dt',()=>Engine.curDt);
+  N('clear',(a)=>{const c=typeof a[0]==='string'?a[0]:'#0f172a';gctx.fillStyle=c;gctx.fillRect(0,0,800,450);return null;});
+  N('rect',(a)=>{gctx.fillStyle=typeof a[4]==='string'?a[4]:'#70d6ff';gctx.fillRect(numArg(a[0]),numArg(a[1]),numArg(a[2]),numArg(a[3]));return null;});
+  N('circle',(a)=>{gctx.fillStyle=typeof a[3]==='string'?a[3]:'#70d6ff';gctx.beginPath();gctx.arc(numArg(a[0]),numArg(a[1]),Math.max(0,numArg(a[2])),0,Math.PI*2);gctx.fill();return null;});
+  N('line',(a)=>{gctx.strokeStyle=typeof a[4]==='string'?a[4]:'#ffffff';gctx.lineWidth=numArg(a[5],2);gctx.beginPath();gctx.moveTo(numArg(a[0]),numArg(a[1]));gctx.lineTo(numArg(a[2]),numArg(a[3]));gctx.stroke();return null;});
+  N('text',(a)=>{
+    gctx.fillStyle=typeof a[3]==='string'?a[3]:'#ffffff';
+    gctx.font='600 '+numArg(a[4],16)+'px "JetBrains Mono",monospace';
+    gctx.textBaseline='top';
+    gctx.fillText(fmtValue(a[0]),numArg(a[1]),numArg(a[2]));
+    return null;
+  });
+  N('sprite',(a)=>{
+    const nm=String(a[0]==null?'':a[0]);
+    const sp=spriteByName(nm);
+    const x=numArg(a[1]),y=numArg(a[2]);
+    if(!sp){
+      if(!Engine.warnedSprites.has(nm)){
+        Engine.warnedSprites.add(nm);
+        logConsole('[sprite] Ресурс «'+nm+'» не найден. Импортируй PNG во вкладке «Файлы».','warn');
+      }
+      drawPlaceholder(x,y,a[3]==null?64:numArg(a[3]),a[4]==null?64:numArg(a[4]),nm);
+      return null;
+    }
+    const img=sp.img;
+    if(!img.complete||!img.naturalWidth){
+      drawPlaceholder(x,y,a[3]==null?64:numArg(a[3]),a[4]==null?64:numArg(a[4]),nm);
+      return null;
+    }
+    const w=a[3]==null?img.naturalWidth:numArg(a[3]);
+    const h=a[4]==null?img.naturalHeight:numArg(a[4]);
+    gctx.drawImage(img,x,y,w,h);
+    return null;
+  });
+  N('object',(a)=>{
+    const nm=String(a[0]==null?'':a[0]);
+    const o=Engine.runtimeScene.find(it=>it.name===nm);
+    if(!o){
+      if(!Engine.warnedSprites.has('obj:'+nm)){
+        Engine.warnedSprites.add('obj:'+nm);
+        logConsole('[object] Объект сцены «'+nm+'» не найден. Создай его во вкладке «Сцена».','warn');
+      }
+      return null;
+    }
+    return o;
+  });
+  /* --- сенсорный ввод (единственный способ управления) --- */
+  N('pointerX',()=>Engine.pointer.x);
+  N('pointerY',()=>Engine.pointer.y);
+  N('pointerDownNow',()=>Engine.pointer.down);
+  N('touchCount',()=>Engine.touches.length);
+  N('touchX',(a)=>{const t=Engine.touches[Math.floor(numArg(a[0]))];return t?t.x:0;});
+  N('touchY',(a)=>{const t=Engine.touches[Math.floor(numArg(a[0]))];return t?t.y:0;});
+  return env;
+}
+function drawPlaceholder(x,y,w,h,nm){
+  gctx.save();
+  gctx.strokeStyle='#ff8088';gctx.lineWidth=2;gctx.setLineDash([6,4]);
+  gctx.strokeRect(x,y,w,h);gctx.setLineDash([]);
+  gctx.fillStyle='#ff8088';gctx.font='12px "JetBrains Mono",monospace';gctx.textBaseline='top';
+  gctx.fillText(nm||'sprite',x+4,y+4);
+  gctx.restore();
+}
+function drawSceneObj(c,o){
+  if(o.type==='rect'){c.fillStyle=o.color||'#ff8844';c.fillRect(o.x,o.y,o.w,o.h);}
+  else if(o.type==='circle'){c.fillStyle=o.color||'#70d6ff';c.beginPath();c.arc(o.x,o.y,Math.max(0,o.r),0,Math.PI*2);c.fill();}
+  else if(o.type==='text'){c.fillStyle=o.color||'#ffffff';c.font='600 '+(o.size||18)+'px "JetBrains Mono",monospace';c.textBaseline='top';c.fillText(o.text||'',o.x,o.y);}
+}
+
+/* ---------------- модули ---------------- */
+function resolveFileName(source){
+  const cands=[source,source+'.mrr'];
+  for(const c of cands)if(state.files[c]!==undefined)return c;
+  return null;
+}
+function loadModule(source,line,ctx){
+  const fileName=resolveFileName(source);
+  if(!fileName)
+    throw new PFError('Файл «'+source+'» не найден для импорта. Создай его: «Файлы» → «Новый .mrr».',line);
+  if(Engine.modules.has(fileName))return Engine.modules.get(fileName);
+  if(Engine.loadingModules.has(fileName))
+    throw new PFError('Циклический импорт файла «'+fileName+'»',line);
+  let modAst;
+  try{modAst=parse(tokenize(state.files[fileName]));}
+  catch(err){
+    if(err instanceof PFError)err.message='[Файл '+fileName+'] '+err.message;
+    throw err;
+  }
+  Engine.loadingModules.add(fileName);
+  const modEnv=createEnv(Engine.baseEnv);
+  try{
+    evalNode(modAst,modEnv,ctx);
+  }catch(err){
+    Engine.loadingModules.delete(fileName);
+    if(err instanceof PFError&&!err.modTagged){err.message='[Файл '+fileName+'] '+err.message;err.modTagged=true;}
+    throw err;
+  }
+  Engine.loadingModules.delete(fileName);
+  Engine.modules.set(fileName,modEnv);
+  logConsole('[import] Модуль загружен: '+fileName,'sys');
+  return modEnv;
+}
+function moduleExports(source){
+  const fn=resolveFileName(source);
+  if(!fn)return [];
+  const code=state.files[fn]||'';
+  const out=[];let m;
+  const reFn=/(?:^|\n)\s*function\s+([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)/g;
+  while((m=reFn.exec(code)))out.push({name:m[1],kind:'my',sig:m[1]+'(…) из '+fn,doc:'Функция из файла '+fn+'. Импортируется: from "'+source+'" import '+m[1]+';'});
+  const reVar=/(?:^|\n)\s*(?:let|const)\s+([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)/g;
+  while((m=reVar.exec(code)))out.push({name:m[1],kind:'var',sig:m[1]+' из '+fn,doc:'Переменная из файла '+fn+'.'});
+  return out;
+}
+function getImportedNames(){
+  const map=new Map();
+  const code=codeInput.value;let m;
+  const re=/\bfrom\s+["']?([\wА-Яа-яЁё$.-]+)["']?\s+import\s+([^\n;]+)/g;
+  while((m=re.exec(code))){
+    const file=m[1],specs=m[2];
+    if(specs.trim()==='*'){
+      moduleExports(file).forEach(it=>{if(!map.has(it.name))map.set(it.name,file);});
+    }else{
+      specs.split(',').forEach(sp=>{
+        const sm=/^\s*([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)(\s+as\s+([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*))?\s*$/.exec(sp);
+        if(sm){const nm=sm[3]||sm[1];if(!map.has(nm))map.set(nm,file);}
+      });
+    }
+  }
+  return map;
+}
+
+/* ---------------- консоль ---------------- */
+function logConsole(text,type){
+  const out=document.getElementById('consoleOut');
+  const div=document.createElement('div');
+  div.className='line-'+(type||'log');
+  const ts=document.createElement('span');ts.className='ts';
+  ts.textContent=new Date().toLocaleTimeString('ru-RU',{hour12:false});
+  div.appendChild(ts);
+  div.appendChild(document.createTextNode(text));
+  out.appendChild(div);
+  while(out.children.length>400)out.removeChild(out.firstChild);
+  out.scrollTop=out.scrollHeight;
+}
+function setRunStatus(text,cls){
+  const el=document.getElementById('runStatus');
+  el.textContent=text;el.className=cls||'';
+}
+
+/* ---------------- полный экран + «назад» ---------------- */
+let fsGuard=false;
+function fsElement(){return document.fullscreenElement||document.webkitFullscreenElement||null;}
+function enterGameFs(){
+  if(fsElement())return;
+  const el=gameStage;
+  const markEntered=()=>{
+    fsGuard=true;
+    try{history.pushState({pfFs:Date.now()},'');}catch(_){}
+  };
+  try{
+    if(el.requestFullscreen){
+      const pr=el.requestFullscreen();
+      if(pr&&pr.then)pr.then(markEntered).catch(err=>logConsole('[Полный экран] Не удалось: '+err.message+'. Игра в обычном окне.','warn'));
+      else markEntered();
+    }else if(el.webkitRequestFullscreen){
+      el.webkitRequestFullscreen();markEntered();
+    }else{
+      logConsole('[Полный экран] Браузер не поддерживает полноэкранный режим — игра в обычном окне.','warn');
+    }
+  }catch(err){
+    logConsole('[Полный экран] '+err.message,'warn');
+  }
+}
+function exitGameFs(){
+  try{
+    if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen();
+    else if(document.webkitFullscreenElement&&document.webkitExitFullscreen)document.webkitExitFullscreen();
+  }catch(_){}
+}
+window.addEventListener('popstate',()=>{
+  if(fsElement()){fsGuard=false;exitGameFs();}
+});
+function onFsChange(){
+  const inFs=!!fsElement();
+  const btn=document.getElementById('btnFullscreen');
+  if(btn)btn.textContent=inFs?'🗗 Оконный режим':'⛶ Во весь экран';
+  if(!inFs&&fsGuard){
+    fsGuard=false;
+    try{history.back();}catch(_){}
+  }
+}
+document.addEventListener('fullscreenchange',onFsChange);
+document.addEventListener('webkitfullscreenchange',onFsChange);
+
+/* ---------------- запуск / остановка ---------------- */
+function syncCodeToFile(){state.files[state.activeFile]=codeInput.value;}
+
+function startGame(){
+  syncCodeToFile();
+  closeAC();
+  const src=state.files[ENTRY_FILE]||'';
+  let ast;
+  try{ast=parse(tokenize(src));}
+  catch(err){
+    logConsole('[main.mrr] '+fmtError(err),'error');
+    setRunStatus('Ошибка кода','error');
+    switchTab('code');
+    return;
+  }
+  if(Engine.raf)cancelAnimationFrame(Engine.raf);
+  Engine.pointer={x:0,y:0,down:false};
+  Engine.touches=[];
+  Engine.warnedSprites.clear();
+  Engine.modules=new Map();Engine.loadingModules=new Set();
+  Engine.runtimeScene=state.scene.map(o=>Object.assign({},o));
+  Engine.handlers={};
+  Engine.baseEnv=buildGlobalEnv();
+  Engine.env=createEnv(Engine.baseEnv);
+  const ctx=newCtx(LIMIT_TOTAL);
+  ctx.loadModule=(source,line)=>loadModule(source,line,ctx);
+  try{evalNode(ast,Engine.env,ctx);}
+  catch(err){
+    if(err instanceof Signal)logConsole('[main.mrr] Ошибка: «'+err.kind+'» вне функции/цикла','error');
+    else logConsole(fmtError(err),'error');
+    setRunStatus('Ошибка запуска','error');
+    switchTab('code');
+    return;
+  }
+  for(const ev of ['start','update','pointerDown','pointerMove','pointerUp']){
+    const v=Engine.env.vars.get(ev);
+    if(v&&v.__pf==='func')Engine.handlers[ev]=v;
+  }
+  Engine.running=true;Engine.frames=0;
+  Engine.startTime=performance.now();Engine.lastTs=Engine.startTime;Engine.curDt=0;
+  if(state.activeFile!==ENTRY_FILE)
+    logConsole('[MrrCode] Выполняется точка входа main.mrr (в редакторе открыт '+state.activeFile+').','warn');
+  logConsole('[MrrCode] Запуск: main.mrr · полный экран · управление касаниями','sys');
+  document.getElementById('btnRun').disabled=true;
+  document.getElementById('btnStop').disabled=false;
+  setRunStatus('Выполняется ●','running');
+  if(Engine.handlers.start){
+    try{callFunc(Engine.handlers.start,[],newCtx(LIMIT_TOTAL));}
+    catch(err){logConsole(fmtError(err),'error');stopGame();return;}
+  }
+  switchTab('game');
+  if(!fsElement())enterGameFs();
+  Engine.raf=requestAnimationFrame(frameLoop);
+}
+
+function frameLoop(ts){
+  if(!Engine.running)return;
+  let dt=(ts-Engine.lastTs)/1000;
+  Engine.lastTs=ts;
+  if(!isFinite(dt)||dt<=0)dt=1/60;
+  dt=Math.min(dt,0.05);
+  Engine.curDt=dt;Engine.frames++;
+  if(Engine.frames%20===0){
+    document.getElementById('fpsLabel').textContent=Math.round(1/Math.max(dt,0.0001))+' к/с · кадр '+Engine.frames;
+  }
+  /* фикс наложения: каждый кадр начинается с чистой поверхности */
+  gctx.setTransform(1,0,0,1,0,0);
+  gctx.fillStyle='#0f172a';
+  gctx.fillRect(0,0,800,450);
+  try{
+    if(Engine.handlers.update)callFunc(Engine.handlers.update,[dt],newCtx(LIMIT_FRAME));
+    for(const o of Engine.runtimeScene)drawSceneObj(gctx,o);
+  }catch(err){
+    logConsole(fmtError(err),'error');
+    stopGame();
+    return;
+  }
+  Engine.raf=requestAnimationFrame(frameLoop);
+}
+
+function stopGame(silent){
+  if(Engine.raf)cancelAnimationFrame(Engine.raf);
+  const was=Engine.running;
+  Engine.running=false;Engine.raf=0;Engine.handlers={};
+  document.getElementById('btnRun').disabled=false;
+  document.getElementById('btnStop').disabled=true;
+  document.getElementById('fpsLabel').textContent='';
+  if(was&&!silent){
+    logConsole('[MrrCode] Остановлено.','sys');
+    setRunStatus('Остановлено');
+  }else if(!silent){
+    setRunStatus('Готов к запуску');
+  }
+}
+
+/* ---------------- сенсорный ввод ---------------- */
+function canvasPos(e){
+  const r=gameCanvas.getBoundingClientRect();
+  return {x:Math.round((e.clientX-r.left)*(800/r.width)),y:Math.round((e.clientY-r.top)*(450/r.height))};
+}
+function firePointer(name,p){
+  if(!Engine.running)return;
+  const h=Engine.handlers[name];
+  if(!h)return;
+  try{callFunc(h,[p.x,p.y],newCtx(LIMIT_FRAME));}
+  catch(err){logConsole(fmtError(err),'error');stopGame();}
+}
+function touchAdd(e,p){
+  const t=Engine.touches.find(t=>t.id===e.pointerId);
+  if(t){t.x=p.x;t.y=p.y;}else Engine.touches.push({id:e.pointerId,x:p.x,y:p.y});
+}
+function touchRemove(id){Engine.touches=Engine.touches.filter(t=>t.id!==id);}
+gameCanvas.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  const p=canvasPos(e);
+  touchAdd(e,p);
+  Engine.pointer.x=p.x;Engine.pointer.y=p.y;Engine.pointer.down=true;
+  try{gameCanvas.setPointerCapture(e.pointerId);}catch(_){}
+  firePointer('pointerDown',p);
+});
+gameCanvas.addEventListener('pointermove',e=>{
+  const p=canvasPos(e);
+  const t=Engine.touches.find(t=>t.id===e.pointerId);
+  if(!t)return;
+  t.x=p.x;t.y=p.y;
+  Engine.pointer.x=p.x;Engine.pointer.y=p.y;
+  firePointer('pointerMove',p);
+});
+gameCanvas.addEventListener('pointerup',e=>{
+  const p=canvasPos(e);
+  touchRemove(e.pointerId);
+  Engine.pointer.down=Engine.touches.length>0;
+  if(Engine.touches.length){Engine.pointer.x=Engine.touches[0].x;Engine.pointer.y=Engine.touches[0].y;}
+  firePointer('pointerUp',p);
+});
+gameCanvas.addEventListener('pointercancel',e=>{
+  touchRemove(e.pointerId);
+  Engine.pointer.down=Engine.touches.length>0;
+});
+gameCanvas.addEventListener('contextmenu',e=>e.preventDefault());
+window.addEventListener('blur',()=>{Engine.touches=[];Engine.pointer.down=false;});
+
+/* ---------------- редактор: подсветка ---------------- */
+const codeInput=document.getElementById('codeInput');
+const hlCode=document.getElementById('hlCode');
+const hlLayer=document.getElementById('hlLayer');
+const gutterInner=document.getElementById('gutterInner');
+
+const EV_NAMES=Object.keys(API).filter(k=>API[k].kind==='ev');
+const FN_NAMES=Object.keys(API).filter(k=>API[k].kind!=='ev');
+const HL_RULES=[
+  {re:/\/\/[^\n]*/y,cls:'c-com'},
+  {re:/\/\*[\s\S]*?(?:\*\/|$)/y,cls:'c-com'},
+  {re:/"(?:[^"\\\n]|\\.)*"?|'(?:[^'\\\n]|\\.)*'?/y,cls:'c-str'},
+  {re:/#[0-9a-fA-F]{3,8}\b/y,cls:'c-color'},
+  {re:/\d+\.?\d*(?:[eE][+-]?\d+)?/y,cls:'c-num'},
+  {re:/\b(?:let|const|if|else|while|for|of|function|return|break|continue|from|import|as)\b/y,cls:'c-kw'},
+  {re:/\b(?:true|false|null)\b/y,cls:'c-lit'},
+  {re:new RegExp('\\b(?:'+EV_NAMES.join('|')+')\\b','y'),cls:'c-ev'},
+  {re:new RegExp('\\b(?:'+FN_NAMES.join('|')+')\\b','y'),cls:'c-bi'},
+  {re:/[A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*/y,cls:'c-id',fnCheck:true},
+  {re:/\s+/y,cls:null},
+  {re:/[{}()[\],;.:]/y,cls:'c-punc'},
+  {re:/[+\-*/%!=<>&|?]+/y,cls:'c-op'},
+  {re:/[\s\S]/y,cls:null}
+];
+function highlight(src){
+  let out='',i=0;
+  while(i<src.length){
+    let matched=false;
+    for(const rule of HL_RULES){
+      rule.re.lastIndex=i;
+      const m=rule.re.exec(src);
+      if(m&&m.index===i&&m[0].length>0){
+        let cls=rule.cls;
+        if(rule.fnCheck){
+          let j=i+m[0].length;
+          while(j<src.length&&(src[j]===' '||src[j]==='\t'))j++;
+          if(src[j]==='(')cls='c-fn';
+        }
+        const txt=escapeHtml(m[0]);
+        out+=cls?'<span class="'+cls+'">'+txt+'</span>':txt;
+        i+=m[0].length;matched=true;break;
+      }
+    }
+    if(!matched){out+=escapeHtml(src[i]);i++;}
+  }
+  return out;
+}
+function refreshEditor(){
+  hlCode.innerHTML=highlight(codeInput.value)+'\n';
+  updateGutter();
+  syncScroll();
+  updateCaretPos();
+}
+function updateGutter(){
+  const n=codeInput.value.split('\n').length;
+  if(gutterInner.dataset.n===String(n))return;
+  gutterInner.dataset.n=String(n);
+  let s='';for(let i=1;i<=n;i++)s+=i+'\n';
+  gutterInner.textContent=s;
+}
+function syncScroll(){
+  hlLayer.scrollTop=codeInput.scrollTop;
+  hlLayer.scrollLeft=codeInput.scrollLeft;
+  gutterInner.style.transform='translateY('+(-codeInput.scrollTop)+'px)';
+}
+function updateCaretPos(){
+  const upto=codeInput.value.slice(0,codeInput.selectionStart);
+  const lines=upto.split('\n');
+  document.getElementById('caretPos').textContent='Строка '+lines.length+', столбец '+(lines[lines.length-1].length+1);
+}
+function saveCode(){state.files[state.activeFile]=codeInput.value;}
+function getHexAtCaret(){
+  const v=codeInput.value, pos=codeInput.selectionStart;
+  const re=/#([0-9a-fA-F]{3,8})/g;
+  let m;
+  while((m=re.exec(v))){
+    if(pos>=m.index && pos<=m.index+m[0].length) return {start:m.index,end:m.index+m[0].length,value:m[0]};
+  }
+  return null;
+}
+function normalizePickerHex(hex){
+  if(/^#[0-9a-fA-F]{3}$/.test(hex)) return '#'+hex.slice(1).split('').map(x=>x+x).join('');
+  if(/^#[0-9a-fA-F]{4}$/.test(hex)) return '#'+hex.slice(1,4).split('').map(x=>x+x).join('')+hex[4]+hex[4];
+  if(/^#[0-9a-fA-F]{6}$/.test(hex)) return hex.toLowerCase();
+  if(/^#[0-9a-fA-F]{8}$/.test(hex)) return hex.slice(0,7).toLowerCase()+hex.slice(7).toLowerCase();
+  return '#70d6ff';
+}
+function updateCodeColorUI(){
+  const hit=getHexAtCaret();
+  const sw=document.getElementById('codeColorSwatch');
+  const val=document.getElementById('codeColorValue');
+  const input=document.getElementById('codeColorInput');
+  if(!hit){sw.style.background='linear-gradient(135deg,#ff4d4d,#4d7cff)';val.textContent='—';return;}
+  const rgb=normalizePickerHex(hit.value).slice(0,7);
+  sw.style.background=rgb;
+  val.textContent=hit.value.toUpperCase();
+  input.value=rgb;
+}
+function openCodeColorPicker(){
+  const hit=getHexAtCaret();
+  if(!hit){setNote('Поставь курсор внутрь HEX-цвета, например #70d6ff, и нажми «🎨 Цвет».');return;}
+  const input=document.getElementById('codeColorInput');
+  input.value=normalizePickerHex(hit.value).slice(0,7);
+  input.dataset.start=String(hit.start); input.dataset.end=String(hit.end); input.dataset.original=hit.value;
+  input.click();
+}
+const codeColorBtn=document.getElementById('btnColorPicker');
+const codeColorInput=document.getElementById('codeColorInput');
+codeColorBtn.addEventListener('click',openCodeColorPicker);
+codeColorInput.addEventListener('input',()=>{
+  const start=Number(codeColorInput.dataset.start), end=Number(codeColorInput.dataset.end);
+  if(!Number.isFinite(start)||!Number.isFinite(end))return;
+  let replacement=codeColorInput.value.toLowerCase();
+  const original=codeColorInput.dataset.original||'';
+  if(original.length===5){ // #RGBA: preserve alpha
+    replacement=replacement.slice(0,7)+original.slice(4).toLowerCase();
+  }else if(original.length===9){ // #RRGGBBAA: preserve alpha
+    replacement=replacement.slice(0,7)+original.slice(7).toLowerCase();
+  }
+  codeInput.focus();
+  codeInput.setSelectionRange(start,end);
+  codeInput.setRangeText(replacement,start,end,'end');
+  refreshEditor();saveCode();updateHint();updateAC(false);updateCodeColorUI();
+});
+codeInput.addEventListener('dblclick',()=>{
+  if(getHexAtCaret()) openCodeColorPicker();
+});
+
+/* ---------------- редактор: подсказки ---------------- */
+function userFuncNames(){
+  const set=new Set();let m;
+  const re=/\bfunction\s+([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)/g;
+  while((m=re.exec(codeInput.value)))set.add(m[1]);
+  return set;
+}
+function userVarNames(){
+  const set=new Set();let m;
+  const re=/\b(?:let|const)\s+([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)/g;
+  while((m=re.exec(codeInput.value)))set.add(m[1]);
+  return set;
+}
+function updateHint(){
+  const v=codeInput.value,pos=codeInput.selectionStart;
+  const hint=document.getElementById('hintBar');
+  let depth=0,fnName=null;
+  for(let i=pos-1;i>=0;i--){
+    const c=v[i];
+    if(c===')')depth++;
+    else if(c==='('){
+      if(depth===0){const m=/([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)\s*$/.exec(v.slice(0,i));fnName=m?m[1]:null;break;}
+      depth--;
+    }
+  }
+  const uFns=userFuncNames(),uVars=userVarNames(),imported=getImportedNames();
+  if(fnName){
+    const info=API[fnName];
+    if(info){hint.innerHTML='<b class="h-sig">'+escapeHtml(info.sig)+'</b> <span class="h-doc">— '+escapeHtml(info.doc)+'</span>';return;}
+    if(uFns.has(fnName)){hint.innerHTML='<b class="h-sig">'+escapeHtml(fnName)+'(…)</b> <span class="h-doc">— функция из твоего кода</span>';return;}
+    if(imported.has(fnName)){hint.innerHTML='<b class="h-sig">'+escapeHtml(fnName)+'(…)</b> <span class="h-doc">— импортировано из файла '+escapeHtml(imported.get(fnName))+'</span>';return;}
+  }
+  let s=pos,e=pos;
+  const isW=ch=>ch&&/[\wА-Яа-яЁё$]/.test(ch);
+  while(s>0&&isW(v[s-1]))s--;
+  while(e<v.length&&isW(v[e]))e++;
+  const word=v.slice(s,e);
+  if(word){
+    const info=API[word];
+    if(info){hint.innerHTML='<b class="h-sig">'+escapeHtml(info.sig)+'</b> <span class="h-doc">— '+escapeHtml(info.doc)+'</span>';return;}
+    if(KEYWORD_DOCS[word]){hint.innerHTML='<b class="h-sig">'+escapeHtml(word)+'</b> <span class="h-doc">— '+escapeHtml(KEYWORD_DOCS[word])+'</span>';return;}
+    if(uFns.has(word)){hint.innerHTML='<b class="h-sig">'+escapeHtml(word)+'(…)</b> <span class="h-doc">— функция из твоего кода</span>';return;}
+    if(imported.has(word)){hint.innerHTML='<b class="h-sig">'+escapeHtml(word)+'</b> <span class="h-doc">— импортировано из файла '+escapeHtml(imported.get(word))+'</span>';return;}
+    if(uVars.has(word)){hint.innerHTML='<b class="h-sig">'+escapeHtml(word)+'</b> <span class="h-doc">— переменная из твоего кода</span>';return;}
+  }
+  hint.innerHTML='💡 Печатай имя — появится список, тапни вариант · «📖» — шпаргалка · «🤖» — ИИ напишет код за тебя';
+}
+
+/* ---------------- редактор: автодополнение ---------------- */
+const AC={open:false,items:[],idx:0,wordStart:0};
+const acPopup=document.getElementById('acPopup');
+const acList=document.getElementById('acList');
+const acDoc=document.getElementById('acDoc');
+const KIND_LABEL={fn:'встр',kw:'ключ',ev:'событ',my:'моя',var:'перем',prop:'свойс',obj:'сцена',spr:'png',snip:'шабл',mod:'файл',imp:'имп'};
+
+const SNIPPETS=[
+  {name:'from',kind:'snip',sig:'from "файл" import имя;',doc:'Шаблон импорта: свяжи файлы проекта. Например: from "player" import spawnPlayer;',insert:'from "§player§" import §spawnPlayer§;'},
+  {name:'for',kind:'snip',sig:'шаблон цикла for',doc:'Цикл со счётчиком. Замени count на нужное число.',insert:'for (let i = 0; i < §count§; i++) {\n    \n}'},
+  {name:'ifelse',kind:'snip',sig:'шаблон if / else',doc:'Условие с веткой «иначе».',insert:'if (§условие§) {\n    \n} else {\n    \n}'},
+  {name:'whileloop',kind:'snip',sig:'шаблон цикла while',doc:'Цикл с условием.',insert:'while (§условие§) {\n    \n}'},
+  {name:'forof',kind:'snip',sig:'шаблон for … of',doc:'Перебор массива.',insert:'for (let item of §array§) {\n    print(item);\n}'},
+  {name:'touchloop',kind:'snip',sig:'перебор всех пальцев',doc:'Мультитач: цикл по всем касаниям через touchCount()/touchX(i)/touchY(i).',insert:'let i = 0;\nwhile (i < touchCount()) {\n    let tx = touchX(i);\n    let ty = touchY(i);\n    §circle(tx, ty, 20, "#70d6ff");§\n    i += 1;\n}'}
+];
+const GENERIC_PROPS=[
+  {name:'x',doc:'Координата X (0..800).'},
+  {name:'y',doc:'Координата Y (0..450).'},
+  {name:'w',doc:'Ширина (прямоугольник).'},
+  {name:'h',doc:'Высота (прямоугольник).'},
+  {name:'r',doc:'Радиус (круг).'},
+  {name:'color',doc:'Цвет, например "#ffcc55".'},
+  {name:'text',doc:'Строка текста (текстовый объект).'},
+  {name:'size',doc:'Размер шрифта (текстовый объект).'},
+  {name:'length',doc:'Длина строки/массива (только чтение).'}
+];
+const TYPE_PROPS={
+  rect:[
+    {name:'x',doc:'Левый край по X (0..800).'},{name:'y',doc:'Верхний край по Y (0..450).'},
+    {name:'w',doc:'Ширина прямоугольника.'},{name:'h',doc:'Высота прямоугольника.'},
+    {name:'color',doc:'Цвет заливки, например "#ff8844".'}
+  ],
+  circle:[
+    {name:'x',doc:'Центр круга по X.'},{name:'y',doc:'Центр круга по Y.'},
+    {name:'r',doc:'Радиус круга.'},{name:'color',doc:'Цвет заливки.'}
+  ],
+  text:[
+    {name:'x',doc:'Начало текста по X.'},{name:'y',doc:'Верх текста по Y.'},
+    {name:'text',doc:'Строка текста.'},{name:'size',doc:'Размер шрифта.'},
+    {name:'color',doc:'Цвет текста.'}
+  ]
+};
+function collectSymbols(){
+  const items=[];
+  for(const nm of Object.keys(API)){
+    const info=API[nm];
+    items.push({name:nm,kind:info.kind,sig:info.sig,doc:info.doc,insert:info.insert||null});
+  }
+  for(const k of KEYWORDS)items.push({name:k,kind:'kw',sig:k,doc:KEYWORD_DOCS[k]||''});
+  const seen=new Set(items.map(i=>i.name));
+  let m;
+  const reFn=/\bfunction\s+([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)/g;
+  while((m=reFn.exec(codeInput.value))){
+    if(!seen.has(m[1])){seen.add(m[1]);items.push({name:m[1],kind:'my',sig:m[1]+'(…) — твоя функция',doc:'Функция из твоего кода.'});}
+  }
+  const reVar=/\b(?:let|const)\s+([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)/g;
+  while((m=reVar.exec(codeInput.value))){
+    if(!seen.has(m[1])){seen.add(m[1]);items.push({name:m[1],kind:'var',sig:m[1],doc:'Переменная из твоего кода.'});}
+  }
+  const imported=getImportedNames();
+  for(const [nm,file] of imported){
+    if(!seen.has(nm)){seen.add(nm);items.push({name:nm,kind:'imp',sig:nm+' ← '+file,doc:'Импортировано из файла '+file+(file.endsWith('.mrr')?'':'.mrr')+'.'});}
+  }
+  for(const sn of SNIPPETS)items.push(sn);
+  return items;
+}
+function memberItems(varName){
+  const code=codeInput.value;
+  let props=null;
+  const objRe=new RegExp('(?:let|const)\\s+'+escapeRe(varName)+'\\s*=\\s*object\\(\\s*[\'"]([^\'"]+)');
+  const om=objRe.exec(code);
+  if(om){
+    const so=state.scene.find(o=>o.name===om[1]);
+    if(so&&TYPE_PROPS[so.type])props=TYPE_PROPS[so.type];
+  }
+  if(!props){
+    const litRe=new RegExp('(?:let|const)\\s+'+escapeRe(varName)+'\\s*=\\s*\\{([^{}]*)\\}');
+    const lm=litRe.exec(code);
+    if(lm){
+      props=[];
+      let km;const kre=/([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)\s*:/g;
+      while((km=kre.exec(lm[1])))props.push({name:km[1],doc:'Поле объекта '+varName+'.'});
+      if(!props.length)props=null;
+    }
+  }
+  if(!props){
+    const arrRe=new RegExp('(?:let|const)\\s+'+escapeRe(varName)+'\\s*=\\s*\\[');
+    if(arrRe.test(code))props=[{name:'length',doc:'Число элементов массива (только чтение).'}];
+  }
+  if(!props)props=GENERIC_PROPS;
+  return props.map(p=>({name:p.name,kind:'prop',sig:varName+'.'+p.name,doc:p.doc||''}));
+}
+function filterItems(all,word){
+  if(!word)return all.slice(0,14);
+  const w=word.toLowerCase();
+  const starts=[],incl=[];
+  for(const it of all){
+    const n=it.name.toLowerCase();
+    if(n.startsWith(w))starts.push(it);
+    else if(n.includes(w))incl.push(it);
+  }
+  starts.sort((a,b)=>a.name.length-b.name.length);
+  return starts.concat(incl).slice(0,14);
+}
+function updateAC(force){
+  const pos=codeInput.selectionStart;
+  if(pos!==codeInput.selectionEnd){closeAC();return;}
+  const before=codeInput.value.slice(0,pos);
+  const fromM=/\bfrom\s+(?:["']([\wА-Яа-яЁё$.-]*)|([\wА-Яа-яЁё$.-]*))$/.exec(before);
+  if(fromM){
+    const prefix=fromM[1]!==undefined?fromM[1]:(fromM[2]||'');
+    const items=Object.keys(state.files).map(f=>{
+      const bare=f.replace(/\.mrr$/,'');
+      return {name:bare,kind:'mod',sig:f,doc:'Файл проекта. Синтаксис: from "'+bare+'" import имя;'};
+    });
+    const filtered=filterItems(items,prefix);
+    if(filtered.length)showAC(filtered,pos-prefix.length);else closeAC();
+    return;
+  }
+  const impM=/\bfrom\s+["']?([\wА-Яа-яЁё$.-]+)["']?\s+import\s+([^\n;]*)$/.exec(before);
+  if(impM){
+    const lastChunk=(impM[2].split(',').pop()||'');
+    const wm=/([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)?\s*$/.exec(lastChunk);
+    const prefix=(wm&&wm[1])?wm[1]:'';
+    const filtered=filterItems(moduleExports(impM[1]),prefix);
+    if(filtered.length)showAC(filtered,pos-prefix.length);else closeAC();
+    return;
+  }
+  const strM=/(object|sprite)\(\s*["']([\wА-Яа-яЁё$-]*)$/.exec(before);
+  if(strM){
+    const isObj=strM[1]==='object';
+    const items=isObj
+      ? state.scene.map(o=>({name:o.name,kind:'obj',sig:'объект сцены · '+o.type,doc:'Имя объекта с вкладки «Сцена». Свойства можно менять из кода.'}))
+      : state.sprites.map(s=>({name:s.name,kind:'spr',sig:'PNG-спрайт',doc:'Ресурс из вкладки «Файлы». Рисуй: sprite("'+s.name+'", x, y, w, h).'}));
+    const filtered=filterItems(items,strM[2]);
+    if(filtered.length)showAC(filtered,pos-strM[2].length);else closeAC();
+    return;
+  }
+  const dotM=/([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)\s*\.([\wА-Яа-яЁё$]*)$/.exec(before);
+  if(dotM){
+    const filtered=filterItems(memberItems(dotM[1]),dotM[2]);
+    if(filtered.length&&(dotM[2].length>0||before.endsWith('.')||force))showAC(filtered,pos-dotM[2].length);
+    else closeAC();
+    return;
+  }
+  const wm=/[A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*$/.exec(before);
+  if(!wm){
+    if(force)showAC(filterItems(collectSymbols(),''),pos);
+    else closeAC();
+    return;
+  }
+  const filtered=filterItems(collectSymbols(),wm[0]);
+  if(filtered.length)showAC(filtered,pos-wm[0].length);
+  else closeAC();
+}
+function showAC(items,wordStart){
+  AC.items=items;AC.idx=0;AC.wordStart=wordStart;AC.open=true;
+  renderAC();
+}
+function renderAC(){
+  acList.innerHTML=AC.items.map((it,i)=>
+    '<div class="ac-item'+(i===AC.idx?' sel':'')+'" data-i="'+i+'">'+
+    '<span class="ac-kind k-'+it.kind+'">'+(KIND_LABEL[it.kind]||'').slice(0,6)+'</span>'+
+    '<span class="ac-name">'+escapeHtml(it.name)+'</span>'+
+    (it.sig?'<span class="ac-sig">'+escapeHtml(it.sig)+'</span>':'')+
+    '</div>'
+  ).join('');
+  const it=AC.items[AC.idx];
+  acDoc.innerHTML=it?'<b>'+escapeHtml(it.name)+'</b> — '+escapeHtml(it.doc||it.sig||''):'';
+  positionAC();
+}
+function positionAC(){
+  acPopup.classList.remove('hidden');
+  const area=document.getElementById('editorArea');
+  const cc=caretCoords(codeInput);
+  const pw=acPopup.offsetWidth,ph=acPopup.offsetHeight;
+  let left=Math.min(Math.max(4,cc.x),area.clientWidth-pw-8);
+  let top=cc.y+cc.lineH+4;
+  if(top+ph>area.clientHeight-4)top=Math.max(4,cc.y-ph-4);
+  acPopup.style.left=left+'px';
+  acPopup.style.top=top+'px';
+}
+function caretCoords(ta){
+  const cs=getComputedStyle(ta);
+  const div=document.createElement('div');
+  const st=div.style;
+  st.position='fixed';st.visibility='hidden';st.whiteSpace='pre';st.wordWrap='normal';
+  st.fontFamily=cs.fontFamily;st.fontSize=cs.fontSize;st.fontWeight=cs.fontWeight;
+  st.lineHeight=cs.lineHeight;st.letterSpacing=cs.letterSpacing;
+  st.paddingTop=cs.paddingTop;st.paddingLeft=cs.paddingLeft;st.paddingRight=cs.paddingRight;st.paddingBottom=cs.paddingBottom;
+  st.borderStyle='solid';st.borderWidth=cs.borderTopWidth+' '+cs.borderRightWidth+' '+cs.borderBottomWidth+' '+cs.borderLeftWidth;
+  st.boxSizing=cs.boxSizing;st.width=cs.width;
+  div.textContent=ta.value.slice(0,ta.selectionStart);
+  const span=document.createElement('span');
+  span.textContent='\u200b';
+  div.appendChild(span);
+  document.body.appendChild(div);
+  const sr=span.getBoundingClientRect(),tr=ta.getBoundingClientRect();
+  document.body.removeChild(div);
+  return {x:sr.left-tr.left-ta.scrollLeft,y:sr.top-tr.top-ta.scrollTop,lineH:parseFloat(cs.lineHeight)||24};
+}
+function closeAC(){AC.open=false;acPopup.classList.add('hidden');}
+function insertSnippet(start,end,snip){
+  const parts=snip.split('§');
+  codeInput.setRangeText(parts.join(''),start,end,'end');
+  if(parts.length>=3){
+    const selStart=start+parts[0].length;
+    codeInput.setSelectionRange(selStart,selStart+parts[1].length);
+  }
+}
+function acceptAC(){
+  const it=AC.items[AC.idx];
+  if(!it)return;
+  const pos=codeInput.selectionStart;
+  const snip=it.insert||null;
+  if(snip&&snip.indexOf('§')>=0)insertSnippet(AC.wordStart,pos,snip);
+  else codeInput.setRangeText(snip||it.name,AC.wordStart,pos,'end');
+  closeAC();
+  refreshEditor();saveCode();updateHint();
+}
+acList.addEventListener('pointerdown',e=>e.preventDefault());
+acList.addEventListener('click',e=>{
+  const item=e.target.closest('.ac-item');
+  if(!item)return;
+  AC.idx=Number(item.dataset.i);
+  acceptAC();
+});
+document.getElementById('acClose').addEventListener('pointerdown',e=>e.preventDefault());
+document.getElementById('acClose').addEventListener('click',()=>closeAC());
+
+/* ---------------- панель быстрой вставки ---------------- */
+const PALETTE=[
+  {label:'⇥',act:'indent',title:'Отступ'},
+  {label:'⏎',act:'newline',title:'Новая строка с отступом'},
+  {sep:true},
+  {label:'(',ins:'()',caret:1},{label:')',ins:')'},
+  {label:'{',ins:'{}',caret:1},{label:'}',ins:'}'},
+  {label:'[',ins:'[]',caret:1},{label:']',ins:']'},
+  {label:'"',ins:'""',caret:1},{label:',',ins:', '},{label:';',ins:';'},
+  {sep:true},
+  {label:'=',ins:' = '},{label:'+',ins:' + '},{label:'-',ins:' - '},{label:'*',ins:' * '},{label:'/',ins:' / '},{label:'%',ins:' % '},
+  {label:'<',ins:' < '},{label:'>',ins:' > '},{label:'==',ins:' == '},{label:'!=',ins:' != '},
+  {label:'<=',ins:' <= '},{label:'>=',ins:' >= '},{label:'!',ins:'!'},
+  {label:'&&',ins:' && '},{label:'||',ins:' || '},
+  {sep:true},
+  {label:'let',ins:'let §x§ = '},{label:'const',ins:'const §x§ = '},
+  {label:'if',snippet:'if (§условие§) {\n    \n}'},
+  {label:'else',ins:' else {\n    \n}'},
+  {label:'while',snippet:'while (§условие§) {\n    \n}'},
+  {label:'for',snippet:'for (let i = 0; i < §count§; i++) {\n    \n}'},
+  {label:'func',snippet:'function §имя§() {\n    \n}'},
+  {label:'return',ins:'return '},
+  {label:'true',ins:'true'},{label:'false',ins:'false'},{label:'null',ins:'null'},
+  {sep:true},
+  {label:'start()',snippet:'function start() {\n    §\n}'},
+  {label:'update()',snippet:'function update(dt) {\n    clear("#101827");\n    §\n}'},
+  {label:'from…import',snippet:'from "§player§" import §spawnPlayer§;'},
+  {sep:true},
+  {label:'print',ins:'print()',caret:1},
+  {label:'clear',snippet:'clear("§#101827§")'},
+  {label:'rect',snippet:'rect(§x§, y, w, h, "#70d6ff")'},
+  {label:'circle',snippet:'circle(§x§, y, r, "#70d6ff")'},
+  {label:'line',snippet:'line(§x1§, y1, x2, y2, "#ffffff", 2)'},
+  {label:'text',snippet:'text(§"текст"§, x, y, "#ffffff", 20)'},
+  {label:'sprite',snippet:'sprite("§имя§", x, y, 64, 64)'},
+  {label:'object',snippet:'object("§имя§")'},
+  {sep:true},
+  {label:'pointerX()',ins:'pointerX()'},
+  {label:'pointerY()',ins:'pointerY()'},
+  {label:'pointerDownNow()',ins:'pointerDownNow()'},
+  {label:'touchCount()',ins:'touchCount()'},
+  {label:'touchX()',ins:'touchX()',caret:1},
+  {label:'touchY()',ins:'touchY()',caret:1},
+  {sep:true},
+  {label:'time()',ins:'time()'},{label:'dt()',ins:'dt()'},
+  {label:'random()',ins:'random()'},{label:'rand()',ins:'rand()',caret:1},
+  {label:'clamp()',ins:'clamp()',caret:1},{label:'length()',ins:'length()',caret:1},
+  {label:'push()',ins:'push()',caret:1},{label:'pop()',ins:'pop()',caret:1},
+  {label:'sqrt()',ins:'sqrt()',caret:1},{label:'abs()',ins:'abs()',caret:1},
+  {label:'sin()',ins:'sin()',caret:1},{label:'cos()',ins:'cos()',caret:1},
+  {label:'floor()',ins:'floor()',caret:1},{label:'round()',ins:'round()',caret:1},
+  {label:'min()',ins:'min()',caret:1},{label:'max()',ins:'max()',caret:1}
+];
+function buildPalette(){
+  const pal=document.getElementById('touchPalette');
+  PALETTE.forEach(item=>{
+    if(item.sep){
+      const s=document.createElement('div');s.className='pal-sep';pal.appendChild(s);return;
+    }
+    const b=document.createElement('button');
+    b.type='button';b.className='pal-btn';b.textContent=item.label;
+    if(item.title)b.title=item.title;
+    b.addEventListener('pointerdown',e=>e.preventDefault());
+    b.addEventListener('click',()=>applyPalette(item));
+    pal.appendChild(b);
+  });
+}
+function applyPalette(item){
+  codeInput.focus();
+  const s=codeInput.selectionStart,e=codeInput.selectionEnd;
+  if(item.act==='indent'){
+    if(s!==e){
+      const sel=codeInput.value.slice(s,e);
+      codeInput.setRangeText(sel.split('\n').map(l=>'    '+l).join('\n'),s,e,'end');
+    }else codeInput.setRangeText('    ',s,e,'end');
+  }else if(item.act==='newline'){
+    const v=codeInput.value;
+    const ls=v.lastIndexOf('\n',s-1)+1;
+    const line=v.slice(ls,s);
+    const indent=(line.match(/^[ \t]*/)||[''])[0];
+    const extra=/\{\s*$/.test(line)?'    ':'';
+    codeInput.setRangeText('\n'+indent+extra,s,e,'end');
+  }else if(item.snippet){
+    insertSnippet(s,e,item.snippet);
+  }else if(item.ins){
+    codeInput.setRangeText(item.ins,s,e,'end');
+    if(item.caret){const p=s+item.ins.length-item.caret;codeInput.setSelectionRange(p,p);}
+  }
+  refreshEditor();saveCode();updateHint();updateAC(false);
+}
+
+/* ---------------- шпаргалка ---------------- */
+function openSheet(){
+  document.getElementById('sheetBackdrop').classList.remove('hidden');
+  renderSheet(document.getElementById('sheetSearch').value);
+}
+function closeSheet(){document.getElementById('sheetBackdrop').classList.add('hidden');}
+function renderSheet(q){
+  const list=document.getElementById('sheetList');
+  q=(q||'').toLowerCase();
+  const fns=Object.keys(API).filter(k=>API[k].kind==='fn');
+  const evs=Object.keys(API).filter(k=>API[k].kind==='ev');
+  const keys=[...fns,...evs].filter(k=>!q||k.toLowerCase().includes(q)||API[k].sig.toLowerCase().includes(q)||API[k].doc.toLowerCase().includes(q));
+  list.innerHTML=keys.map(k=>{
+    const info=API[k];
+    return '<div class="sheet-item"><div class="si-top">'+
+      '<span class="si-kind'+(info.kind==='ev'?' ev':'')+'">'+(info.kind==='ev'?'событие':'функция')+'</span>'+
+      '<code class="si-sig">'+escapeHtml(info.sig)+'</code>'+
+      '<button class="btn mini si-ins" data-k="'+k+'">Вставить</button></div>'+
+      '<div class="si-doc">'+escapeHtml(info.doc)+'</div></div>';
+  }).join('')||'<div class="empty-note">Ничего не найдено</div>';
+  list.querySelectorAll('.si-ins').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const k=b.dataset.k,info=API[k];
+      closeSheet();
+      switchTab('code');
+      setTimeout(()=>{
+        codeInput.focus();
+        const s=codeInput.selectionStart,e=codeInput.selectionEnd;
+        if(info.insert)insertSnippet(s,e,info.insert);
+        else{
+          const ins=k+'()';
+          codeInput.setRangeText(ins,s,e,'end');
+          const p=s+ins.length-1;
+          codeInput.setSelectionRange(p,p);
+        }
+        refreshEditor();saveCode();updateHint();
+      },60);
+    });
+  });
+}
+
+/* =====================================================================
+   ИИ-АГЕНТ (OpenAI-совместимый API: Base URL + ключ + модель)
+===================================================================== */
+const AI={busy:false,history:[]};
+function loadAiCfg(){
+  let ls=null;try{ls=window.localStorage;}catch(_){}
+  return {
+    baseUrl:((ls&&ls.getItem('pf_ai_base'))||'https://api.openai.com/v1').trim(),
+    apiKey:((ls&&ls.getItem('pf_ai_key'))||'').trim(),
+    model:((ls&&ls.getItem('pf_ai_model'))||'').trim()
+  };
+}
+function saveAiCfg(){
+  let ls=null;try{ls=window.localStorage;}catch(_){}
+  if(!ls)return;
+  ls.setItem('pf_ai_base',document.getElementById('aiBaseUrl').value.trim()||'https://api.openai.com/v1');
+  ls.setItem('pf_ai_key',document.getElementById('aiApiKey').value.trim());
+  ls.setItem('pf_ai_model',document.getElementById('aiModel').value.trim());
+}
+function aiAdd(cls,text){
+  const chat=document.getElementById('aiChat');
+  const d=document.createElement('div');
+  d.className='ai-msg '+cls;
+  d.textContent=text;
+  chat.appendChild(d);
+  chat.scrollTop=chat.scrollHeight;
+  return d;
+}
+function openAiSheet(){
+  const cfg=loadAiCfg();
+  document.getElementById('aiBaseUrl').value=cfg.baseUrl;
+  document.getElementById('aiApiKey').value=cfg.apiKey;
+  document.getElementById('aiModel').value=cfg.model;
+  document.getElementById('aiBackdrop').classList.remove('hidden');
+  const chat=document.getElementById('aiChat');
+  if(!chat.children.length){
+    aiAdd('sys','🤖 ИИ-агент MrrCode. Опиши игру или изменение — ИИ получит код всех файлов, спрайты и сцену, напишет код, создаст файлы, обновит сцену и скажет, какие PNG импортировать.');
+    if(!cfg.apiKey||!cfg.model){
+      document.getElementById('aiSettingsPanel').classList.remove('hidden');
+      aiAdd('sys','Сначала подключи ИИ: Base URL, API-ключ и модель → «💾 Сохранить».');
+    }
+  }
+}
+function closeAiSheet(){document.getElementById('aiBackdrop').classList.add('hidden');}
+function setAiSendState(busy){
+  const btn=document.getElementById('btnAiSend');
+  const input=document.getElementById('aiPrompt');
+  if(btn){
+    btn.disabled=!!busy;
+    btn.textContent=busy?'…':'➤';
+  }
+  if(input)input.disabled=!!busy;
+}
+
+function buildSystemPrompt(){
+  return 'Ты — ИИ-агент внутри MrrCode v0.1.0, среды создания мобильных игр на языке MrrCode.\n'+
+'Движок ТОЛЬКО для телефонов и планшетов: НЕТ мыши и клавиатуры. Управление — только касания.\n'+
+'\n'+
+'ЯЗЫК PIXELSCRIPT (упрощённый, НЕ JavaScript):\n'+
+'- Переменные: let x = 10; const y = 2; числа, строки ("…"), true/false/null, массивы [1, 2], объекты {a: 1}.\n'+
+'- Операторы: + -  / %  == !=  = && || ! = += -= = /= ++ --\n'+
+'- Условия: if (…) { } else if (…) { } else { }\n'+
+'- Циклы: while (…) { }, for (let i = 0; i < 10; i++) { } — не используй бесконечные циклы.\n'+
+'- Рисование: clear(color), rect(x,y,w,h,color), circle(x,y,r,color), line(x1,y1,x2,y2,color,width), text(value,x,y,color,size), sprite(name,x,y,w,h).\n'+
+'- События: function start() {}, function update(dt) {}, function pointerDown(x,y) {}, function pointerMove(x,y) {}, function pointerUp(x,y) {}.\n'+
+'- Встроенные функции: используй только функции, описанные в справке проекта.\n'+
+'ПРОТОКОЛ ИЗМЕНЕНИЙ: всегда возвращай JSON-объект с полями message, files, scene, spritesNeeded.\n'+
+'files — объект вида {\"main.mrr\": \"ПОЛНЫЙ НОВЫЙ ИСХОДНЫЙ КОД\"}. Если меняешь код, ОБЯЗАТЕЛЬНО передай полный код изменённого файла, а не описание изменений и не фрагмент. Для main.mrr используй именно ключ main.mrr.\n'+
+'scene — null, если пользователь НЕ просил менять объекты редакторской сцены. Никогда не создавай объекты сцены только потому, что в коде есть rect(), circle(), text() или переменная вроде bgRect. Если пользователь просит изменить сцену, тогда передай полный массив объектов сцены.\n'+
+'spritesNeeded — массив имён PNG, только если действительно нужны новые изображения.\n'+
+'Если задача относится к игровому коду, сначала измени files. Не подменяй изменение кода созданием объектов сцены. Не добавляй Markdown и не добавляй пояснения вне JSON.';
+}
+function buildContextMessage(){
+  let ctx='ТЕКУЩИЕ ФАЙЛЫ ПРОЕКТА:\n';
+  for(const nm of Object.keys(state.files)){
+    let code=String(state.files[nm]||'');
+    if(code.length>6000)code=code.slice(0,6000)+'\n…(обрезано)';
+    ctx+='=== '+nm+' ===\n'+code+'\n\n';
+  }
+  ctx+='СПРАЙТЫ (PNG-ресурсы): '+(state.sprites.length?state.sprites.map(s=>s.name+' ('+(s.img.naturalWidth||'?')+'×'+(s.img.naturalHeight||'?')+')').join(', '):'нет')+'\n';
+  ctx+='СЦЕНА (JSON): '+JSON.stringify(state.scene.map(o=>{const c=Object.assign({},o);delete c.id;return c;}))+'\n';
+  return ctx;
+}
+function extractJSON(text){
+  const m=text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const cand=m?m[1]:text;
+  const start=cand.indexOf('{'),end=cand.lastIndexOf('}');
+  if(start<0||end<start)return null;
+  try{return JSON.parse(cand.slice(start,end+1));}catch(_){return null;}
+}
+async function aiSend(){
+  if(AI.busy)return;
+  const prompt=document.getElementById('aiPrompt').value.trim();
+  if(!prompt)return;
+  document.getElementById('aiPrompt').value='';
+  aiAdd('user',prompt);
+  const cfg=loadAiCfg();
+  if(!cfg.apiKey||!cfg.model||!cfg.baseUrl){aiAdd('err','Сначала укажи Base URL, API-ключ и модель в настройках.');return;}
+  AI.busy=true;setAiSendState(true);
+  const typing=aiAdd('sys','ИИ думает над проектом…');
+  const messages=[
+    {role:'system',content:buildSystemPrompt()},
+    {role:'user',content:buildContextMessage()},
+    {role:'assistant',content:'Контекст проекта получил. Жду задачу, отвечу JSON по протоколу.'}
+  ];
+  for(const h of AI.history.slice(-8)){
+    messages.push({role:h.role,content:h.content.length>4000?h.content.slice(0,4000)+'…':h.content});
+  }
+  messages.push({role:'user',content:prompt});
+  try{
+    const url=cfg.baseUrl.replace(/\/+$/,'')+'/chat/completions';
+    const resp=await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.apiKey},
+      body:JSON.stringify({model:cfg.model,messages:messages,temperature:0.4})
+    });
+    if(!resp.ok){
+      const t=await resp.text();
+      typing.remove();
+      aiAdd('err','Ошибка API '+resp.status+': '+t.slice(0,300));
+      return;
+    }
+    const data=await resp.json();
+    let reply=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'';
+    if(Array.isArray(reply)) reply=reply.map(x=>typeof x==='string'?x:(x&&x.text)||'').join('');
+    if(typeof reply!=='string') reply=String(reply||'');
+    AI.history.push({role:'user',content:prompt},{role:'assistant',content:reply});
+    typing.remove();
+    applyAIReply(reply);
+  }catch(err){
+    typing.remove();
+    aiAdd('err','Сеть/CORS: '+err.message+'\nПроверь Base URL и что провайдер разрешает запросы из браузера.');
+  }finally{
+    AI.busy=false;setAiSendState(false);
+  }
+}
+function applyAIReply(reply){
+  const data=extractJSON(reply);
+  if(!data){
+    const el=aiAdd('bot',stripFences(reply).slice(0,4000)||'(пустой ответ)');
+    const code=stripFences(reply);
+    if(code){
+      const b=document.createElement('button');
+      b.className='btn mini ai-insert';b.textContent='⬇ Вставить в редактор';
+      b.addEventListener('click',()=>{
+        closeAiSheet();switchTab('code');
+        setTimeout(()=>{
+          codeInput.focus();
+          codeInput.setRangeText(code,codeInput.selectionStart,codeInput.selectionEnd,'end');
+          refreshEditor();saveCode();updateHint();
+        },60);
+      });
+      el.appendChild(b);
+    }
+    aiAdd('sys','Ответ не в формате JSON — изменения не применены автоматически.');
+    return;
+  }
+  const applied=[];
+  let openName=null;
+  if(data.files&&typeof data.files==='object'&&!Array.isArray(data.files)){
+    for(let nm of Object.keys(data.files)){
+      if(typeof data.files[nm]!=='string')continue;
+      if(!nm.endsWith('.mrr'))nm+='.mrr';
+      // ИИ должен присылать полный файл. Не меняем проект пустым/обрезанным значением.
+      const nextCode=data.files[nm];
+      if(!nextCode.trim())continue;
+      state.files[nm]=nextCode;
+      applied.push('📄 '+nm);
+      if(nm===ENTRY_FILE)openName=ENTRY_FILE;
+      else if(!openName)openName=nm;
+    }
+    renderFiles();
+    // Не вызываем openCodeFile(): он сначала сохраняет текущее содержимое
+    // редактора обратно в state.files[activeFile], что могло затереть только
+    // что применённый ИИ-код старым содержимым редактора.
+    if(openName){
+      state.activeFile=openName;
+      codeInput.value=state.files[openName];
+      document.getElementById('codeFileName').textContent=openName;
+      refreshEditor();
+      updateHint();
+      renderFiles();
+      switchTab('code');
+      setNote('ИИ применил изменения к файлу «'+openName+'».');
+    }
+  }
+  if(Array.isArray(data.scene)){
+    state.scene=sanitizeScene(data.scene);
+    state.selectedId=null;
+    renderObjList();renderProps();renderScenePreview();
+    applied.push('▦ сцена: '+state.scene.length+' объектов');
+  }
+  const el=aiAdd('bot',String(data.message||'Готово.'));
+  if(applied.length){
+    const d=document.createElement('div');d.className='ai-applied';
+    d.innerHTML=applied.map(a=>''+escapeHtml(a)+'').join('');
+    el.appendChild(d);
+  }
+  if(Array.isArray(data.spritesNeeded)&&data.spritesNeeded.length){
+    const w=document.createElement('div');w.className='ai-applied';
+    w.innerHTML=data.spritesNeeded.map(x=>'🖼 '+escapeHtml(String(x))+'').join('');
+    el.appendChild(w);
+    const note=document.createElement('div');
+    note.className='ai-img-note';
+    note.textContent='Импортируй эти изображения: «Файлы» → «＋ Импорт PNG-спрайта». Имя файла должно совпадать с именем в sprite("…") (без .png).';
+    el.appendChild(note);
+    setNote('🤖 ИИ просит импортировать изображения: '+data.spritesNeeded.map(String).join('; '));
+  }
+  logConsole('[ИИ] Применено: '+(applied.join(', ')||'только сообщение'),'sys');
+  const chat=document.getElementById('aiChat');
+  chat.scrollTop=chat.scrollHeight;
+}
+
+/* ---------------- редактор: минимум клавиатуры ---------------- */
+codeInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.ctrlKey&&!e.metaKey&&!e.isComposing){
+    e.preventDefault();
+    const v=codeInput.value,pos=codeInput.selectionStart;
+    const ls=v.lastIndexOf('\n',pos-1)+1;
+    const line=v.slice(ls,pos);
+    const indent=(line.match(/^[ \t]*/)||[''])[0];
+    const extra=/\{\s*$/.test(line)?'    ':'';
+    codeInput.setRangeText('\n'+indent+extra,pos,codeInput.selectionEnd,'end');
+    refreshEditor();saveCode();updateHint();
+  }
+});
+codeInput.addEventListener('input',()=>{
+  refreshEditor();saveCode();updateAC(false);updateHint();
+});
+codeInput.addEventListener('scroll',()=>{syncScroll();if(AC.open)positionAC();});
+codeInput.addEventListener('click',()=>{closeAC();updateCaretPos();updateHint();updateCodeColorUI();});
+codeInput.addEventListener('blur',()=>setTimeout(()=>{if(!acPopup.matches(':hover'))closeAC();},120));
+document.addEventListener('selectionchange',()=>{
+  if(document.activeElement===codeInput){updateCaretPos();updateHint();updateCodeColorUI();}
+});
+
+/* ---------------- вкладки ---------------- */
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('active',s.id==='tab-'+id));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  if(id==='scene')renderScenePreview();
+  if(id==='files')renderFiles();
+  if(id==='code')setTimeout(()=>{refreshEditor();updateCodeColorUI();},0);
+}
+document.querySelectorAll('.tab-btn').forEach(b=>{
+  b.addEventListener('click',()=>switchTab(b.dataset.tab));
+});
+
+/* ---------------- сцена ---------------- */
+const TYPE_LABEL={rect:'▰ Прямоугольник',circle:'● Круг',text:'T Текст'};
+const TYPE_ICON={rect:'▰',circle:'●',text:'T'};
+function sanitizeScene(arr){
+  if(!Array.isArray(arr))return [];
+  return arr.filter(o=>o&&['rect','circle','text'].includes(o.type)).map(o=>{
+    const base={id:uid(),type:o.type,name:String(o.name||o.type),x:numArg(o.x),y:numArg(o.y),
+      color:String(o.color||(o.type==='rect'?'#ff8844':o.type==='circle'?'#70d6ff':'#ffffff'))};
+    if(o.type==='rect'){base.w=numArg(o.w,80);base.h=numArg(o.h,50);}
+    if(o.type==='circle'){base.r=numArg(o.r,30);}
+    if(o.type==='text'){base.text=o.text==null?'Текст':String(o.text);base.size=numArg(o.size,20);}
+    return base;
+  });
+}
+function renderScenePreview(){
+  const c=sctx;
+  c.setTransform(1,0,0,1,0,0);
+  c.clearRect(0,0,800,450);
+  c.fillStyle='#0d1424';c.fillRect(0,0,800,450);
+  c.strokeStyle='rgba(120,150,220,0.08)';c.lineWidth=1;
+  for(let x=0;x<=800;x+=50){c.beginPath();c.moveTo(x,0);c.lineTo(x,450);c.stroke();}
+  for(let y=0;y<=450;y+=50){c.beginPath();c.moveTo(0,y);c.lineTo(800,y);c.stroke();}
+
+  // Сначала рисуем все объекты сцены, иначе превью показывало только сетку.
+  for(const o of state.scene)drawSceneObj(c,o);
+
+  const sel=state.scene.find(o=>o.id===state.selectedId);
+  if(sel){
+    const b=objBounds(sel);
+    c.save();c.strokeStyle='#38d6ff';c.setLineDash([6,4]);c.lineWidth=2;
+    c.strokeRect(b.x-4,b.y-4,b.w+8,b.h+8);c.restore();
+  }
+  document.getElementById('sceneCount').textContent=state.scene.length?'('+state.scene.length+')':'';
+}
+function objBounds(o){
+  if(o.type==='rect')return {x:o.x,y:o.y,w:o.w,h:o.h};
+  if(o.type==='circle')return {x:o.x-o.r,y:o.y-o.r,w:o.r*2,h:o.r*2};
+  const size=o.size||18;
+  return {x:o.x,y:o.y,w:String(o.text||'').length*size*0.6,h:size};
+}
+function renderObjList(){
+  const list=document.getElementById('objList');
+  list.innerHTML='';
+  if(!state.scene.length){
+    list.innerHTML='Сцена пуста. Добавь объект или попроси ИИ-агента создать сцену.';
+    return;
+  }
+  state.scene.forEach(o=>{
+    const row=document.createElement('div');
+    row.className='obj-row'+(o.id===state.selectedId?' selected':'');
+    row.innerHTML=''+TYPE_ICON[o.type]+''+escapeHtml(o.name)+''+o.type+'';
+    row.addEventListener('click',()=>selectObject(o.id));
+    const del=document.createElement('button');
+    del.className='btn mini danger';del.textContent='✕';
+    del.addEventListener('click',ev=>{ev.stopPropagation();deleteObject(o.id);});
+    row.appendChild(del);
+    list.appendChild(row);
+  });
+}
+function selectObject(id){
+  state.selectedId=id;
+  renderObjList();renderProps();renderScenePreview();
+}
+function deleteObject(id){
+  state.scene=state.scene.filter(o=>o.id!==id);
+  if(state.selectedId===id)state.selectedId=null;
+  renderObjList();renderProps();renderScenePreview();
+}
+function renderProps(){
+  const sel=state.scene.find(o=>o.id===state.selectedId);
+  const p=document.getElementById('propsPanel');
+  if(!sel){
+    p.innerHTML='<div class="props-empty">Выбери объект в списке или тапни по нему на предпросмотре. Объекты можно перетаскивать пальцем прямо на холсте.</div>';
+    return;
+  }
+
+  const fields=[
+    {k:'name',label:'Имя — для object("…")',type:'text'},
+    {k:'x',label:'X',type:'number'},
+    {k:'y',label:'Y',type:'number'}
+  ];
+  if(sel.type==='rect'){
+    fields.push({k:'w',label:'Ширина',type:'number'},
+                {k:'h',label:'Высота',type:'number'},
+                {k:'color',label:'Цвет',type:'color'});
+  }
+  if(sel.type==='circle'){
+    fields.push({k:'r',label:'Радиус',type:'number'},
+                {k:'color',label:'Цвет',type:'color'});
+  }
+  if(sel.type==='text'){
+    fields.push({k:'text',label:'Текст',type:'text'},
+                {k:'size',label:'Размер',type:'number'},
+                {k:'color',label:'Цвет',type:'color'});
+  }
+
+  const safeVar=/^[A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*$/.test(sel.name)?sel.name:'obj';
+
+  p.innerHTML=
+    '<div class="props-head">'+
+      '<span class="type-badge t-'+sel.type+'">'+escapeHtml(TYPE_LABEL[sel.type])+'</span>'+
+      '<span class="props-tip">Изменения применяются сразу</span>'+
+    '</div>'+
+    '<div class="props-grid">'+
+      fields.map(f=>{
+        const value=String(sel[f.k]??'');
+        const escaped=escapeHtml(value);
+        return '<label class="pf">'+escapeHtml(f.label)+
+          '<input data-k="'+escapeHtml(f.k)+'" type="'+f.type+'" value="'+escaped+'"></label>';
+      }).join('')+
+    '</div>'+
+    '<div class="row-btns">'+
+      '<button class="btn ghost" id="btnDupObj">⧉ Дублировать</button>'+
+      '<button class="btn ghost danger" id="btnDelObj">✕ Удалить</button>'+
+    '</div>'+
+    '<div class="props-tip" style="margin-top:9px">В коде: let '+escapeHtml(safeVar)+
+      ' = object("'+escapeHtml(sel.name)+'")</div>';
+
+  p.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const k=inp.dataset.k;
+      let v=inp.value;
+      if(inp.type==='number')v=Number(v)||0;
+      sel[k]=v;
+      if(k==='name')renderObjList();
+      renderScenePreview();
+    });
+  });
+
+  const dup=document.getElementById('btnDupObj');
+  if(dup)dup.addEventListener('click',()=>{
+    const copy=Object.assign({},sel,{id:uid()});
+    let n=2;
+    while(state.scene.some(o=>o.name===sel.name+'_'+n))n++;
+    copy.name=sel.name+'_'+n;
+    copy.x=sel.x+20;
+    copy.y=sel.y+20;
+    state.scene.push(copy);
+    selectObject(copy.id);
+  });
+
+  const del=document.getElementById('btnDelObj');
+  if(del)del.addEventListener('click',()=>deleteObject(sel.id));
+}
+let dragInfo=null;
+function sceneCoords(e){
+  const r=sceneCanvas.getBoundingClientRect();
+  return {x:(e.clientX-r.left)*(800/r.width),y:(e.clientY-r.top)*(450/r.height)};
+}
+function topObjectAt(x,y){
+  for(let i=state.scene.length-1;i>=0;i--){
+    const o=state.scene[i];
+    const b=objBounds(o);
+    if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)return o;
+  }
+  return null;
+}
+sceneCanvas.addEventListener('pointerdown',e=>{
+  const p=sceneCoords(e);
+  const obj=topObjectAt(p.x,p.y);
+  selectObject(obj?obj.id:null);
+  if(obj){
+    dragInfo={id:obj.id,ox:p.x-obj.x,oy:p.y-obj.y};
+    try{sceneCanvas.setPointerCapture(e.pointerId);}catch(_){}
+  }
+});
+sceneCanvas.addEventListener('pointermove',e=>{
+  if(!dragInfo)return;
+  const p=sceneCoords(e);
+  const obj=state.scene.find(o=>o.id===dragInfo.id);
+  if(!obj)return;
+  obj.x=Math.round(p.x-dragInfo.ox);
+  obj.y=Math.round(p.y-dragInfo.oy);
+  renderScenePreview();
+  document.querySelectorAll('#propsPanel input').forEach(inp=>{
+    const k=inp.dataset.k;
+    if((k==='x'||k==='y')&&document.activeElement!==inp)inp.value=obj[k];
+  });
+});
+sceneCanvas.addEventListener('pointerup',()=>{dragInfo=null;});
+sceneCanvas.addEventListener('pointercancel',()=>{dragInfo=null;});
+
+document.querySelectorAll('[data-add]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const type=btn.dataset.add;
+    let n=state.scene.filter(o=>o.type===type).length+1;
+    let nm=type+n;
+    while(state.scene.some(o=>o.name===nm)){n++;nm=type+n;}
+    const o={id:uid(),type,name:nm,x:340,y:180,color:type==='rect'?'#ff8844':type==='circle'?'#70d6ff':'#ffffff'};
+    if(type==='rect'){o.w=120;o.h=70;}
+    if(type==='circle'){o.r=40;}
+    if(type==='text'){o.text='Привет!';o.size=24;}
+    state.scene.push(o);
+    selectObject(o.id);
+  });
+});
+document.getElementById('btnSceneClear').addEventListener('click',()=>{
+  if(!state.scene.length)return;
+  if(confirm('Очистить сцену? Все объекты будут удалены.')){
+    state.scene=[];state.selectedId=null;
+    renderObjList();renderProps();renderScenePreview();
+  }
+});
+document.getElementById('btnSceneExport').addEventListener('click',()=>{
+  download('scene.json',JSON.stringify(state.scene.map(o=>{const c=Object.assign({},o);delete c.id;return c;}),null,2),'application/json');
+});
+document.getElementById('btnSceneImport').addEventListener('click',()=>document.getElementById('sceneInput').click());
+document.getElementById('sceneInput').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];
+  if(!f)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(String(reader.result));
+      state.scene=sanitizeScene(data);
+      state.selectedId=null;
+      renderObjList();renderProps();renderScenePreview();
+      logConsole('[Сцена] Импортировано объектов: '+state.scene.length,'sys');
+    }catch(_){alert('Не удалось прочитать файл сцены.');}
+  };
+  reader.readAsText(f);
+  e.target.value='';
+});
+
+/* ---------------- файлы ---------------- */
+function setNote(text){document.getElementById('filesNote').textContent=text;}
+function renderFiles(){
+  const cfl=document.getElementById('codeFilesList');
+  cfl.innerHTML='';
+  Object.keys(state.files).forEach(nm=>{
+    const row=document.createElement('div');
+    row.className='file-row'+(nm===state.activeFile?' active':'');
+    const entryTag=nm===ENTRY_FILE?' точка входа':'';
+    row.innerHTML='📄'+escapeHtml(nm)+entryTag+''+
+      ''+((state.files[nm].length||1)/1024).toFixed(1)+' КБ';
+    const open=document.createElement('button');
+    open.className='btn mini';open.textContent='Открыть';
+    open.addEventListener('click',()=>openCodeFile(nm));
+    row.appendChild(open);
+    if(nm!==ENTRY_FILE){
+      const del=document.createElement('button');
+      del.className='btn mini danger';del.textContent='✕';
+      del.addEventListener('click',()=>{
+        if(!confirm('Удалить файл '+nm+'?\nЕсли на него есть импорты (from "'+nm.replace(/\.mrr$/,'')+'" import …), они сломаются.'))return;
+        delete state.files[nm];
+        if(state.activeFile===nm)openCodeFile(ENTRY_FILE);
+        renderFiles();setNote('Файл «'+nm+'» удалён.');
+      });
+      row.appendChild(del);
+    }
+    cfl.appendChild(row);
+  });
+  const sl=document.getElementById('spriteList');
+  sl.innerHTML='';
+  if(!state.sprites.length){
+    sl.innerHTML='Спрайтов пока нет. Импортируй PNG — имя файла без расширения станет именем ресурса для sprite("имя", …). Если игру делает ИИ — он напишет, какие картинки нужны.';
+  }
+  state.sprites.forEach(s=>{
+    const row=document.createElement('div');
+    row.className='file-row';
+    row.innerHTML=''+
+      ''+escapeHtml(s.name)+''+
+      ''+(s.img.naturalWidth||'?')+'×'+(s.img.naturalHeight||'?')+' · '+(s.sizeKb||'?')+' КБ';
+    const del=document.createElement('button');
+    del.className='btn mini danger';del.textContent='✕';
+    del.addEventListener('click',()=>{
+      state.sprites=state.sprites.filter(x=>x!==s);
+      renderFiles();setNote('Спрайт «'+s.name+'» удалён.');
+    });
+    row.appendChild(del);
+    sl.appendChild(row);
+  });
+}
+function openCodeFile(nm){
+  syncCodeToFile();
+  state.activeFile=nm;
+  codeInput.value=state.files[nm];
+  document.getElementById('codeFileName').textContent=nm;
+  refreshEditor();updateHint();
+  renderFiles();
+  switchTab('code');
+  setNote('Открыт файл «'+nm+'».'+(nm===ENTRY_FILE?' Это точка входа — «Запуск» выполняет его.':' Чтобы выполнить его код, импортируй имена в main.mrr: from "'+nm.replace(/\.mrr$/,'')+'" import …'));
+}
+document.getElementById('btnNewPxl').addEventListener('click',()=>{
+  let nm=prompt('Имя нового файла:','player.mrr');
+  if(!nm)return;
+  nm=nm.trim();
+  if(!nm)return;
+  if(!nm.endsWith('.mrr'))nm+='.mrr';
+  if(nm===ENTRY_FILE||state.files[nm]!==undefined){setNote('Файл «'+nm+'» уже существует — открой его или выбери другое имя.');return;}
+  const bare=nm.replace(/\.mrr$/,'');
+  state.files[nm]=
+'// '+nm+' — модуль.\n'+
+'// Импортируй имена из этого файла в main.mrr:\n'+
+'// from "'+bare+'" import myFunction;\n\n'+
+'function myFunction() {\n    print("Привет из '+bare+'!");\n}\n';
+  openCodeFile(nm);
+  setNote('Создан файл «'+nm+'». Свяжи его с main.mrr: from "'+bare+'" import myFunction;');
+});
+/* импорт PNG: обработчик привязан ОДИН раз, дубликаты заменяются, а не плодятся */
+document.getElementById('btnImportPng').addEventListener('click',()=>document.getElementById('pngInput').click());
+document.getElementById('pngInput').addEventListener('change',e=>{
+  const filesArr=Array.from(e.target.files||[]);
+  e.target.value='';
+  if(!filesArr.length)return;
+  let added=0,replaced=0;
+  const handleOne=(f)=>new Promise(res=>{
+    if(!/^image\//.test(f.type||'')){setNote('Пропущен не-изображение: '+f.name);res();return;}
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const dataUrl=String(reader.result);
+      let nm=f.name.replace(/\.[^.]+$/,'').replace(/[^\wА-Яа-яЁё$-]/g,'_');
+      if(!nm)nm='sprite';
+      const img=new Image();img.src=dataUrl;
+      const entry={name:nm,dataUrl,img,sizeKb:Math.max(1,Math.round(f.size/1024))};
+      const idx=state.sprites.findIndex(s=>s.name===nm);
+      if(idx>=0){state.sprites[idx]=entry;replaced++;}
+      else{state.sprites.push(entry);added++;}
+      res();
+    };
+    reader.onerror=()=>res();
+    reader.readAsDataURL(f);
+  });
+  (async()=>{
+    for(const f of filesArr)await handleOne(f);
+    renderFiles();
+    setNote('Импорт завершён: добавлено '+added+', заменено (дубликаты) '+replaced+'. Имена доступны в sprite("имя", …) и ИИ-агенту.');
+    logConsole('[Файлы] Импорт спрайтов: +'+added+', заменено '+replaced+'.','sys');
+  })();
+});
+document.getElementById('btnExportProject').addEventListener('click',()=>{
+  syncCodeToFile();
+  const data={
+    app:'MrrCode',format:'pixelforge-project',version:7,
+    activeFile:state.activeFile,files:state.files,
+    sprites:state.sprites.map(s=>({name:s.name,dataUrl:s.dataUrl})),
+    scene:state.scene.map(o=>{const c=Object.assign({},o);delete c.id;return c;})
+  };
+  download('pixelforge-project.json',JSON.stringify(data,null,2),'application/json');
+  setNote('Проект экспортирован (.json): код всех файлов, спрайты и сцена внутри.');
+});
+document.getElementById('btnImportProject').addEventListener('click',()=>document.getElementById('projInput').click());
+document.getElementById('projInput').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];
+  e.target.value='';
+  if(!f)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(String(reader.result));
+      if(!data||!data.files)throw new Error('bad');
+      state.files={};
+      for(const k of Object.keys(data.files))state.files[k]=String(data.files[k]);
+      if(!state.files[ENTRY_FILE])state.files[ENTRY_FILE]=DEFAULT_CODE;
+      state.activeFile=(data.activeFile&&state.files[data.activeFile])?data.activeFile:ENTRY_FILE;
+      state.sprites=(data.sprites||[]).map(s=>{const img=new Image();img.src=s.dataUrl;return {name:String(s.name),dataUrl:s.dataUrl,img,sizeKb:Math.max(1,Math.round((s.dataUrl||'').length*0.75/1024))};});
+      state.scene=sanitizeScene(data.scene||[]);
+      state.selectedId=null;
+      codeInput.value=state.files[state.activeFile];
+      document.getElementById('codeFileName').textContent=state.activeFile;
+      refreshEditor();renderObjList();renderProps();renderScenePreview();renderFiles();
+      setNote('Проект импортирован: файлов '+Object.keys(state.files).length+', спрайтов '+state.sprites.length+', объектов сцены '+state.scene.length+'.');
+      logConsole('[Файлы] Проект импортирован.','sys');
+    }catch(_){
+      setNote('Не удалось прочитать файл проекта. Ожидается .json, экспортированный из MrrCode.');
+    }
+  };
+  reader.readAsText(f);
+});
+function exportPxl(){
+  syncCodeToFile();
+  download(state.activeFile,state.files[state.activeFile],'text/plain;charset=utf-8');
+  setNote('Экспортирован '+state.activeFile);
+}
+document.getElementById('btnExportPxl').addEventListener('click',exportPxl);
+document.getElementById('btnImportPxl').addEventListener('click',()=>document.getElementById('mrrInput').click());
+document.getElementById('mrrInput').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];
+  e.target.value='';
+  if(!f)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    let nm=f.name;
+    if(!nm.endsWith('.mrr'))nm+='.mrr';
+    state.files[nm]=String(reader.result);
+    openCodeFile(nm);
+    setNote('Импортирован '+nm+'.');
+    logConsole('[Файлы] Импортирован код: '+nm,'sys');
+  };
+  reader.readAsText(f);
+});
+
+/* ---------------- примеры ---------------- */
+function buildExamplesUI(){
+  const sel=document.getElementById('examplesSelect');
+  EXAMPLES.forEach(ex=>{
+    const opt=document.createElement('option');
+    opt.value=ex.id;opt.textContent=ex.icon+' '+ex.title;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change',()=>{
+    const ex=EXAMPLES.find(x=>x.id===sel.value);
+    sel.value='';
+    if(ex)loadExample(ex);
+  });
+  const grid=document.getElementById('examplesGrid');
+  EXAMPLES.forEach(ex=>{
+    const b=document.createElement('button');
+    b.className='ex-btn';
+    b.innerHTML=''+ex.icon+''+escapeHtml(ex.title)+''+escapeHtml(ex.desc)+'';
+    b.addEventListener('click',()=>loadExample(ex));
+    grid.appendChild(b);
+  });
+  const chips=document.getElementById('apiChips');
+  chips.innerHTML=Object.keys(API).filter(k=>API[k].kind==='fn')
+    .map(k=>''+escapeHtml(API[k].sig)+'').join('');
+}
+function loadExample(ex){
+  if(!confirm('Загрузить пример «'+ex.title+'»?\nКод main.mrr и сцена будут заменены.'+(ex.files?'\nТакже будут созданы файлы примера.':'')))return;
+  if(ex.files){for(const k of Object.keys(ex.files))state.files[k]=ex.files[k];}
+  state.files[ENTRY_FILE]=ex.code;
+  state.activeFile=ENTRY_FILE;
+  codeInput.value=ex.code;
+  document.getElementById('codeFileName').textContent=ENTRY_FILE;
+  refreshEditor();
+  state.scene=sanitizeScene(ex.scene||[]);
+  state.selectedId=null;
+  renderObjList();renderProps();renderScenePreview();renderFiles();
+  logConsole('[MrrCode] Загружен пример: '+ex.title,'sys');
+  switchTab('code');
+}
+
+/* ---------------- привязка кнопок ---------------- */
+document.getElementById('btnRun').addEventListener('click',startGame);
+document.getElementById('btnStop').addEventListener('click',()=>stopGame());
+document.getElementById('btnRunCode').addEventListener('click',startGame);
+document.getElementById('btnFsStop').addEventListener('click',()=>stopGame());
+document.getElementById('btnFullscreen').addEventListener('click',()=>{fsElement()?exitGameFs():enterGameFs();});
+document.getElementById('btnExitFs').addEventListener('click',exitGameFs);
+document.getElementById('btnClearConsole').addEventListener('click',()=>{
+  document.getElementById('consoleOut').innerHTML='';
+  logConsole('[MrrCode] Консоль очищена.','sys');
+});
+document.getElementById('btnSheet').addEventListener('click',openSheet);
+document.getElementById('btnCloseSheet').addEventListener('click',closeSheet);
+document.getElementById('sheetBackdrop').addEventListener('click',e=>{
+  if(e.target===document.getElementById('sheetBackdrop'))closeSheet();
+});
+document.getElementById('sheetSearch').addEventListener('input',e=>renderSheet(e.target.value));
+/* ИИ */
+document.getElementById('btnAI').addEventListener('click',openAiSheet);
+document.getElementById('btnAiCode').addEventListener('click',openAiSheet);
+document.getElementById('btnAiClose').addEventListener('click',closeAiSheet);
+document.getElementById('aiBackdrop').addEventListener('click',e=>{
+  if(e.target===document.getElementById('aiBackdrop'))closeAiSheet();
+});
+document.getElementById('btnAiSettings').addEventListener('click',()=>{
+  document.getElementById('aiSettingsPanel').classList.toggle('hidden');
+});
+document.getElementById('btnAiSave').addEventListener('click',()=>{
+  saveAiCfg();
+  const st=document.getElementById('aiStatus');
+  st.textContent='Сохранено ✓';
+  setTimeout(()=>{st.textContent='';},2000);
+  aiAdd('sys','Подключение сохранено в этом браузере. Модель: '+(document.getElementById('aiModel').value.trim()||'не указана')+'.');
+});
+document.getElementById('btnAiSend').addEventListener('click',aiSend);
+document.getElementById('btnAiClear').addEventListener('click',()=>{
+  AI.history=[];
+  document.getElementById('aiChat').innerHTML='';
+  aiAdd('sys','Чат очищен. Контекст проекта ИИ получает заново с каждым сообщением.');
+});
+
+/* ---------------- инициализация ---------------- */
+(function init(){
+  codeInput.value=state.files[state.activeFile];
+  document.getElementById('codeFileName').textContent=state.activeFile;
+  buildPalette();
+  refreshEditor();
+  renderObjList();renderProps();renderScenePreview();
+  renderFiles();
+  buildExamplesUI();
+  updateHint();
+  logConsole('[MrrCode] Готов. Нажми «Запуск» — игра откроется на весь экран устройства.','sys');
+  logConsole('v0.1.0 · только сенсор · 🤖 ИИ-агент (кнопка «ИИ»): подключи Base URL, API-ключ и модель — ИИ напишет код, создаст файлы и сцену.','sys');
+})();
+</script>
+
+<!-- MrrCode game overlay -->
+<div id="mrrGameOverlay" aria-hidden="true">
+  <button id="mrrGameBack" type="button" aria-label="Назад в MrrCode">← Назад</button>
+  <iframe id="mrrGameFrame" title="Игра MrrCode" sandbox="allow-scripts allow-pointer-lock"></iframe>
+</div>
+
+
+<script>
+(function(){
+  const overlay = document.getElementById('mrrGameOverlay');
+  const frame = document.getElementById('mrrGameFrame');
+  const back = document.getElementById('mrrGameBack');
+
+  function appMode(on){
+    document.documentElement.classList.toggle('mrr-app-mode', on);
+    document.body.classList.toggle('mrr-app-mode', on);
+  }
+
+  window.mrrOpenGame = async function(gameHtml){
+    if (!overlay || !frame) return;
+    frame.srcdoc = String(gameHtml || '');
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden','false');
+    appMode(true);
+
+    // Fullscreen is optional. If the browser rejects it, the overlay still
+    // fills the available browser viewport.
+    try {
+      if (document.fullscreenEnabled && !document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch(e) {}
+  };
+
+  window.mrrBackToEditor = async function(){
+    if (!overlay) return;
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden','true');
+    frame.srcdoc = '';
+    appMode(false);
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+    } catch(e) {}
+  };
+
+  back && back.addEventListener('click', window.mrrBackToEditor);
+
+  // Android/browser back: first close the in-engine game, otherwise leave
+  // browser history untouched.
+  window.addEventListener('popstate', function(){
+    if (overlay && overlay.classList.contains('active')) {
+      history.pushState({mrrGame:true}, '');
+      window.mrrBackToEditor();
+    }
+  });
+})();
+</script>
+
+
+<script>
+window.MrrCodeUI = window.MrrCodeUI || {};
+window.MrrCodeUI.showGame = function(html){ return window.mrrOpenGame(html); };
+window.MrrCodeUI.hideGame = function(){ return window.mrrBackToEditor(); };
+</script>
+
+
+<script>
+(function(){
+  const closeBtn = document.getElementById('mrrCloseSite');
+  if (!closeBtn) return;
+
+  closeBtn.addEventListener('click', function(){
+    // If the page is currently fullscreen, leave it first.
+    try {
+      if (document.fullscreenElement) document.exitFullscreen();
+    } catch (_) {}
+
+    // A normal browser page cannot always close itself unless it was
+    // opened by script. Try that first.
+    try { window.close(); } catch (_) {}
+
+    // If the browser refuses window.close(), show a clear fallback.
+    setTimeout(function(){
+      if (!document.hidden) {
+        const ok = confirm('Браузер не разрешил странице закрыть себя. Закрыть вкладку вручную?');
+        if (ok) {
+          try { window.history.back(); } catch (_) {}
+        }
+      }
+    }, 120);
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  const builtin = [
+    "print","rect","circle","line","text","clear","color","fill","stroke",
+    "width","height","if","else","for","while","let","const","true","false",
+    "return","function","random","sin","cos","abs","sqrt","touch",
+    "pointerDown","pointerUp"
+  ];
+
+  const boxId = "mrrFallbackCompletions";
+
+  function editorEl(){
+    return document.querySelector(
+      'textarea#codeEditor, textarea.code-editor, textarea.editor, textarea'
+    );
+  }
+
+  function currentPrefix(el){
+    const pos = el.selectionStart ?? el.value.length;
+    const before = el.value.slice(0, pos);
+    const m = before.match(/[A-Za-z_][A-Za-z0-9_]*$/);
+    return { prefix:m ? m[0] : "", pos };
+  }
+
+  function indexSymbols(code){
+    const symbols = new Map();
+
+    // User variables/constants:
+    // let coins = 10;
+    // const playerSpeed = 5;
+    const variableRe = /\b(?:let|const|var)\s+([A-Za-z_][A-Za-z0-9_]*)/g;
+    let m;
+    while ((m = variableRe.exec(code))) {
+      symbols.set(m[1], {name:m[1], kind:"variable"});
+    }
+
+    // User functions:
+    // function attack(...) { ... }
+    const functionRe = /\bfunction\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)/g;
+    while ((m = functionRe.exec(code))) {
+      symbols.set(m[1], {name:m[1], kind:"function", params:m[2]});
+    }
+
+    // Function parameters become local suggestions too.
+    const paramRe = /\bfunction\s+[A-Za-z_][A-Za-z0-9_]*\s*\(([^)]*)\)/g;
+    while ((m = paramRe.exec(code))) {
+      m[1].split(",").forEach(p => {
+        const name = p.trim().match(/^[A-Za-z_][A-Za-z0-9_]*/);
+        if (name) symbols.set(name[0], {name:name[0], kind:"parameter"});
+      });
+    }
+
+    return [...symbols.values()];
+  }
+
+  function ensureBox(){
+    let box = document.getElementById(boxId);
+    if (!box) {
+      box = document.createElement("div");
+      box.id = boxId;
+      box.style.cssText =
+        "position:fixed;z-index:100020;display:none;min-width:180px;max-width:300px;" +
+        "max-height:240px;overflow:auto;padding:5px;border:1px solid rgba(255,255,255,.14);" +
+        "border-radius:10px;background:rgba(25,29,38,.98);color:#fff;" +
+        "box-shadow:0 8px 28px rgba(0,0,0,.35);";
+      document.body.appendChild(box);
+    }
+    return box;
+  }
+
+  function hide(){
+    const box = document.getElementById(boxId);
+    if (box) box.style.display = "none";
+  }
+
+  function insertCompletion(el, item){
+    const {prefix, pos} = currentPrefix(el);
+    const from = pos - prefix.length;
+
+    // Functions get parentheses, variables/keywords keep their name.
+    const text = item.kind === "function" || item.kind === "builtin-function"
+      ? item.name + "()"
+      : item.name;
+
+    el.setRangeText(text, from, pos, "end");
+    el.dispatchEvent(new Event("input", {bubbles:true}));
+    hide();
+    el.focus();
+  }
+
+  function show(el){
+    const {prefix} = currentPrefix(el);
+    if (!prefix) { hide(); return; }
+
+    const code = el.value || "";
+    const userSymbols = indexSymbols(code);
+
+    const items = [
+      ...userSymbols,
+      ...builtin.map(name => ({
+        name,
+        kind: ["print","rect","circle","line","text","clear","random",
+               "sin","cos","abs","sqrt"].includes(name)
+          ? "builtin-function" : "keyword"
+      }))
+    ];
+
+    // De-duplicate, keeping user-defined symbols first.
+    const seen = new Set();
+    const matches = items.filter(item => {
+      const key = item.name.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return key.startsWith(prefix.toLowerCase());
+    }).slice(0, 10);
+
+    if (!matches.length) { hide(); return; }
+
+    const box = ensureBox();
+    box.innerHTML = "";
+
+    matches.forEach(item => {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.textContent =
+        item.name +
+        (item.kind === "variable" ? "  · variable" :
+         item.kind === "parameter" ? "  · parameter" :
+         item.kind === "function" ? "  · function" :
+         item.kind === "builtin-function" ? "()" : "");
+
+      row.style.cssText =
+        "display:block;width:100%;padding:7px 9px;text-align:left;" +
+        "border:0;background:transparent;color:inherit;border-radius:7px;";
+
+      row.onmouseenter = () => row.style.background = "rgba(255,255,255,.08)";
+      row.onmouseleave = () => row.style.background = "transparent";
+      row.onclick = () => insertCompletion(el, item);
+
+      box.appendChild(row);
+    });
+
+    const r = el.getBoundingClientRect();
+    box.style.left = Math.max(8, r.left) + "px";
+    box.style.top = Math.min(window.innerHeight - 250, r.bottom + 6) + "px";
+    box.style.display = "block";
+  }
+
+  document.addEventListener("input", e => {
+    if (e.target && e.target.tagName === "TEXTAREA") show(e.target);
+  }, true);
+
+  document.addEventListener("keyup", e => {
+    if (e.target && e.target.tagName === "TEXTAREA" &&
+        !["ArrowUp","ArrowDown","Enter","Escape","Tab"].includes(e.key)) {
+      show(e.target);
+    }
+  }, true);
+
+  document.addEventListener("focusout", e => {
+    if (e.target && e.target.tagName === "TEXTAREA") {
+      setTimeout(hide, 180);
+    }
+  }, true);
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") hide();
+  }, true);
+})();
+</script>
+
+
+<script>
+window.MrrCodeAutocomplete = window.MrrCodeAutocomplete || {
+  refresh: function(){
+    const el = document.querySelector(
+      'textarea#codeEditor, textarea.code-editor, textarea.editor, textarea'
+    );
+    if (el) el.dispatchEvent(new Event("input", {bubbles:true}));
+  }
+};
+</script>
+
+</body>
+</html>
