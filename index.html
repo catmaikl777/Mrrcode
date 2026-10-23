@@ -2,7 +2,7 @@
 <html lang="ru"><head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
-<title>MrrCode</title>
+<title>MrrCode — Игра</title>
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-400-normal.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-600-normal.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-800-normal.css" rel="stylesheet">
@@ -413,7 +413,13 @@ window.MRRCODE_AI_SPEC = {
     "When asked to replace a file, return complete file contents.",
     "Use MrrCode array functions only: push(array, value), pop(array), splice(array, start, count, ...items), shift(array), unshift(array, value), length(array), join(array, separator), split(text, separator), contains(array, value), indexOf(array, value), slice(array, start, end). Do not use JavaScript-style dot methods.",
     "For arrays use MrrCode functions push(array, value), pop(array), length(value), join(array, separator), split(text, separator), and ordinary indexing such as array[i].",
-    "Before returning code, check every array operation and remove unsupported dot-method calls."
+    "Before returning code, check every array operation and remove unsupported dot-method calls.",
+    "Physics helpers: overlapRect(ax,ay,aw,ah,bx,by,bw,bh) returns true only when two axis-aligned rectangles overlap; touching edges alone is not overlap.",
+    "moveBody(body,dt,gravity) mutates and returns body with x,y,vx,vy numeric properties. dt is clamped to 0..0.1 seconds; gravity is added to vy before position is advanced.",
+    "Camera: camera(x,y) sets the camera offset for subsequent rect/circle/line/text/sprite/spriteAnim drawing; use camera(0,0) to reset. Input coordinates remain canvas coordinates.",
+    "spriteAnim(name,x,y,w,h,frameW,frameH,fps) animates a grid of frames from an imported PNG sprite sheet. frameW/frameH are source-image pixels; the image must be imported in Files under the same name.",
+    "Editor features are UI tools, not MrrCode language functions: drag/resize scene objects, optional grid snapping, project version history, and resource reference checking.",
+    "Do not claim the editor automatically edits source when a scene object is dragged; scene manipulation and code drawing are separate workflows."
   ],
   keywords: ["let","const","var","if","else","for","while","return","function","true","false"],
   conditionalOperator: {
@@ -440,7 +446,7 @@ window.MRRCODE_AI_SPEC = {
     ["push","push(array,value)"], ["pop","pop(array)"], ["time","time()"], ["dt","dt()"],
     ["clear","clear(color)"], ["rect","rect(x,y,width,height,color?)"], ["circle","circle(x,y,radius,color?)"],
     ["line","line(x1,y1,x2,y2,color?,lineWidth?)"], ["text","text(value,x,y,color?,size?)"],
-    ["sprite","sprite(name,x,y,width?,height?)"], ["object","object(name)"],
+    ["sprite","sprite(name,x,y,width?,height?)"], ["spriteAnim","spriteAnim(name,x,y,w,h,frameW,frameH,fps)"], ["camera","camera(x,y)"], ["overlapRect","overlapRect(ax,ay,aw,ah,bx,by,bw,bh)"], ["moveBody","moveBody(body,dt,gravity)"], ["object","object(name)"],
     ["pointerX","pointerX()"], ["pointerY","pointerY()"], ["pointerDownNow","pointerDownNow()"],
     ["touchCount","touchCount()"], ["touchX","touchX(index)"], ["touchY","touchY(index)"]
   ],
@@ -454,8 +460,9 @@ window.MRRCODE_AI_SPEC = {
     "contains(array,value)", "indexOf(array,value)", "slice(array,start,end)"
   ],
   mathFunctions: [
+    "abs(x)", "sqrt(x)", "sin(a)", "cos(a)", "atan2(y,x)",
     "min(a,b)", "max(a,b)", "clamp(value,min,max)", "floor(value)",
-    "ceil(value)", "round(value)", "pow(a,b)"
+    "ceil(value)", "round(value)", "random()", "rand(min,max)", "randomInt(min,max)"
   ],
   stringFunctions: [
     "trim(text)", "upper(text)", "lower(text)", "startsWith(text,prefix)",
@@ -715,7 +722,7 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <div class="scene-layout">
 <div class="panel scene-main">
 <div class="panel-head"><b>Редактор сцены</b><span>Перетаскивай объекты пальцем</span></div>
-<div class="preview-wrap"><canvas height="450" id="sceneCanvas" width="800"></canvas></div>
+<div class="row-btns" style="margin:0 0 8px"><button class="btn mini" id="sceneGridToggle" aria-pressed="true">▦ Сетка: вкл.</button><button class="btn mini" id="sceneSnapToggle" aria-pressed="false">🧲 Привязка: выкл.</button><button class="btn mini" id="sceneResizeToggle" aria-pressed="true">↘ Размер: вкл.</button></div><div class="preview-wrap"><canvas height="450" id="sceneCanvas" width="800"></canvas></div>
 <div class="props" id="propsPanel"><div class="props-empty">Выбери объект в списке или тапни по нему на предпросмотре. Объекты можно перетаскивать пальцем прямо на холсте.</div></div>
 </div>
 <div class="panel scene-side">
@@ -751,7 +758,7 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <button class="btn ghost" id="btnExportGameHtml">🎮 Сборка HTML</button>
 <button class="btn ghost" id="btnExportProject">⬇ Проект</button>
 <button class="btn ghost" id="btnImportProject">⬆ Проект</button>
-<button class="btn ghost" id="btnSaveProjectLocal">💾 Автосейв</button>
+<button class="btn ghost" id="btnSaveProjectLocal">💾 Автосейв</button><button class="btn ghost" id="btnProjectHistory">🕘 Версии</button><button class="btn ghost" id="btnCheckResources">🔎 Проверить ресурсы</button>
 </div>
 <div class="note" id="filesNote">Восстановлен последний локальный проект.</div>
 </div>
@@ -882,7 +889,7 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 </div>
 <div class="panel doc-section">
 <h2><span class="num">9</span>Полезные встроенные функции</h2>
-<div class="api-chips" id="apiChips">pointerX()pointerY()pointerDownNow()touchCount()touchX(i)touchY(i)clear(color?)rect(x, y, w, h, color)circle(x, y, r, color)line(x1, y1, x2, y2, color, width?)text(str, x, y, color, size?)sprite(name, x, y, w?, h?)object(name)random()rand(min, max)abs(x)sqrt(x)sin(a)cos(a)floor(x)ceil(x)round(x)min(a, b)max(a, b)clamp(value, min, max)length(value)push(array, value)pop(array)time()dt()rgba(r, g, b, a)print(...values)lerp(a, b, t)map(value, inMin, inMax, outMin, outMax)sign(x)randomInt(min, max)toString(value)toNumber(value)contains(text, part)join(array, separator)split(text, separator)save(key, value)load(key, defaultValue)playTone(frequency, duration, volume?)stopSound()</div>
+<div class="api-chips" id="apiChips">pointerX()pointerY()pointerDownNow()touchCount()touchX(i)touchY(i)clear(color?)rect(x, y, w, h, color)circle(x, y, r, color)line(x1, y1, x2, y2, color, width?)text(str, x, y, color, size?)sprite(name, x, y, w?, h?)spriteAnim(name,x,y,w,h,frameW,frameH,fps)camera(x,y)overlapRect(ax,ay,aw,ah,bx,by,bw,bh)moveBody(body,dt,gravity)object(name)random()rand(min, max)abs(x)sqrt(x)sin(a)cos(a)floor(x)ceil(x)round(x)min(a, b)max(a, b)clamp(value, min, max)length(value)push(array, value)pop(array)time()dt()rgba(r, g, b, a)print(...values)lerp(a, b, t)map(value, inMin, inMax, outMin, outMax)sign(x)randomInt(min, max)toString(value)toNumber(value)contains(text, part)join(array, separator)split(text, separator)save(key, value)load(key, defaultValue)playTone(frequency, duration, volume?)stopSound()</div>
 <p>Полный список с описаниями и кнопкой «Вставить» — в «📖 Шпаргалке» на вкладке «Код».</p>
 </div>
 <div class="panel doc-section">
@@ -916,20 +923,25 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <p>ИИ также должен учитывать текущий код проекта: пользовательские переменные, функции и параметры извлекаются из текущего файла и используются как контекст.</p>
 </div><div class="panel doc-section">
 <h2><span class="num">14</span>Новые возможности языка 0.2.0+</h2>
-<p><b>Массивы:</b> <code>push</code>, <code>pop</code>, <code>splice</code>, <code>shift</code>, <code>unshift</code>, <code>length</code>, <code>join</code>, <code>split</code>, <code>contains</code>, <code>indexOf</code>, <code>slice</code>.</p>
-<p><b>Математика:</b> <code>min</code>, <code>max</code>, <code>clamp</code>, <code>floor</code>, <code>ceil</code>, <code>round</code>, <code>pow</code>.</p>
-<p><b>Строки:</b> <code>trim</code>, <code>upper</code>, <code>lower</code>, <code>startsWith</code>, <code>endsWith</code>, <code>replace</code>.</p>
-<p><b>Типы:</b> <code>typeof</code>.</p>
-<p>Массивы используют функции языка, а не JavaScript-подобные методы через точку. Например: <code>splice(items, 2, 1)</code>, а не <code>items.splice(2, 1)</code>.</p>
+<p><b>Массивы и строки:</b> <code>push(array,value)</code>, <code>pop(array)</code>, <code>length(value)</code>, <code>join(array,separator)</code>, <code>split(text,separator)</code>, <code>contains(collection,value)</code>. <code>contains</code> проверяет элемент массива или подстроку в тексте.</p>
+<p><b>Математика:</b> <code>abs</code>, <code>sqrt</code>, <code>sin</code>, <code>cos</code>, <code>atan2</code>, <code>min</code>, <code>max</code>, <code>clamp</code>, <code>floor</code>, <code>ceil</code>, <code>round</code>, <code>random</code>, <code>rand</code>, <code>randomInt</code>.</p>
+<p><b>Преобразования и служебные функции:</b> <code>toString</code>, <code>toNumber</code>, <code>time</code>, <code>dt</code>, <code>save</code>, <code>load</code>, <code>playTone</code>, <code>stopSound</code>.</p>
+<p>Используй только функции, перечисленные в справочнике API и в <code>MRRCODE_AI_SPEC.builtins</code>. Не используй неподдерживаемые функции вроде <code>splice</code>, <code>indexOf</code>, <code>pow</code>, <code>trim</code> или <code>typeof</code>, пока они не добавлены в сам интерпретатор.</p>
 </div><div class="panel doc-section">
 <h2>Примеры</h2>
-<div class="examples-grid" id="examplesGrid"><button class="ex-btn">📦Модули: from … importspawnPlayer() и movePlayer() живут в player.mrr; игрок идёт за пальцем.</button><button class="ex-btn">🧱Бег и прыжок касаниямиЗоны экрана: держи слева/справа — бег, тап в центре — прыжок. Мультитач!</button><button class="ex-btn">🧩Объекты сцены из кодаОбъект «hero» идёт за пальцем, а без касания летает сам.</button><button class="ex-btn">☝Своя сенсорная кнопкаТап по нарисованной кнопке — счётчик очков.</button><button class="ex-btn">⚽Мяч и гравитацияТап — подбросить мяч к месту касания.</button><button class="ex-btn">🪐ОрбитаКруговое движение через sin и cos.</button><button class="ex-btn">✍Рисование пальцемРисуй касанием; кнопка «Очистить» на самом холсте.</button><button class="ex-btn">📦Модули: from … importspawnPlayer() и movePlayer() живут в player.mrr; игрок идёт за пальцем.</button><button class="ex-btn">🧱Бег и прыжок касаниямиЗоны экрана: держи слева/справа — бег, тап в центре — прыжок. Мультитач!</button><button class="ex-btn">🧩Объекты сцены из кодаОбъект «hero» идёт за пальцем, а без касания летает сам.</button><button class="ex-btn">☝Своя сенсорная кнопкаТап по нарисованной кнопке — счётчик очков.</button><button class="ex-btn">⚽Мяч и гравитацияТап — подбросить мяч к месту касания.</button><button class="ex-btn">🪐ОрбитаКруговое движение через sin и cos.</button><button class="ex-btn">✍Рисование пальцемРисуй касанием; кнопка «Очистить» на самом холсте.</button><button class="ex-btn">📦Модули: from … importspawnPlayer() и movePlayer() живут в player.mrr; игрок идёт за пальцем.</button><button class="ex-btn">🧱Бег и прыжок касаниямиЗоны экрана: держи слева/справа — бег, тап в центре — прыжок. Мультитач!</button><button class="ex-btn">🧩Объекты сцены из кодаОбъект «hero» идёт за пальцем, а без касания летает сам.</button><button class="ex-btn">☝Своя сенсорная кнопкаТап по нарисованной кнопке — счётчик очков.</button><button class="ex-btn">⚽Мяч и гравитацияТап — подбросить мяч к месту касания.</button><button class="ex-btn">🪐ОрбитаКруговое движение через sin и cos.</button><button class="ex-btn">✍Рисование пальцемРисуй касанием; кнопка «Очистить» на самом холсте.</button><button class="ex-btn">📦Модули: from … importspawnPlayer() и movePlayer() живут в player.mrr; игрок идёт за пальцем.</button><button class="ex-btn">🧱Бег и прыжок касаниямиЗоны экрана: держи слева/справа — бег, тап в центре — прыжок. Мультитач!</button><button class="ex-btn">🧩Объекты сцены из кодаОбъект «hero» идёт за пальцем, а без касания летает сам.</button><button class="ex-btn">☝Своя сенсорная кнопкаТап по нарисованной кнопке — счётчик очков.</button><button class="ex-btn">⚽Мяч и гравитацияТап — подбросить мяч к месту касания.</button><button class="ex-btn">🪐ОрбитаКруговое движение через sin и cos.</button><button class="ex-btn">✍Рисование пальцемРисуй касанием; кнопка «Очистить» на самом холсте.</button></div>
+<div class="examples-grid" id="examplesGrid"></div>
 </div>
 </div>
 <div class="panel doc-section">
 <h2><span class="num">15</span>MrrCode 0.2.0</h2>
 <p><b>Проекты:</b> локальное автосохранение, undo/redo, многофайловые .mrr-проекты, PNG-спрайты и импорт/экспорт проекта.</p>
 <p><b>Отладка:</b> кнопка 🐞 Debug открывает точки останова по строкам и показывает место остановки в консоли.</p>
+<p><b>Сцена:</b> объекты можно перемещать перетаскиванием и менять размер за угловой маркер. Сетка и привязка к сетке включаются отдельно; шаг привязки — 10 px. Это редактор визуальных объектов сцены, не автоматическое преобразование всех команд рисования в объекты.</p>
+<p><b>Физика:</b> <code>overlapRect(ax,ay,aw,ah,bx,by,bw,bh)</code> проверяет пересечение AABB-прямоугольников; касание только краями не считается пересечением. <code>moveBody(body,dt,gravity)</code> обновляет объект с полями <code>x,y,vx,vy</code> и возвращает его. Время шага ограничивается 0..0.1 секунды.</p>
+<p><b>Камера:</b> <code>camera(x,y)</code> задаёт смещение для последующих команд рисования <code>rect</code>, <code>circle</code>, <code>line</code>, <code>text</code>, <code>sprite</code> и <code>spriteAnim</code>. Для сброса используй <code>camera(0,0)</code>. Координаты касаний остаются координатами холста.</p>
+<p><b>Анимация:</b> <code>spriteAnim(name,x,y,w,h,frameW,frameH,fps)</code> проигрывает кадры PNG-спрайтшита слева направо и сверху вниз. <code>frameW</code> и <code>frameH</code> — размеры кадра в исходной картинке; PNG нужно импортировать во вкладке «Файлы» под тем же именем.</p>
+<p><b>История и ресурсы:</b> «🕘 Версии» сохраняет снимок проекта и позволяет восстановить выбранную версию; хранится до 12 снимков в локальном хранилище браузера. «🔎 Проверить ресурсы» ищет ссылки на отсутствующие спрайты и объекты сцены в буквальных вызовах <code>sprite("имя")</code> и <code>object("имя")</code>; динамические имена такая проверка не обнаруживает.</p>
+<p><b>ИИ:</b> перед применением предложенных изменений проект сохраняется в истории, а изменяемые файлы проверяются валидатором MrrCode. Это статическая проверка языка, а не гарантия отсутствия ошибок во время запуска.</p>
 <p><b>Графика:</b> rect, circle, line, text, sprite и управление объектами сцены через object("name"). Сцену можно преобразовать обратно в MrrCode.</p>
 <p><b>Ввод:</b> pointerDown, pointerMove, pointerUp, pointerX, pointerY, pointerDownNow, touchCount, touchX, touchY.</p>
 <p><b>Новые возможности языка:</b> for-of, массивы и объекты, доступ к свойствам, **, +=/-=/\*=, lerp, map, sign, randomInt, преобразования строк/чисел, contains/join/split, сохранения и синтезированный звук.</p>
@@ -980,7 +992,7 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 </div>
 </div>
 <input accept="image/png,image/*" hidden="" id="pngInput" multiple="" type="file">
-<input accept=".mrr,.txt,text/plain" hidden="" id="mrrInput" type="file">
+<input hidden id="mrrInput" type="file" accept=".mrr">
 <input accept=".json,application/json" hidden="" id="projInput" type="file">
 <input accept=".json,application/json" hidden="" id="sceneInput" type="file">
 <script>
@@ -1050,6 +1062,10 @@ const API={
   line:{kind:'fn',sig:'line(x1, y1, x2, y2, color, width?)',doc:'Линия из (x1, y1) в (x2, y2). width — толщина, по умолчанию 2.'},
   text:{kind:'fn',sig:'text(str, x, y, color, size?)',doc:'Текст в точке (x, y). size — размер шрифта, по умолчанию 16.'},
   sprite:{kind:'fn',sig:'sprite(name, x, y, w?, h?)',doc:'Рисует PNG-спрайт по имени из вкладки «Файлы». w и h необязательны — иначе берётся исходный размер.'},
+  spriteAnim:{kind:'fn',sig:'spriteAnim(name,x,y,w,h,frameW,frameH,fps)',doc:'Анимирует импортированный PNG-спрайтшит по сетке слева направо, затем сверху вниз. frameW/frameH — размер кадра в исходной PNG; fps — кадров в секунду. Имя должно совпадать с ресурсом во вкладке «Файлы».'},
+  camera:{kind:'fn',sig:'camera(x,y)',doc:'Задаёт смещение камеры для следующих rect/circle/line/text/sprite/spriteAnim. Для сброса вызови camera(0,0); координаты касаний не меняются.'},
+  overlapRect:{kind:'fn',sig:'overlapRect(ax,ay,aw,ah,bx,by,bw,bh)',doc:'Проверяет пересечение двух осевых прямоугольников (x,y,w,h). Касание только краями не считается пересечением; возвращает true/false.'},
+  moveBody:{kind:'fn',sig:'moveBody(body,dt,gravity)',doc:'Обновляет объект {x,y,vx,vy}: сначала vy += gravity*dt, затем x/y обновляются по vx/vy. dt ограничивается 0..0.1 сек. Меняет объект и возвращает его.'},
   object:{kind:'fn',sig:'object(name)',doc:'Возвращает объект сцены по имени (вкладка «Сцена»). Свойства можно менять из кода: x, y, w, h, r, color, text, size.'},
   random:{kind:'fn',sig:'random()',doc:'Случайное число от 0 до 1.'},
   rand:{kind:'fn',sig:'rand(min, max)',doc:'Случайное число от min до max.'},
@@ -2033,6 +2049,46 @@ function update(dt) {
     rect(630, 16, 150, 48, "#2a3a55");
     text("Очистить", 648, 30, "#dbe4f5", 18);
     text("Рисуй пальцем", 20, 30, "#8899bb", 16);
+}`},
+{id:'physics-helper',icon:'🧲',title:'Физика: moveBody и столкновение',desc:'Обновление скорости с гравитацией и проверка пересечения прямоугольников.',scene:[],code:
+`let ball = {x: 100, y: 80, vx: 180, vy: 0};
+const gravity = 500;
+const floor = {x: 0, y: 390, w: 800, h: 40};
+
+function update(dt) {
+    clear("#101827");
+    moveBody(ball, dt, gravity);
+    if (overlapRect(ball.x - 15, ball.y - 15, 30, 30, floor.x, floor.y, floor.w, floor.h)) {
+        ball.y = floor.y - 15;
+        ball.vy = -abs(ball.vy) * 0.65;
+    }
+    if (ball.x > 785) { ball.x = 785; ball.vx = -abs(ball.vx); }
+    if (ball.x < 15) { ball.x = 15; ball.vx = abs(ball.vx); }
+    rect(floor.x, floor.y, floor.w, floor.h, "#40516b");
+    circle(ball.x, ball.y, 15, "#ffcc55");
+    text("moveBody + overlapRect", 20, 30, "#dbe4f5", 18);
+}`},
+{id:'camera-scroll',icon:'🎥',title:'Камера и мир',desc:'Камера сдвигает рисование; для сброса используй camera(0,0).',scene:[],code:
+`let worldX = 0;
+function update(dt) {
+    clear("#101827");
+    worldX += 60 * dt;
+    camera(worldX, 0);
+    let i = 0;
+    while (i < 12) {
+        rect(i * 100, 180, 70, 70, i % 2 == 0 ? "#70d6ff" : "#ff8844");
+        i += 1;
+    }
+    camera(0, 0);
+    text("Камера: " + round(worldX), 20, 30, "#dbe4f5", 18);
+}`},
+{id:'sprite-animation',icon:'🎞️',title:'Анимация спрайтшита',desc:'Импортируй PNG-таблицу кадров и укажи размер одного кадра.',scene:[],code:
+`// Импортируй в «Файлы» PNG с кадрами сеткой,
+// затем замени player.png на точное имя ресурса.
+function update(dt) {
+    clear("#101827");
+    spriteAnim("player.png", 320, 150, 160, 160, 32, 32, 8);
+    text("Проверь имя PNG и размеры кадра", 20, 30, "#dbe4f5", 18);
 }`}
 ];
 
@@ -2047,7 +2103,7 @@ const Engine={
   running:false,raf:0,lastTs:0,startTime:0,curDt:0,frames:0,
   pointer:{x:0,y:0,down:false},
   touches:[],
-  runtimeScene:[],handlers:{},env:null,baseEnv:null,warnedSprites:new Set(),
+  runtimeScene:[],handlers:{},env:null,baseEnv:null,warnedSprites:new Set(),camera:{x:0,y:0},
   modules:new Map(),loadingModules:new Set(),debugEnabled:false,debugBreakpoints:new Set(),debugHit:false
 };
 
@@ -2090,14 +2146,14 @@ function buildGlobalEnv(){
   N('time',()=>(performance.now()-Engine.startTime)/1000);
   N('dt',()=>Engine.curDt);
   N('clear',(a)=>{const c=typeof a[0]==='string'?a[0]:'#0f172a';gctx.fillStyle=c;gctx.fillRect(0,0,800,450);return null;});
-  N('rect',(a)=>{gctx.fillStyle=typeof a[4]==='string'?a[4]:'#70d6ff';gctx.fillRect(numArg(a[0]),numArg(a[1]),numArg(a[2]),numArg(a[3]));return null;});
-  N('circle',(a)=>{gctx.fillStyle=typeof a[3]==='string'?a[3]:'#70d6ff';gctx.beginPath();gctx.arc(numArg(a[0]),numArg(a[1]),Math.max(0,numArg(a[2])),0,Math.PI*2);gctx.fill();return null;});
-  N('line',(a)=>{gctx.strokeStyle=typeof a[4]==='string'?a[4]:'#ffffff';gctx.lineWidth=numArg(a[5],2);gctx.beginPath();gctx.moveTo(numArg(a[0]),numArg(a[1]));gctx.lineTo(numArg(a[2]),numArg(a[3]));gctx.stroke();return null;});
+  N('rect',(a)=>{gctx.fillStyle=typeof a[4]==='string'?a[4]:'#70d6ff';gctx.fillRect(numArg(a[0])-Engine.camera.x,numArg(a[1])-Engine.camera.y,numArg(a[2]),numArg(a[3]));return null;});
+  N('circle',(a)=>{gctx.fillStyle=typeof a[3]==='string'?a[3]:'#70d6ff';gctx.beginPath();gctx.arc(numArg(a[0])-Engine.camera.x,numArg(a[1])-Engine.camera.y,Math.max(0,numArg(a[2])),0,Math.PI*2);gctx.fill();return null;});
+  N('line',(a)=>{gctx.strokeStyle=typeof a[4]==='string'?a[4]:'#ffffff';gctx.lineWidth=numArg(a[5],2);gctx.beginPath();gctx.moveTo(numArg(a[0])-Engine.camera.x,numArg(a[1])-Engine.camera.y);gctx.lineTo(numArg(a[2])-Engine.camera.x,numArg(a[3])-Engine.camera.y);gctx.stroke();return null;});
   N('text',(a)=>{
     gctx.fillStyle=typeof a[3]==='string'?a[3]:'#ffffff';
     gctx.font='600 '+numArg(a[4],16)+'px "JetBrains Mono",monospace';
     gctx.textBaseline='top';
-    gctx.fillText(fmtValue(a[0]),numArg(a[1]),numArg(a[2]));
+    gctx.fillText(fmtValue(a[0]),numArg(a[1])-Engine.camera.x,numArg(a[2])-Engine.camera.y);
     return null;
   });
   N('sprite',(a)=>{
@@ -2119,9 +2175,13 @@ function buildGlobalEnv(){
     }
     const w=a[3]==null?img.naturalWidth:numArg(a[3]);
     const h=a[4]==null?img.naturalHeight:numArg(a[4]);
-    gctx.drawImage(img,x,y,w,h);
+    gctx.drawImage(img,x-Engine.camera.x,y-Engine.camera.y,w,h);
     return null;
   });
+  N('camera',(a)=>{Engine.camera.x=numArg(a[0]);Engine.camera.y=numArg(a[1]);return null;});
+  N('overlapRect',(a)=>{const x1=numArg(a[0]),y1=numArg(a[1]),w1=numArg(a[2]),h1=numArg(a[3]),x2=numArg(a[4]),y2=numArg(a[5]),w2=numArg(a[6]),h2=numArg(a[7]);return x1<x2+w2&&x1+w1>x2&&y1<y2+h2&&y1+h1>y2;});
+  N('moveBody',(a)=>{const b=a[0];if(!b||typeof b!=='object')throw new PFError('moveBody(body,dt,gravity) ожидает объект {x,y,vx,vy} первым аргументом');const d=Math.max(0,Math.min(.1,numArg(a[1],Engine.curDt))),g=numArg(a[2],0);b.vy=numArg(b.vy)+g*d;b.x=numArg(b.x)+numArg(b.vx)*d;b.y=numArg(b.y)+numArg(b.vy)*d;return b;});
+  N('spriteAnim',(a)=>{const nm=String(a[0]??''),sp=spriteByName(nm),x=numArg(a[1])-Engine.camera.x,y=numArg(a[2])-Engine.camera.y,w=numArg(a[3],32),h=numArg(a[4],32),fw=Math.max(1,numArg(a[5],w)),fh=Math.max(1,numArg(a[6],h)),fps=Math.max(1,numArg(a[7],8));if(!sp||!sp.img.complete||!sp.img.naturalWidth){drawPlaceholder(x,y,w,h,nm);return null;}const cols=Math.max(1,Math.floor(sp.img.naturalWidth/fw)),rows=Math.max(1,Math.floor(sp.img.naturalHeight/fh)),count=cols*rows,frame=Math.floor((performance.now()/1000)*fps)%count;gctx.drawImage(sp.img,(frame%cols)*fw,Math.floor(frame/cols)*fh,fw,fh,x,y,w,h);return null;});
   N('object',(a)=>{
     const nm=String(a[0]==null?'':a[0]);
     const o=Engine.runtimeScene.find(it=>it.name===nm);
@@ -2327,7 +2387,7 @@ function startGame(){
     const v=Engine.env.vars.get(ev);
     if(v&&v.__pf==='func')Engine.handlers[ev]=v;
   }
-  Engine.running=true;Engine.frames=0;
+  Engine.running=true;Engine.frames=0;Engine.camera={x:0,y:0};
   Engine.startTime=performance.now();Engine.lastTs=Engine.startTime;Engine.curDt=0;
   if(state.activeFile!==ENTRY_FILE)
     logConsole('[MrrCode] Выполняется точка входа main.mrr (в редакторе открыт '+state.activeFile+').','warn');
@@ -2512,6 +2572,11 @@ function projectData(){syncCodeToFile();return {app:'MrrCode',format:'mrrcode-pr
 function saveProjectLocal(){try{localStorage.setItem('mrrcode-project-v2',JSON.stringify(projectData()));setNote('Проект сохранён в браузере.');logConsole('[MrrCode] Автосохранение выполнено.','sys');}catch(err){setNote('Не удалось сохранить проект: '+err.message);}}
 function restoreProjectLocal(){if(window.__MRRCODE_STANDALONE__)return false;try{const raw=localStorage.getItem('mrrcode-project-v2');if(!raw)return false;const data=JSON.parse(raw);if(!data||!data.files)return false;state.files={};for(const k of Object.keys(data.files))state.files[k]=String(data.files[k]);if(!state.files[ENTRY_FILE])state.files[ENTRY_FILE]=DEFAULT_CODE;state.activeFile=state.files[data.activeFile]?data.activeFile:ENTRY_FILE;state.sprites=(data.sprites||[]).map(s=>{const img=new Image();img.src=s.dataUrl;return {name:String(s.name),dataUrl:s.dataUrl,img,sizeKb:Math.max(1,Math.round((s.dataUrl||'').length*.75/1024))};});state.scene=sanitizeScene(data.scene||[]);codeInput.value=state.files[state.activeFile];document.getElementById('codeFileName').textContent=state.activeFile;renderObjList();renderProps();renderScenePreview();renderFiles();return true;}catch(_){return false;}}
 setInterval(()=>{try{localStorage.setItem('mrrcode-project-v2',JSON.stringify(projectData()));}catch(_){}},15000);
+function saveProjectVersion(label){try{const key='mrrcode-history-v1';const list=JSON.parse(localStorage.getItem(key)||'[]');const snap=projectData();snap.savedAt=new Date().toISOString();snap.label=label||'Автосохранение';list.unshift(snap);localStorage.setItem(key,JSON.stringify(list.slice(0,12)));return true;}catch(err){setNote('Не удалось сохранить версию: '+err.message);return false;}}
+function showProjectHistory(){try{const list=JSON.parse(localStorage.getItem('mrrcode-history-v1')||'[]');if(!list.length){setNote('История пуста. Сохрани версию через «🕘 Версии».');return;}const choice=prompt('История версий (введи номер для восстановления; отмена — выход):\n'+list.map((v,i)=>(i+1)+'. '+(v.label||'Версия')+' — '+(v.savedAt||'дата неизвестна')+'; файлов '+Object.keys(v.files||{}).length).join('\n'));if(choice===null)return;const idx=Number(choice)-1;if(!Number.isInteger(idx)||idx<0||idx>=list.length){setNote('Номер версии не распознан.');return;}if(!confirm('Восстановить версию? Текущее состояние сначала сохранится в истории.'))return;saveProjectVersion('Перед восстановлением');const d=list[idx];state.files={};Object.keys(d.files||{}).forEach(k=>state.files[k]=String(d.files[k]));if(!state.files[ENTRY_FILE])state.files[ENTRY_FILE]=DEFAULT_CODE;state.activeFile=state.files[d.activeFile]?d.activeFile:ENTRY_FILE;state.sprites=(d.sprites||[]).map(sp=>{const img=new Image();img.src=sp.dataUrl;return {name:String(sp.name),dataUrl:sp.dataUrl,img,sizeKb:Math.max(1,Math.round((sp.dataUrl||'').length*.75/1024))};});state.scene=sanitizeScene(d.scene||[]);state.selectedId=null;codeInput.value=state.files[state.activeFile];document.getElementById('codeFileName').textContent=state.activeFile;refreshEditor();renderFiles();renderObjList();renderProps();renderScenePreview();setNote('Версия восстановлена: '+(d.savedAt||''));}catch(err){setNote('История недоступна: '+err.message);}}
+document.getElementById('btnProjectHistory').addEventListener('click',()=>{saveProjectVersion('Снимок вручную');showProjectHistory();});
+setInterval(()=>{try{saveProjectVersion('Автоснимок');}catch(_){}},300000);
+document.getElementById('btnCheckResources').addEventListener('click',()=>{syncCodeToFile();const names=new Set(state.sprites.map(sp=>sp.name));const missing=[];for(const file of Object.keys(state.files)){const re=/\bsprite\(\s*[\"']([^\"']+)[\"']/g;let m;while((m=re.exec(state.files[file])))if(!names.has(m[1]))missing.push(file+': sprite(\"'+m[1]+'\")');}const objNames=new Set(state.scene.map(o=>o.name));for(const file of Object.keys(state.files)){const re=/\bobject\(\s*[\"']([^\"']+)[\"']/g;let m;while((m=re.exec(state.files[file])))if(!objNames.has(m[1]))missing.push(file+': object(\"'+m[1]+'\")');}if(missing.length){logConsole('[Ресурсы] Не найдены: '+missing.join(' | '),'warn');setNote('Проверка ресурсов: найдено '+missing.length+' ссылок без ресурса. См. консоль.');}else{logConsole('[Ресурсы] Проверка завершена: ссылки на спрайты и объекты сцены найдены.','sys');setNote('Проверка ресурсов пройдена.');}});
 function getHexAtCaret(){
   const v=codeInput.value, pos=codeInput.selectionStart;
   const re=/#([0-9a-fA-F]{3,8})/g;
@@ -3038,6 +3103,9 @@ function buildSystemPrompt(){
   return [
     'Ты — помощник по языку MrrCode 0.2.0.',
     'ОБЯЗАТЕЛЬНЫЙ РЕЖИМ ЗАКРЫТОГО МИРА: актуальный MRRCODE_AI_SPEC ниже — единственный источник встроенных функций, сигнатур и возможностей языка. Парсер MrrCode приложения задаёт допустимую грамматику.',
+    'НОВЫЕ ВОЗМОЖНОСТИ: scene-editor drag/resize/grid, история проекта и проверка ресурсов — инструменты интерфейса, а не команды языка. В коде доступны только описанные в MRRCODE_AI_SPEC функции: overlapRect, moveBody, camera и spriteAnim. Не выдумывай API синхронизации сцены с исходником.',
+    'ФИЗИКА: moveBody(body,dt,gravity) требует объект с x,y,vx,vy; overlapRect принимает два набора x,y,w,h и считает только настоящее пересечение без касания краями. Камера сдвигает рисование, но не координаты ввода. spriteAnim требует импортированный PNG-спрайтшит и размеры кадра в исходных пикселях.',
+    'ПЕРЕД ПРИМЕНЕНИЕМ: сохраняй исходную версию, валидируй каждый изменённый файл, не утверждай что код гарантированно работает до реального запуска. Если ответ обрезан или файл неполный, не применяй его как целый файл.', 
     'Запрещено выводить поддержку из JavaScript, Python, браузера или другого языка. Знакомый синтаксис не означает, что он поддерживается MrrCode.',
     'Используй только синтаксис, который описан спецификацией и принимается грамматикой MrrCode, встроенные вызовы только из MRRCODE_AI_SPEC.builtins и явно объявленные в проекте функции. Не придумывай API, параметры, события, свойства, операторы и методы.',
     'Вызовы через свойства объекта вида value.map(...) не являются встроенным API MrrCode, если отдельная сигнатура не указана в спецификации. Не используй методы JavaScript-массивов/строк/объектов.',
@@ -3222,6 +3290,10 @@ function applyAIReply(reply){
   }
   const applied=[];
   let openName=null;
+  const proposedFiles=data.files&&typeof data.files==='object'&&!Array.isArray(data.files)?data.files:{};
+  let validationFailed=false;
+  // Сохраняем версию до любых автоматических изменений ИИ.
+  if(Object.keys(proposedFiles).length||Array.isArray(data.scene))saveProjectVersion('Перед изменениями ИИ');
   if(data.files&&typeof data.files==='object'&&!Array.isArray(data.files)){
     for(const originalName of Object.keys(data.files)){
       if(typeof data.files[originalName]!=='string')continue;
@@ -3233,7 +3305,7 @@ function applyAIReply(reply){
       try {
         if(typeof window.MrrCodeValidate === 'function') window.MrrCodeValidate(nextCode,{projectFiles:Object.assign({},state.files,data.files),currentFile:nm});
       } catch(validationError) {
-        aiAdd('err','Файл «'+nm+'» не применён: проверка MrrCode обнаружила неподдерживаемую конструкцию. '+validationError.message);
+        validationFailed=true;aiAdd('err','Файл «'+nm+'» не применён: проверка MrrCode обнаружила неподдерживаемую конструкцию. '+validationError.message);
         continue;
       }
       state.files[nm]=nextCode;
@@ -3262,6 +3334,7 @@ function applyAIReply(reply){
     renderObjList();renderProps();renderScenePreview();
     applied.push('▦ сцена: '+state.scene.length+' объектов');
   }
+  if(validationFailed)aiAdd('sys','Часть предложенных файлов отклонена проверкой. Остальные прошедшие проверку изменения применены; исходная версия сохранена в «🕘 Версии».');
   const el=aiAdd('bot',String(data.message||'Готово.'));
   if(applied.length){
     const d=document.createElement('div');d.className='ai-applied';
@@ -3332,14 +3405,13 @@ function sanitizeScene(arr){
     return base;
   });
 }
+let sceneShowGrid=true,sceneSnap=false,sceneResize=true;
 function renderScenePreview(){
   const c=sctx;
   c.setTransform(1,0,0,1,0,0);
   c.clearRect(0,0,800,450);
   c.fillStyle='#0d1424';c.fillRect(0,0,800,450);
-  c.strokeStyle='rgba(120,150,220,0.08)';c.lineWidth=1;
-  for(let x=0;x<=800;x+=50){c.beginPath();c.moveTo(x,0);c.lineTo(x,450);c.stroke();}
-  for(let y=0;y<=450;y+=50){c.beginPath();c.moveTo(0,y);c.lineTo(800,y);c.stroke();}
+  if(sceneShowGrid){c.strokeStyle='rgba(120,150,220,0.08)';c.lineWidth=1;for(let x=0;x<=800;x+=50){c.beginPath();c.moveTo(x,0);c.lineTo(x,450);c.stroke();}for(let y=0;y<=450;y+=50){c.beginPath();c.moveTo(0,y);c.lineTo(800,y);c.stroke();}}
 
   // Сначала рисуем все объекты сцены, иначе превью показывало только сетку.
   for(const o of state.scene)drawSceneObj(c,o);
@@ -3348,7 +3420,7 @@ function renderScenePreview(){
   if(sel){
     const b=objBounds(sel);
     c.save();c.strokeStyle='#38d6ff';c.setLineDash([6,4]);c.lineWidth=2;
-    c.strokeRect(b.x-4,b.y-4,b.w+8,b.h+8);c.restore();
+    c.strokeRect(b.x-4,b.y-4,b.w+8,b.h+8);if(sceneResize&&sel.type==='rect'){c.setLineDash([]);c.fillStyle='#38d6ff';c.fillRect(b.x+b.w-5,b.y+b.h-5,10,10);}c.restore();
   }
   document.getElementById('sceneCount').textContent=state.scene.length?'('+state.scene.length+')':'';
 }
@@ -3463,6 +3535,9 @@ function renderProps(){
   if(del)del.addEventListener('click',()=>deleteObject(sel.id));
 }
 let dragInfo=null;
+document.getElementById('sceneGridToggle').addEventListener('click',e=>{sceneShowGrid=!sceneShowGrid;e.currentTarget.textContent='▦ Сетка: '+(sceneShowGrid?'вкл.':'выкл.');renderScenePreview();});
+document.getElementById('sceneSnapToggle').addEventListener('click',e=>{sceneSnap=!sceneSnap;e.currentTarget.textContent='🧲 Привязка: '+(sceneSnap?'вкл.':'выкл.');e.currentTarget.setAttribute('aria-pressed',String(sceneSnap));});
+document.getElementById('sceneResizeToggle').addEventListener('click',e=>{sceneResize=!sceneResize;e.currentTarget.textContent='↘ Размер: '+(sceneResize?'вкл.':'выкл.');renderScenePreview();});
 function sceneCoords(e){
   const r=sceneCanvas.getBoundingClientRect();
   return {x:(e.clientX-r.left)*(800/r.width),y:(e.clientY-r.top)*(450/r.height)};
@@ -3480,7 +3555,8 @@ sceneCanvas.addEventListener('pointerdown',e=>{
   const obj=topObjectAt(p.x,p.y);
   selectObject(obj?obj.id:null);
   if(obj){
-    dragInfo={id:obj.id,ox:p.x-obj.x,oy:p.y-obj.y};
+    const b=objBounds(obj),resizeHit=sceneResize&&obj.type==='rect'&&p.x>=b.x+b.w-12&&p.y>=b.y+b.h-12;
+    dragInfo={id:obj.id,mode:resizeHit?'resize':'move',ox:p.x-obj.x,oy:p.y-obj.y,startX:p.x,startY:p.y,startW:obj.w,startH:obj.h};
     try{sceneCanvas.setPointerCapture(e.pointerId);}catch(_){}
   }
 });
@@ -3489,8 +3565,8 @@ sceneCanvas.addEventListener('pointermove',e=>{
   const p=sceneCoords(e);
   const obj=state.scene.find(o=>o.id===dragInfo.id);
   if(!obj)return;
-  obj.x=Math.round(p.x-dragInfo.ox);
-  obj.y=Math.round(p.y-dragInfo.oy);
+  if(dragInfo.mode==='resize'&&obj.type==='rect'){obj.w=Math.max(8,Math.round(dragInfo.startW+p.x-dragInfo.startX));obj.h=Math.max(8,Math.round(dragInfo.startH+p.y-dragInfo.startY));}else{obj.x=Math.round(p.x-dragInfo.ox);obj.y=Math.round(p.y-dragInfo.oy);}
+  if(sceneSnap){obj.x=Math.round(obj.x/10)*10;obj.y=Math.round(obj.y/10)*10;if(obj.type==='rect'&&dragInfo.mode==='resize'){obj.w=Math.max(10,Math.round(obj.w/10)*10);obj.h=Math.max(10,Math.round(obj.h/10)*10);}}
   renderScenePreview();
   document.querySelectorAll('#propsPanel input').forEach(inp=>{
     const k=inp.dataset.k;
@@ -3698,26 +3774,135 @@ document.getElementById('projInput').addEventListener('change',e=>{
 });
 function exportPxl(){
   syncCodeToFile();
-  download(state.activeFile,state.files[state.activeFile],'text/plain;charset=utf-8');
-  setNote('Экспортирован '+state.activeFile);
+  const name=/\.mrr$/i.test(state.activeFile)?state.activeFile:state.activeFile+'.mrr';
+  const source=String(state.files[state.activeFile]||'');
+  download(name,source,'text/plain;charset=utf-8');
+  setNote('Экспортирован '+name);
+  logConsole('[Файлы] Экспортирован код: '+name,'sys');
 }
 document.getElementById('btnExportPxl').addEventListener('click',exportPxl);
-document.getElementById('btnImportPxl').addEventListener('click',()=>document.getElementById('mrrInput').click());
-document.getElementById('mrrInput').addEventListener('change',e=>{
-  const f=e.target.files&&e.target.files[0];
-  e.target.value='';
-  if(!f)return;
-  const reader=new FileReader();
-  reader.onload=()=>{
-    let nm=f.name;
-    if(!nm.endsWith('.mrr'))nm+='.mrr';
-    state.files[nm]=String(reader.result);
-    openCodeFile(nm);
-    setNote('Импортирован '+nm+'.');
-    logConsole('[Файлы] Импортирован код: '+nm,'sys');
-  };
-  reader.readAsText(f);
-});
+
+const mrrInput=document.getElementById('mrrInput');
+const mrrImportButton=document.getElementById('btnImportPxl');
+
+function importMrrText(originalName,source){
+  source=String(source==null?'':source).replace(/^\uFEFF/,'');
+  if(!source.trim())throw new Error('Файл пустой.');
+
+  state.files[originalName]=source;
+  state.activeFile=originalName;
+  codeInput.value=source;
+
+  const nameEl=document.getElementById('codeFileName');
+  if(nameEl)nameEl.textContent=originalName;
+
+  refreshEditor();
+  renderFiles();
+  updateHint();
+  saveCode();
+  pushEditSnapshot();
+
+  setNote('Импортирован '+originalName+'.');
+  logConsole('[Файлы] Успешно импортирован .mrr: '+originalName,'sys');
+
+  try{
+    const tokens=tokenize(source);
+    parse(tokens);
+    logConsole('[MrrCode] Синтаксис импортированного файла корректен.','sys');
+  }catch(err){
+    const msg=err&&err.message?err.message:String(err);
+    setNote('Файл импортирован, но есть ошибка MrrCode: '+msg);
+    logConsole('[MrrCode] Ошибка синтаксиса: '+msg,'err');
+  }
+}
+
+async function openMrrWithPicker(){
+  if(!window.showOpenFilePicker) return false;
+
+  let handles;
+  try{
+    handles=await window.showOpenFilePicker({
+      multiple:false,
+      types:[{
+        description:'MrrCode',
+        accept:{'application/mrr':['.mrr']}
+      }],
+      excludeAcceptAllOption:true
+    });
+  }catch(err){
+    // Отмена пользователем — не ошибка.
+    if(err&&err.name==='AbortError')return true;
+    throw err;
+  }
+
+  if(!handles||!handles.length)return true;
+
+  const handle=handles[0];
+  const file=await handle.getFile();
+  const name=String(file.name||'');
+
+  if(!/\.mrr$/i.test(name)){
+    throw new Error('Выбран не файл .mrr.');
+  }
+
+  // Получаем содержимое только после получения свежего File из handle.
+  const source=await file.text();
+  importMrrText(name,source);
+  return true;
+}
+
+if(mrrImportButton&&mrrInput){
+  mrrImportButton.addEventListener('click',async(ev)=>{
+    ev.preventDefault();
+
+    // В современных браузерах используем File System Access API.
+    // Он не хранит устаревшую ссылку на File после выбора.
+    if(window.showOpenFilePicker){
+      try{
+        await openMrrWithPicker();
+        return;
+      }catch(err){
+        const msg=err&&err.message?err.message:String(err);
+        setNote('Не удалось импортировать .mrr: '+msg);
+        logConsole('[Файлы] Ошибка выбора .mrr: '+msg,'err');
+        return;
+      }
+    }
+
+    // Fallback для браузеров без showOpenFilePicker.
+    mrrInput.value='';
+    mrrInput.click();
+  });
+
+  mrrInput.addEventListener('change',async(e)=>{
+    const input=e.currentTarget;
+    const file=input.files&&input.files[0];
+
+    if(!file){
+      setNote('Файл не выбран.');
+      return;
+    }
+
+    const originalName=String(file.name||'');
+    if(!/\.mrr$/i.test(originalName)){
+      setNote('Импорт отменён: нужен файл .mrr');
+      logConsole('[Файлы] Отклонён '+originalName+'. Разрешён только .mrr.','err');
+      input.value='';
+      return;
+    }
+
+    try{
+      const source=await file.text();
+      importMrrText(originalName,source);
+    }catch(err){
+      const msg=err&&err.message?err.message:String(err);
+      setNote('Ошибка чтения '+originalName+': '+msg);
+      logConsole('[Файлы] Ошибка чтения '+originalName+': '+msg,'err');
+    }finally{
+      input.value='';
+    }
+  });
+}
 
 /* ---------------- восстановление проекта ---------------- */
 setTimeout(()=>{if(!window.__MRRCODE_STANDALONE__&&restoreProjectLocal()){setNote('Восстановлен последний локальный проект.');logConsole('[MrrCode] Локальный проект восстановлен.','sys');}pushEditSnapshot();},0);
@@ -4124,6 +4309,8 @@ window.mrrBuildAIPrompt = function(userPrompt, currentCode){
     JSON.stringify(window.MRRCODE_AI_SPEC),
     "CURRENT main.mrr:\n" + (currentCode || ""),
     "CLOSED WORLD: Only names and signatures in MRRCODE_AI_SPEC are built-in. The parser grammar is authoritative for syntax. Never infer MrrCode support from JavaScript or Python. Do not use undocumented member-method calls or invented APIs.",
+    "New feature guidance: overlapRect checks axis-aligned rectangle overlap (edge-touch alone is false); moveBody mutates {x,y,vx,vy} and clamps dt to 0..0.1; camera(x,y) offsets drawing but not pointer input; spriteAnim requires an imported PNG spritesheet and source frame dimensions. Scene editor, project history and resource checking are UI features, not MrrCode functions.",
+    "Before applying AI edits, preserve a project version and validate changed MrrCode files. Validation is static and does not guarantee successful runtime behavior.",
     "USER REQUEST:\n" + (userPrompt || "")
   ].join("\n\n");
 };
