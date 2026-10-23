@@ -3042,7 +3042,7 @@ function buildSystemPrompt(){
     'Если возможности нет в спецификации или проекте, прямо скажи, что она не документирована, и не генерируй код с ней. Не делай предположений о семантике и сигнатурах.',
     'Перед ответом проверь код по спецификации и парсеру. Если сомневаешься — исключи конструкцию и объясни ограничение.',
     'Не подменяй MrrCode JavaScript. Не меняй файлы, не относящиеся к запросу. Для файлов возвращай полный текст.',
-    'Ответ строго JSON: {"message":"...","files":{"имя.mrr":"полный код"},"scene":[],"spritesNeeded":[]}. Не добавляй Markdown вокруг JSON.',
+    'Ответ строго одним валидным JSON-объектом без Markdown и пояснений снаружи. Все переводы строк внутри значений JSON экранируй как \\n, кавычки и обратные слеши также экранируй. Формат: {"message":"...","files":{"имя.mrr":"полный код"},"scene":[],"spritesNeeded":[]}. Не добавляй Markdown вокруг JSON.',
     'АКТУАЛЬНАЯ СПЕЦИФИКАЦИЯ:', spec
   ].join('\n\n');
 }function buildContextMessage(){
@@ -3062,20 +3062,41 @@ function stripFences(value){
   const match = text.match(/^```(?:[a-z0-9_-]+)?\s*\n?([\s\S]*?)\n?```$/i);
   return (match ? match[1] : text).trim();
 }
+function repairJSONControlChars(source){
+  // Исправляет частую ошибку моделей: реальные переводы строк/табуляции внутри JSON-строк.
+  let out='',inString=false,escaped=false;
+  for(let i=0;i<source.length;i++){
+    const ch=source[i],code=source.charCodeAt(i);
+    if(inString){
+      if(escaped){out+=ch;escaped=false;continue;}
+      if(ch==='\\'){out+=ch;escaped=true;continue;}
+      if(ch==='"'){out+=ch;inString=false;continue;}
+      if(code===10){out+='\\n';continue;}
+      if(code===13){out+='\\r';continue;}
+      if(code===9){out+='\\t';continue;}
+      if(code<32){out+='\\u'+code.toString(16).padStart(4,'0');continue;}
+    }
+    if(ch==='"')inString=true;
+    out+=ch;
+  }
+  return out;
+}
 function extractJSON(text){
-  // Принимаем обычный JSON, Markdown-блоки, JSON внутри строки и текст вокруг объекта.
+  // Принимаем JSON напрямую, в Markdown, внутри текста и с переносами строк в значениях.
   const raw=String(text==null?'':text).replace(/^\uFEFF/,'').trim();
   const fence=raw.match(/```(?:json|javascript|js)?\s*([\s\S]*?)```/i);
   const candidates=[fence?fence[1].trim():raw,raw];
   for(const candidate of candidates){
-    try{
-      let direct=JSON.parse(candidate);
-      if(typeof direct==='string'){
-        try{direct=JSON.parse(direct);}catch(_){}
-      }
-      if(direct&&typeof direct==='object'&&!Array.isArray(direct))return direct;
-    }catch(_){}
-    // Извлекаем первый сбалансированный JSON-объект, не считая скобки внутри строк.
+    for(const attempt of [candidate,repairJSONControlChars(candidate)]){
+      try{
+        let direct=JSON.parse(attempt);
+        if(typeof direct==='string'){
+          try{direct=JSON.parse(repairJSONControlChars(direct));}catch(_){}
+        }
+        if(direct&&typeof direct==='object'&&!Array.isArray(direct))return direct;
+      }catch(_){}
+    }
+    // Ищем сбалансированный объект, учитывая экранирование и строки.
     for(let start=0;start<candidate.length;start++){
       if(candidate[start]!=='{')continue;
       let depth=0,inString=false,escaped=false;
@@ -3093,10 +3114,12 @@ function extractJSON(text){
           depth--;
           if(depth===0){
             const piece=candidate.slice(start,i+1);
-            try{
-              const parsed=JSON.parse(piece);
-              if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))return parsed;
-            }catch(_){}
+            for(const attempt of [piece,repairJSONControlChars(piece)]){
+              try{
+                const parsed=JSON.parse(attempt);
+                if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))return parsed;
+              }catch(_){}
+            }
             break;
           }
         }
