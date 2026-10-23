@@ -1,16 +1,15 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>MrrCode · v0.1.0</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-400-normal.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-600-normal.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-800-normal.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/latin-400-normal.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/cyrillic-400-normal.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/cyrillic-700-normal.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/latin-400-normal.css">
+<!doctype html>
+<html lang="ru"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<title>MrrCode — Игра</title>
+<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-400-normal.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-600-normal.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-800-normal.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/latin-400-normal.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/cyrillic-400-normal.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/cyrillic-700-normal.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/latin-400-normal.css" rel="stylesheet">
 <style>
 :root{
   --bg:#0a0e1a; --panel:#10162a; --panel2:#0d1426; --border:#1e2a45; --border2:#2b3a5e;
@@ -383,7 +382,6 @@ body.mrr-app-mode { margin:0; }
 #mrrCloseSite:active { transform:scale(.97); }
 
 </style>
-
 <style id="mrr-cat-decor">
   /* MrrCode: subtle decorative cat details; existing theme is untouched. */
   .mrr-cat {
@@ -416,165 +414,393 @@ body.mrr-app-mode { margin:0; }
     user-select: none;
   }
 </style>
+<script id="mrrcode-ai-spec">
+window.MRRCODE_AI_SPEC = {
+  version: "0.2.0",
+  language: "MrrCode",
+  extension: ".mrr",
+  rules: [
+    "Generate MrrCode only; never replace it with JavaScript or Python.",
+    "Only syntax accepted by the MrrCode parser and names in this specification are built-in MrrCode features.",
+    "Project-defined variables and functions are allowed only when declared in project source or imported from an existing module.",
+    "Member-function calls such as value.map(...) are not part of the documented built-in API. Use only listed function-call forms.",
+    "Keep Scene objects separate from drawing commands in .mrr source.",
+    "Preserve working user code when changing unrelated parts.",
+    "When asked to replace a file, return complete file contents.",
+    "Use MrrCode array functions only: push(array, value), pop(array), splice(array, start, count, ...items), shift(array), unshift(array, value), length(array), join(array, separator), split(text, separator), contains(array, value), indexOf(array, value), slice(array, start, end). Do not use JavaScript-style dot methods.",
+    "For arrays use MrrCode functions push(array, value), pop(array), length(value), join(array, separator), split(text, separator), and ordinary indexing such as array[i].",
+    "Before returning code, check every array operation and remove unsupported dot-method calls."
+  ],
+  keywords: ["let","const","var","if","else","for","while","return","function","true","false"],
+  conditionalOperator: {
+    syntax: "condition ? valueIfTrue : valueIfFalse",
+    description: "Тернарный оператор MrrCode для выбора одного из двух значений."
+  },
+  colorFunctions: {
+    rgba: "rgba(red, green, blue, alpha)"
+  },
+  templateLiterals: {
+    syntax: "`text ${expression}`",
+    description: "Шаблонные строки с выражениями ${...}. Внутри ${...} разрешены только выражения MrrCode.",
+    examples: ["let c = `rgba(255,255,255,${brightness})`;", "let title = `Score: ${score}`;"]
+  },
+  builtins: [
+    ["print","print(value)"], ["lerp","lerp(a,b,t)"], ["map","map(value,inMin,inMax,outMin,outMax)"],
+    ["sign","sign(x)"], ["randomInt","randomInt(min,max)"], ["toString","toString(value)"], ["toNumber","toNumber(value)"],
+    ["contains","contains(text,part)"], ["join","join(array,separator)"], ["split","split(text,separator)"],
+    ["save","save(key,value)"], ["load","load(key,defaultValue)"], ["playTone","playTone(frequency,duration,volume?)"],
+    ["stopSound","stopSound()"], ["random","random()"], ["rand","rand(min,max)"], ["abs","abs(value)"],
+    ["sqrt","sqrt(value)"], ["sin","sin(value)"], ["cos","cos(value)"], ["rgba","rgba(r,g,b,a?)"],
+    ["floor","floor(value)"], ["ceil","ceil(value)"], ["round","round(value)"], ["min","min(a,b)"],
+    ["max","max(a,b)"], ["clamp","clamp(value,min,max)"], ["length","length(value)"],
+    ["push","push(array,value)"], ["pop","pop(array)"], ["time","time()"], ["dt","dt()"],
+    ["clear","clear(color)"], ["rect","rect(x,y,width,height,color?)"], ["circle","circle(x,y,radius,color?)"],
+    ["line","line(x1,y1,x2,y2,color?,lineWidth?)"], ["text","text(value,x,y,color?,size?)"],
+    ["sprite","sprite(name,x,y,width?,height?)"], ["object","object(name)"],
+    ["pointerX","pointerX()"], ["pointerY","pointerY()"], ["pointerDownNow","pointerDownNow()"],
+    ["touchCount","touchCount()"], ["touchX","touchX(index)"], ["touchY","touchY(index)"]
+  ],
+  userSymbols: "Extract variables, constants, functions and function parameters from the current .mrr file.",
+  validation: "Never invent an undocumented command; if an API feature is missing, say so.",
+  unsupportedArrayMethods: [],
+  arrayFunctions: [
+    "push(array,value)", "pop(array)", "splice(array,start,count,...items)",
+    "shift(array)", "unshift(array,value)", "length(array)",
+    "join(array,separator)", "split(text,separator)",
+    "contains(array,value)", "indexOf(array,value)", "slice(array,start,end)"
+  ],
+  mathFunctions: [
+    "min(a,b)", "max(a,b)", "clamp(value,min,max)", "floor(value)",
+    "ceil(value)", "round(value)", "pow(a,b)"
+  ],
+  stringFunctions: [
+    "trim(text)", "upper(text)", "lower(text)", "startsWith(text,prefix)",
+    "endsWith(text,suffix)", "replace(text,from,to)"
+  ],
+  utilityFunctions: [
+    "typeof(value)", "toString(value)", "toNumber(value)"
+  ],
+
+  languageFeatures: ["arrays", "objects", "for-of", "modules", "compound assignment", "++/--", "break/continue", "member access", "short-circuit &&/||", "exponentiation **"],
+  persistence: ["save(key,value)", "load(key,defaultValue)"],
+  audio: ["playTone(frequency,duration,volume?)", "stopSound()"],
+  math: ["lerp(a,b,t)", "map(value,inMin,inMax,outMin,outMax)", "sign(x)", "randomInt(min,max)"],
+  strings: ["toString(value)", "toNumber(value)", "contains(text,part)", "join(array,separator)", "split(text,separator)" ]
+};
+</script>
+<style>
+.mrr-debug-hit{outline:2px solid #ffcc55;border-radius:4px}
+#debugPanel input{background:var(--panel2,#111827);color:inherit;border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:7px}
+</style>
+<script id="mrr-ai-network-fix">
+(function(){
+  window.MrrCodeAINetwork = {
+    async request(url, options){
+      const target = String(url || "").trim();
+      if (!target) throw new Error("AI Base URL не задан.");
+
+      let parsed;
+      try { parsed = new URL(target, location.href); }
+      catch(e) { throw new Error("Некорректный Base URL."); }
+
+      try {
+        const req = Object.assign({}, options || {}, {
+          mode: "cors",
+          credentials: "omit"
+        });
+        const response = await fetch(parsed.href, req);
+        const text = await response.text();
+
+        if (!response.ok) {
+          let detail = text;
+          try {
+            const j = JSON.parse(text);
+            detail = (j.error && j.error.message) || j.message || text;
+          } catch(_) {}
+          throw new Error("HTTP " + response.status + ": " + detail.slice(0,500));
+        }
+        return text;
+      } catch(e) {
+        if (e && /^HTTP \d+/.test(e.message || "")) throw e;
+        throw new Error(
+          "Сетевой/CORS-запрос к ИИ не выполнен. " +
+          "Проверь Base URL, доступность endpoint и разрешение CORS. " +
+          "URL: " + parsed.href
+        );
+      }
+    }
+  };
+})();
+</script>
+<script id="mrrcode-language-validator">
+// Реальная проверка определена ниже, после лексера и парсера MrrCode.
+window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode ещё не инициализирован.'); };
+</script>
+<script id="mrrcode-stdlib-020">
+(function(){
+  const std = {
+    push(a, v){ a.push(v); return a; },
+    pop(a){ return a.pop(); },
+    splice(a, start, count, ...items){ return a.splice(start, count, ...items); },
+    shift(a){ return a.shift(); },
+    unshift(a, v){ a.unshift(v); return a.length; },
+    length(v){ return v == null ? 0 : v.length; },
+    join(a, sep){ return a.join(sep == null ? "," : sep); },
+    split(s, sep){ return String(s).split(sep); },
+    contains(a, v){ return a.includes(v); },
+    indexOf(a, v){ return a.indexOf(v); },
+    slice(a, start, end){ return a.slice(start, end); },
+
+    min(a,b){ return Math.min(a,b); },
+    max(a,b){ return Math.max(a,b); },
+    clamp(v,min,max){ return Math.min(max, Math.max(min, v)); },
+    floor(v){ return Math.floor(v); },
+    ceil(v){ return Math.ceil(v); },
+    round(v){ return Math.round(v); },
+    pow(a,b){ return Math.pow(a,b); },
+
+    trim(s){ return String(s).trim(); },
+    upper(s){ return String(s).toUpperCase(); },
+    lower(s){ return String(s).toLowerCase(); },
+    startsWith(s,p){ return String(s).startsWith(String(p)); },
+    endsWith(s,p){ return String(s).endsWith(String(p)); },
+    replace(s,a,b){ return String(s).replaceAll(String(a), String(b)); },
+
+    typeof(v){ return Array.isArray(v) ? "array" : typeof v; }
+  };
+
+  window.MrrCodeStdlib020 = std;
+
+  // Expose the library for the interpreter without overwriting existing
+  // engine functions.
+  window.MrrCodeStdlib020Version = "0.2.0+";
+})();
+</script>
+
 </head>
-
-<button id="mrrCloseSite" type="button" aria-label="Закрыть MrrCode">✕ Закрыть</button>
-
-<body>
+<body><button aria-label="Закрыть MrrCode" id="mrrCloseSite" type="button">✕ Закрыть</button>
 
 <header>
-  <div class="logo">🎮 MrrCode <small>MrrCode Studio · v0.1.0 · сенсор + ИИ <span class="mrr-cat">ฅ^•ﻌ•^ฅ</span></small></div>
-  <nav class="tabs">
-    <button class="tab-btn active" data-tab="game">▶ Игра</button>
-    <button class="tab-btn" data-tab="code">⌘ Код</button>
-    <button class="tab-btn" data-tab="scene">▦ Сцена</button>
-    <button class="tab-btn" data-tab="files">📁 Файлы</button>
-    <button class="tab-btn" data-tab="help">? Справка</button>
-  </nav>
-  <div class="run-controls">
-    <button class="btn ai" id="btnAI" title="ИИ-агент">🤖 ИИ</button>
-    <button class="btn primary" id="btnRun" title="Запуск main.mrr на весь экран">▶ Запуск</button>
-    <button class="btn stop" id="btnStop" disabled>■ Стоп</button>
-    <span id="runStatus">Готов к запуску</span>
-  </div>
+<div class="logo">🎮 MrrCode <small>MrrCode Studio · v0.2.0 · сенсор + ИИ <span class="mrr-cat">ฅ^•ﻌ•^ฅ</span></small></div>
+<nav class="tabs">
+<button class="tab-btn" data-tab="game">▶ Игра</button>
+<button class="tab-btn" data-tab="code">⌘ Код</button>
+<button class="tab-btn" data-tab="scene">▦ Сцена</button>
+<button class="tab-btn active" data-tab="files">📁 Файлы</button>
+<button class="tab-btn" data-tab="help">? Справка</button>
+</nav>
+<div class="run-controls">
+<button class="btn ai" id="btnAI" title="ИИ-агент">🤖 ИИ</button>
+<button class="btn primary" id="btnRun" title="Запуск main.mrr на весь экран">▶ Запуск</button>
+<button class="btn stop" id="btnStop" disabled="">■ Стоп</button>
+<span id="runStatus" class="">Остановлено</span>
+</div>
 </header>
-
 <main>
-  <!-- ================= GAME ================= -->
-  <section class="tab active" id="tab-game">
-    <div class="panel canvas-wrap" id="gameStage">
-      <div class="fs-controls">
-        <button id="btnFsStop">■ Стоп</button>
-        <button id="btnExitFs">✕ Выйти</button>
-      </div>
-      <canvas id="gameCanvas" width="800" height="450"></canvas>
-      <div class="canvas-bar">
-        <span>Поле 800×450 · только касания (мультитач) · «назад» — выход из полного экрана</span>
-        <span class="cb-right">
-          <button class="btn mini ghost" id="btnFullscreen">⛶ Во весь экран</button>
-          <span id="fpsLabel"></span>
-        </span>
-      </div>
-    </div>
-    <div class="panel console-panel">
-      <div class="panel-head"><b>Консоль</b><button class="btn mini ghost" id="btnClearConsole">Очистить</button></div>
-      <div id="consoleOut"></div>
-    </div>
-  </section>
+<!-- ================= GAME ================= -->
+<section class="tab" id="tab-game">
+<div class="panel canvas-wrap" id="gameStage">
+<div class="fs-controls">
+<button id="btnFsStop">■ Стоп</button>
+<button id="btnExitFs">✕ Выйти</button>
+</div>
+<canvas height="450" id="gameCanvas" width="800"></canvas>
+<div class="canvas-bar">
+<span>Поле 800×450 · только касания (мультитач) · «назад» — выход из полного экрана</span>
+<span class="cb-right">
+<button class="btn mini ghost" id="btnFullscreen">⛶ Во весь экран</button>
+<span id="fpsLabel"></span>
+</span>
+</div>
+</div>
+<div class="panel console-panel">
+<div class="panel-head"><b>Консоль</b><button class="btn mini ghost" id="btnClearConsole">Очистить</button></div>
+<div id="consoleOut"><div class="line-sys"><span class="ts">12:12:42</span>[MrrCode] Готов. Нажми «Запуск» — игра откроется на весь экран устройства.</div><div class="line-sys"><span class="ts">12:12:42</span>v0.1.0 · только сенсор · 🤖 ИИ-агент (кнопка «ИИ»): подключи Base URL, API-ключ и модель — ИИ напишет код, создаст файлы и сцену.</div><div class="line-sys"><span class="ts">12:12:42</span>[MrrCode] Локальный проект восстановлен.</div><div class="line-sys"><span class="ts">12:12:45</span>[MrrCode] Запуск: main.mrr · полный экран · управление касаниями</div><div class="line-log"><span class="ts">12:12:45</span>Привет! Это твой первый скрипт.</div><div class="line-sys"><span class="ts">12:12:49</span>[Сборка] Создан автономный MrrCode-game.html.</div><div class="line-sys"><span class="ts">12:13:36</span>[MrrCode] Остановлено.</div><div class="line-sys"><span class="ts">12:13:37</span>[MrrCode] Запуск: main.mrr · полный экран · управление касаниями</div><div class="line-sys"><span class="ts">12:37:30</span>[MrrCode] Готов. Нажми «Запуск» — игра откроется на весь экран устройства.</div><div class="line-sys"><span class="ts">12:37:30</span>v0.1.0 · только сенсор · 🤖 ИИ-агент (кнопка «ИИ»): подключи Base URL, API-ключ и модель — ИИ напишет код, создаст файлы и сцену.</div><div class="line-sys"><span class="ts">12:37:30</span>[MrrCode] Локальный проект восстановлен.</div><div class="line-sys"><span class="ts">12:37:34</span>[MrrCode] Запуск: main.mrr · полный экран · управление касаниями</div><div class="line-sys"><span class="ts">12:37:40</span>[MrrCode] Остановлено.</div><div class="line-sys"><span class="ts">12:37:42</span>[MrrCode] Запуск: main.mrr · полный экран · управление касаниями</div><div class="line-sys"><span class="ts">12:37:47</span>[MrrCode] Остановлено.</div><div class="line-sys"><span class="ts">12:41:08</span>[MrrCode] Готов. Нажми «Запуск» — игра откроется на весь экран устройства.</div><div class="line-sys"><span class="ts">12:41:08</span>v0.1.0 · только сенсор · 🤖 ИИ-агент (кнопка «ИИ»): подключи Base URL, API-ключ и модель — ИИ напишет код, создаст файлы и сцену.</div><div class="line-sys"><span class="ts">12:41:08</span>[MrrCode] Запуск: main.mrr · полный экран · управление касаниями</div><div class="line-warn"><span class="ts">12:41:08</span>[Полный экран] Не удалось: Permissions check failed. Игра в обычном окне.</div><div class="line-sys"><span class="ts">12:41:11</span>[MrrCode] Остановлено.</div><div class="line-sys"><span class="ts">12:41:13</span>[MrrCode] Запуск: main.mrr · полный экран · управление касаниями</div><div class="line-sys"><span class="ts">12:41:15</span>[MrrCode] Остановлено.</div><div class="line-sys"><span class="ts">12:43:14</span>[MrrCode] Готов. Нажми «Запуск» — игра откроется на весь экран устройства.</div><div class="line-sys"><span class="ts">12:43:14</span>v0.1.0 · только сенсор · 🤖 ИИ-агент (кнопка «ИИ»): подключи Base URL, API-ключ и модель — ИИ напишет код, создаст файлы и сцену.</div><div class="line-sys"><span class="ts">12:43:14</span>[MrrCode] Локальный проект восстановлен.</div><div class="line-sys"><span class="ts">12:43:14</span>[MrrCode] Запуск: main.mrr · полный экран · управление касаниями</div><div class="line-sys"><span class="ts">12:43:14</span>[MrrCode] Запуск: main.mrr · полный экран · управление касаниями</div><div class="line-warn"><span class="ts">12:43:14</span>[Полный экран] Не удалось: Permissions check failed. Игра в обычном окне.</div><div class="line-warn"><span class="ts">12:43:14</span>[Полный экран] Не удалось: Permissions check failed. Игра в обычном окне.</div><div class="line-sys"><span class="ts">12:43:51</span>[MrrCode] Остановлено.</div></div>
+</div>
+</section>
+<!-- ================= CODE ================= -->
+<section class="tab" id="tab-code">
+<div class="code-toolbar">
+<span class="file-chip">📄 <b id="codeFileName">main.mrr</b></span>
+<span class="chip accent">MrrCode</span>
+<span class="chip">Точка входа: main.mrr</span>
+<span class="spacer"></span>
+<select class="sel" id="examplesSelect" title="Примеры"><option value="">Примеры…</option><option value="modules">📦 Модули: from … import</option><option value="touch-platformer">🧱 Бег и прыжок касаниями</option><option value="scene-objects">🧩 Объекты сцены из кода</option><option value="touch-button">☝ Своя сенсорная кнопка</option><option value="ball-gravity">⚽ Мяч и гравитация</option><option value="orbit">🪐 Орбита</option><option value="paint">✍ Рисование пальцем</option><option value="modules">📦 Модули: from … import</option><option value="touch-platformer">🧱 Бег и прыжок касаниями</option><option value="scene-objects">🧩 Объекты сцены из кода</option><option value="touch-button">☝ Своя сенсорная кнопка</option><option value="ball-gravity">⚽ Мяч и гравитация</option><option value="orbit">🪐 Орбита</option><option value="paint">✍ Рисование пальцем</option><option value="modules">📦 Модули: from … import</option><option value="touch-platformer">🧱 Бег и прыжок касаниями</option><option value="scene-objects">🧩 Объекты сцены из кода</option><option value="touch-button">☝ Своя сенсорная кнопка</option><option value="ball-gravity">⚽ Мяч и гравитация</option><option value="orbit">🪐 Орбита</option><option value="paint">✍ Рисование пальцем</option><option value="modules">📦 Модули: from … import</option><option value="touch-platformer">🧱 Бег и прыжок касаниями</option><option value="scene-objects">🧩 Объекты сцены из кода</option><option value="touch-button">☝ Своя сенсорная кнопка</option><option value="ball-gravity">⚽ Мяч и гравитация</option><option value="orbit">🪐 Орбита</option><option value="paint">✍ Рисование пальцем</option></select>
+<button class="btn" id="btnSheet" title="Шпаргалка по языку">📖</button>
+<button class="btn ai" id="btnAiCode" title="ИИ-агент">🤖</button>
+<button class="btn primary" id="btnRunCode" title="Запуск main.mrr">▶</button>
+<button class="btn ghost" id="btnExportPxl" title="Экспорт текущего файла .mrr">⬇ .mrr</button>
+<button class="btn ghost" id="btnImportPxl" title="Импорт .mrr">⬆ .mrr</button>
+<button class="btn" id="btnUndo" title="Отменить">↶</button>
+<button class="btn" id="btnRedo" title="Повторить">↷</button>
+<button class="btn" id="btnSaveNow" title="Сохранить проект в браузере">💾</button>
+<button class="btn" id="btnDebug" title="Режим отладки">🐞 Debug</button>
+<button class="btn" id="btnColorPicker" title="Выбрать цвет для HEX-кода">🎨 Цвет</button>
+<span class="color-tool" title="Текущий цвет в коде"><span class="color-swatch" id="codeColorSwatch" style="background: linear-gradient(135deg, rgb(255, 77, 77), rgb(77, 124, 255));"></span><span id="codeColorValue" style="font:12px var(--font-code);color:var(--muted)">—</span></span>
+<input aria-label="Выбор цвета" class="color-picker-input" id="codeColorInput" type="color" value="#70d6ff" data-start="18" data-end="26" data-original="#fffffff">
+</div>
+<div class="palette" id="touchPalette"><button type="button" class="pal-btn" title="Отступ">⇥</button><button type="button" class="pal-btn" title="Новая строка с отступом">⏎</button><div class="pal-sep"></div><button type="button" class="pal-btn">(</button><button type="button" class="pal-btn">)</button><button type="button" class="pal-btn">{</button><button type="button" class="pal-btn">}</button><button type="button" class="pal-btn">[</button><button type="button" class="pal-btn">]</button><button type="button" class="pal-btn">"</button><button type="button" class="pal-btn">,</button><button type="button" class="pal-btn">;</button><div class="pal-sep"></div><button type="button" class="pal-btn">=</button><button type="button" class="pal-btn">+</button><button type="button" class="pal-btn">-</button><button type="button" class="pal-btn">*</button><button type="button" class="pal-btn">/</button><button type="button" class="pal-btn">%</button><button type="button" class="pal-btn">&lt;</button><button type="button" class="pal-btn">&gt;</button><button type="button" class="pal-btn">==</button><button type="button" class="pal-btn">!=</button><button type="button" class="pal-btn">&lt;=</button><button type="button" class="pal-btn">&gt;=</button><button type="button" class="pal-btn">!</button><button type="button" class="pal-btn">&amp;&amp;</button><button type="button" class="pal-btn">||</button><div class="pal-sep"></div><button type="button" class="pal-btn">let</button><button type="button" class="pal-btn">const</button><button type="button" class="pal-btn">if</button><button type="button" class="pal-btn">else</button><button type="button" class="pal-btn">while</button><button type="button" class="pal-btn">for</button><button type="button" class="pal-btn">func</button><button type="button" class="pal-btn">return</button><button type="button" class="pal-btn">true</button><button type="button" class="pal-btn">false</button><button type="button" class="pal-btn">null</button><div class="pal-sep"></div><button type="button" class="pal-btn">start()</button><button type="button" class="pal-btn">update()</button><button type="button" class="pal-btn">from…import</button><div class="pal-sep"></div><button type="button" class="pal-btn">print</button><button type="button" class="pal-btn">clear</button><button type="button" class="pal-btn">rect</button><button type="button" class="pal-btn">circle</button><button type="button" class="pal-btn">line</button><button type="button" class="pal-btn">text</button><button type="button" class="pal-btn">sprite</button><button type="button" class="pal-btn">object</button><div class="pal-sep"></div><button type="button" class="pal-btn">pointerX()</button><button type="button" class="pal-btn">pointerY()</button><button type="button" class="pal-btn">pointerDownNow()</button><button type="button" class="pal-btn">touchCount()</button><button type="button" class="pal-btn">touchX()</button><button type="button" class="pal-btn">touchY()</button><div class="pal-sep"></div><button type="button" class="pal-btn">time()</button><button type="button" class="pal-btn">dt()</button><button type="button" class="pal-btn">random()</button><button type="button" class="pal-btn">rand()</button><button type="button" class="pal-btn">clamp()</button><button type="button" class="pal-btn">length()</button><button type="button" class="pal-btn">push()</button><button type="button" class="pal-btn">pop()</button><button type="button" class="pal-btn">sqrt()</button><button type="button" class="pal-btn">abs()</button><button type="button" class="pal-btn">sin()</button><button type="button" class="pal-btn">cos()</button><button type="button" class="pal-btn">floor()</button><button type="button" class="pal-btn">round()</button><button type="button" class="pal-btn">min()</button><button type="button" class="pal-btn">max()</button><button type="button" class="pal-btn" title="Отступ">⇥</button><button type="button" class="pal-btn" title="Новая строка с отступом">⏎</button><div class="pal-sep"></div><button type="button" class="pal-btn">(</button><button type="button" class="pal-btn">)</button><button type="button" class="pal-btn">{</button><button type="button" class="pal-btn">}</button><button type="button" class="pal-btn">[</button><button type="button" class="pal-btn">]</button><button type="button" class="pal-btn">"</button><button type="button" class="pal-btn">,</button><button type="button" class="pal-btn">;</button><div class="pal-sep"></div><button type="button" class="pal-btn">=</button><button type="button" class="pal-btn">+</button><button type="button" class="pal-btn">-</button><button type="button" class="pal-btn">*</button><button type="button" class="pal-btn">/</button><button type="button" class="pal-btn">%</button><button type="button" class="pal-btn">&lt;</button><button type="button" class="pal-btn">&gt;</button><button type="button" class="pal-btn">==</button><button type="button" class="pal-btn">!=</button><button type="button" class="pal-btn">&lt;=</button><button type="button" class="pal-btn">&gt;=</button><button type="button" class="pal-btn">!</button><button type="button" class="pal-btn">&amp;&amp;</button><button type="button" class="pal-btn">||</button><div class="pal-sep"></div><button type="button" class="pal-btn">let</button><button type="button" class="pal-btn">const</button><button type="button" class="pal-btn">if</button><button type="button" class="pal-btn">else</button><button type="button" class="pal-btn">while</button><button type="button" class="pal-btn">for</button><button type="button" class="pal-btn">func</button><button type="button" class="pal-btn">return</button><button type="button" class="pal-btn">true</button><button type="button" class="pal-btn">false</button><button type="button" class="pal-btn">null</button><div class="pal-sep"></div><button type="button" class="pal-btn">start()</button><button type="button" class="pal-btn">update()</button><button type="button" class="pal-btn">from…import</button><div class="pal-sep"></div><button type="button" class="pal-btn">print</button><button type="button" class="pal-btn">clear</button><button type="button" class="pal-btn">rect</button><button type="button" class="pal-btn">circle</button><button type="button" class="pal-btn">line</button><button type="button" class="pal-btn">text</button><button type="button" class="pal-btn">sprite</button><button type="button" class="pal-btn">object</button><div class="pal-sep"></div><button type="button" class="pal-btn">pointerX()</button><button type="button" class="pal-btn">pointerY()</button><button type="button" class="pal-btn">pointerDownNow()</button><button type="button" class="pal-btn">touchCount()</button><button type="button" class="pal-btn">touchX()</button><button type="button" class="pal-btn">touchY()</button><div class="pal-sep"></div><button type="button" class="pal-btn">time()</button><button type="button" class="pal-btn">dt()</button><button type="button" class="pal-btn">random()</button><button type="button" class="pal-btn">rand()</button><button type="button" class="pal-btn">clamp()</button><button type="button" class="pal-btn">length()</button><button type="button" class="pal-btn">push()</button><button type="button" class="pal-btn">pop()</button><button type="button" class="pal-btn">sqrt()</button><button type="button" class="pal-btn">abs()</button><button type="button" class="pal-btn">sin()</button><button type="button" class="pal-btn">cos()</button><button type="button" class="pal-btn">floor()</button><button type="button" class="pal-btn">round()</button><button type="button" class="pal-btn">min()</button><button type="button" class="pal-btn">max()</button><button type="button" class="pal-btn" title="Отступ">⇥</button><button type="button" class="pal-btn" title="Новая строка с отступом">⏎</button><div class="pal-sep"></div><button type="button" class="pal-btn">(</button><button type="button" class="pal-btn">)</button><button type="button" class="pal-btn">{</button><button type="button" class="pal-btn">}</button><button type="button" class="pal-btn">[</button><button type="button" class="pal-btn">]</button><button type="button" class="pal-btn">"</button><button type="button" class="pal-btn">,</button><button type="button" class="pal-btn">;</button><div class="pal-sep"></div><button type="button" class="pal-btn">=</button><button type="button" class="pal-btn">+</button><button type="button" class="pal-btn">-</button><button type="button" class="pal-btn">*</button><button type="button" class="pal-btn">/</button><button type="button" class="pal-btn">%</button><button type="button" class="pal-btn">&lt;</button><button type="button" class="pal-btn">&gt;</button><button type="button" class="pal-btn">==</button><button type="button" class="pal-btn">!=</button><button type="button" class="pal-btn">&lt;=</button><button type="button" class="pal-btn">&gt;=</button><button type="button" class="pal-btn">!</button><button type="button" class="pal-btn">&amp;&amp;</button><button type="button" class="pal-btn">||</button><div class="pal-sep"></div><button type="button" class="pal-btn">let</button><button type="button" class="pal-btn">const</button><button type="button" class="pal-btn">if</button><button type="button" class="pal-btn">else</button><button type="button" class="pal-btn">while</button><button type="button" class="pal-btn">for</button><button type="button" class="pal-btn">func</button><button type="button" class="pal-btn">return</button><button type="button" class="pal-btn">true</button><button type="button" class="pal-btn">false</button><button type="button" class="pal-btn">null</button><div class="pal-sep"></div><button type="button" class="pal-btn">start()</button><button type="button" class="pal-btn">update()</button><button type="button" class="pal-btn">from…import</button><div class="pal-sep"></div><button type="button" class="pal-btn">print</button><button type="button" class="pal-btn">clear</button><button type="button" class="pal-btn">rect</button><button type="button" class="pal-btn">circle</button><button type="button" class="pal-btn">line</button><button type="button" class="pal-btn">text</button><button type="button" class="pal-btn">sprite</button><button type="button" class="pal-btn">object</button><div class="pal-sep"></div><button type="button" class="pal-btn">pointerX()</button><button type="button" class="pal-btn">pointerY()</button><button type="button" class="pal-btn">pointerDownNow()</button><button type="button" class="pal-btn">touchCount()</button><button type="button" class="pal-btn">touchX()</button><button type="button" class="pal-btn">touchY()</button><div class="pal-sep"></div><button type="button" class="pal-btn">time()</button><button type="button" class="pal-btn">dt()</button><button type="button" class="pal-btn">random()</button><button type="button" class="pal-btn">rand()</button><button type="button" class="pal-btn">clamp()</button><button type="button" class="pal-btn">length()</button><button type="button" class="pal-btn">push()</button><button type="button" class="pal-btn">pop()</button><button type="button" class="pal-btn">sqrt()</button><button type="button" class="pal-btn">abs()</button><button type="button" class="pal-btn">sin()</button><button type="button" class="pal-btn">cos()</button><button type="button" class="pal-btn">floor()</button><button type="button" class="pal-btn">round()</button><button type="button" class="pal-btn">min()</button><button type="button" class="pal-btn">max()</button><button type="button" class="pal-btn" title="Отступ">⇥</button><button type="button" class="pal-btn" title="Новая строка с отступом">⏎</button><div class="pal-sep"></div><button type="button" class="pal-btn">(</button><button type="button" class="pal-btn">)</button><button type="button" class="pal-btn">{</button><button type="button" class="pal-btn">}</button><button type="button" class="pal-btn">[</button><button type="button" class="pal-btn">]</button><button type="button" class="pal-btn">"</button><button type="button" class="pal-btn">,</button><button type="button" class="pal-btn">;</button><div class="pal-sep"></div><button type="button" class="pal-btn">=</button><button type="button" class="pal-btn">+</button><button type="button" class="pal-btn">-</button><button type="button" class="pal-btn">*</button><button type="button" class="pal-btn">/</button><button type="button" class="pal-btn">%</button><button type="button" class="pal-btn">&lt;</button><button type="button" class="pal-btn">&gt;</button><button type="button" class="pal-btn">==</button><button type="button" class="pal-btn">!=</button><button type="button" class="pal-btn">&lt;=</button><button type="button" class="pal-btn">&gt;=</button><button type="button" class="pal-btn">!</button><button type="button" class="pal-btn">&amp;&amp;</button><button type="button" class="pal-btn">||</button><div class="pal-sep"></div><button type="button" class="pal-btn">let</button><button type="button" class="pal-btn">const</button><button type="button" class="pal-btn">if</button><button type="button" class="pal-btn">else</button><button type="button" class="pal-btn">while</button><button type="button" class="pal-btn">for</button><button type="button" class="pal-btn">func</button><button type="button" class="pal-btn">return</button><button type="button" class="pal-btn">true</button><button type="button" class="pal-btn">false</button><button type="button" class="pal-btn">null</button><div class="pal-sep"></div><button type="button" class="pal-btn">start()</button><button type="button" class="pal-btn">update()</button><button type="button" class="pal-btn">from…import</button><div class="pal-sep"></div><button type="button" class="pal-btn">print</button><button type="button" class="pal-btn">clear</button><button type="button" class="pal-btn">rect</button><button type="button" class="pal-btn">circle</button><button type="button" class="pal-btn">line</button><button type="button" class="pal-btn">text</button><button type="button" class="pal-btn">sprite</button><button type="button" class="pal-btn">object</button><div class="pal-sep"></div><button type="button" class="pal-btn">pointerX()</button><button type="button" class="pal-btn">pointerY()</button><button type="button" class="pal-btn">pointerDownNow()</button><button type="button" class="pal-btn">touchCount()</button><button type="button" class="pal-btn">touchX()</button><button type="button" class="pal-btn">touchY()</button><div class="pal-sep"></div><button type="button" class="pal-btn">time()</button><button type="button" class="pal-btn">dt()</button><button type="button" class="pal-btn">random()</button><button type="button" class="pal-btn">rand()</button><button type="button" class="pal-btn">clamp()</button><button type="button" class="pal-btn">length()</button><button type="button" class="pal-btn">push()</button><button type="button" class="pal-btn">pop()</button><button type="button" class="pal-btn">sqrt()</button><button type="button" class="pal-btn">abs()</button><button type="button" class="pal-btn">sin()</button><button type="button" class="pal-btn">cos()</button><button type="button" class="pal-btn">floor()</button><button type="button" class="pal-btn">round()</button><button type="button" class="pal-btn">min()</button><button type="button" class="pal-btn">max()</button></div>
+<div class="panel editor-wrap" id="editorWrap">
+<div class="gutter"><div class="gutter-inner" id="gutterInner" data-n="29" style="transform: translateY(0px);">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+</div></div>
+<div class="editor-area" id="editorArea">
+<pre aria-hidden="true" class="hl" id="hlLayer"><code id="hlCode"><span class="c-com">// Добро пожаловать в MrrCode!</span>
+<span class="c-com">// «Запуск» откроет игру на весь экран устройства.</span>
+<span class="c-com">// На телефоне выход — системная кнопка «назад».</span>
+<span class="c-com">// Управление только касаниями: коснись поля — появится круг.</span>
+<span class="c-com">// 🤖 Кнопка «ИИ» в шапке — агент напишет игру за тебя.</span>
 
-  <!-- ================= CODE ================= -->
-  <section class="tab" id="tab-code">
-    <div class="code-toolbar">
-      <span class="file-chip">📄 <b id="codeFileName">main.mrr</b></span>
-      <span class="chip accent">MrrCode</span>
-      <span class="chip">Точка входа: main.mrr</span>
-      <span class="spacer"></span>
-      <select class="sel" id="examplesSelect" title="Примеры"><option value="">Примеры…</option></select>
-      <button class="btn" id="btnSheet" title="Шпаргалка по языку">📖</button>
-      <button class="btn ai" id="btnAiCode" title="ИИ-агент">🤖</button>
-      <button class="btn primary" id="btnRunCode" title="Запуск main.mrr">▶</button>
-      <button class="btn ghost" id="btnExportPxl" title="Экспорт текущего файла .mrr">⬇ .mrr</button>
-      <button class="btn ghost" id="btnImportPxl" title="Импорт .mrr">⬆ .mrr</button>
-      <button class="btn" id="btnColorPicker" title="Выбрать цвет для HEX-кода">🎨 Цвет</button>
-      <span class="color-tool" title="Текущий цвет в коде"><span class="color-swatch" id="codeColorSwatch"></span><span id="codeColorValue" style="font:12px var(--font-code);color:var(--muted)">—</span></span>
-      <input class="color-picker-input" id="codeColorInput" type="color" value="#70d6ff" aria-label="Выбор цвета">
-    </div>
-    <div class="palette" id="touchPalette"></div>
-    <div class="panel editor-wrap" id="editorWrap">
-      <div class="gutter"><div class="gutter-inner" id="gutterInner">1</div></div>
-      <div class="editor-area" id="editorArea">
-        <pre class="hl" id="hlLayer" aria-hidden="true"><code id="hlCode"></code></pre>
-        <textarea id="codeInput" spellcheck="false" wrap="off" autocomplete="off" autocorrect="off" autocapitalize="off" enterkeyhint="next"></textarea>
-        <div class="ac-popup hidden" id="acPopup">
-          <button id="acClose">✕</button>
-          <div id="acList"></div>
-          <div class="ac-doc" id="acDoc"></div>
-        </div>
-      </div>
-    </div>
-    <div class="panel code-status">
-      <span id="caretPos">Строка 1, столбец 1</span>
-      <span class="status-sep"></span>
-      <span id="hintBar"></span>
-    </div>
-  </section>
+<span class="c-kw">let</span> <span class="c-id">title</span> <span class="c-op">=</span> <span class="c-str">"MrrCode"</span><span class="c-punc">;</span>
+<span class="c-kw">let</span> <span class="c-id">t</span> <span class="c-op">=</span> <span class="c-num">0</span><span class="c-punc">;</span>
 
-  <!-- ================= SCENE ================= -->
-  <section class="tab" id="tab-scene">
-    <div class="scene-layout">
-      <div class="panel scene-main">
-        <div class="panel-head"><b>Редактор сцены</b><span>Перетаскивай объекты пальцем</span></div>
-        <div class="preview-wrap"><canvas id="sceneCanvas" width="800" height="450"></canvas></div>
-        <div class="props" id="propsPanel"></div>
-      </div>
-      <div class="panel scene-side">
-        <h3>Добавить объект</h3>
-        <div class="add-btns">
-          <button class="btn" data-add="rect">▰ Прямоуг.</button>
-          <button class="btn" data-add="circle">● Круг</button>
-          <button class="btn" data-add="text">T Текст</button>
-        </div>
-        <h3>Объекты сцены <span id="sceneCount"></span></h3>
-        <div class="obj-list" id="objList"></div>
-        <div class="row-btns">
-          <button class="btn ghost danger" id="btnSceneClear">Очистить</button>
-          <button class="btn ghost" id="btnSceneExport">⬇ Сцена</button>
-          <button class="btn ghost" id="btnSceneImport">⬆ Сцена</button>
-        </div>
-      </div>
-    </div>
-  </section>
+<span class="c-kw">function</span> <span class="c-ev">start</span><span class="c-punc">(</span><span class="c-punc">)</span> <span class="c-punc">{</span>
+    <span class="c-bi">print</span><span class="c-punc">(</span><span class="c-str">"Привет! Это твой первый скрипт."</span><span class="c-punc">)</span><span class="c-punc">;</span>
+<span class="c-punc">}</span>
 
-  <!-- ================= FILES ================= -->
-  <section class="tab" id="tab-files">
-    <div class="files-layout">
-      <div class="panel files-main">
-        <div class="panel-head" style="margin:-12px -12px 4px"><b>Файлы проекта</b><span>Локальные ресурсы</span></div>
-        <h4>Исходники</h4>
-        <div id="codeFilesList" style="display:flex;flex-direction:column;gap:6px"></div>
-        <button class="btn" id="btnNewPxl">＋ Новый .mrr</button>
-        <h4>Спрайты</h4>
-        <div id="spriteList" style="display:flex;flex-direction:column;gap:6px"></div>
-        <button class="btn" id="btnImportPng">＋ Импорт PNG-спрайта</button>
-        <div class="row-btns" style="margin-top:6px">
-          <button class="btn ghost" id="btnExportProject">⬇ Проект</button>
-          <button class="btn ghost" id="btnImportProject">⬆ Проект</button>
-        </div>
-        <div class="note" id="filesNote">Выбери файл</div>
-      </div>
-      <div class="panel files-info">
-        <p><b>Как это работает</b></p>
-        <p><b>main.mrr — точка входа:</b> «Запуск» всегда выполняет его и открывает игру на весь экран.</p>
-        <p><b>Связывай файлы импортами:</b> создай <code>player.mrr</code> с функцией <code>spawnPlayer()</code>, а в main.mrr напиши <code>from "player" import spawnPlayer;</code></p>
-        <p><b>🤖 ИИ-агент</b> умеет сам создавать файлы и менять сцену — кнопка «🤖 ИИ» в шапке.</p>
-        <p>Имя PNG без расширения = имя ресурса для <code>sprite("имя", x, y, w, h)</code>. Повторный импорт того же файла заменяет спрайт (без дубликатов).</p>
-        <p>Данные хранятся в памяти страницы — экспортируй проект (.json), чтобы не потерять их.</p>
-      </div>
-    </div>
-  </section>
+<span class="c-kw">function</span> <span class="c-ev">update</span><span class="c-punc">(</span><span class="c-bi">dt</span><span class="c-punc">)</span> <span class="c-punc">{</span>
+    <span class="c-bi">clear</span><span class="c-punc">(</span><span class="c-str">"#101827"</span><span class="c-punc">)</span><span class="c-punc">;</span>
+    <span class="c-id">t</span> <span class="c-op">+=</span> <span class="c-bi">dt</span><span class="c-punc">;</span>
 
-  <!-- ================= HELP ================= -->
-  <section class="tab" id="tab-help">
-    <div class="help-wrap">
+    <span class="c-bi">text</span><span class="c-punc">(</span><span class="c-id">title</span><span class="c-punc">,</span> <span class="c-num">290</span><span class="c-punc">,</span> <span class="c-num">60</span><span class="c-punc">,</span> <span class="c-str">"#ffcc55"</span><span class="c-punc">,</span> <span class="c-num">34</span><span class="c-punc">)</span><span class="c-punc">;</span>
+
+    <span class="c-kw">let</span> <span class="c-id">x</span> <span class="c-op">=</span> <span class="c-num">400</span> <span class="c-op">+</span> <span class="c-bi">cos</span><span class="c-punc">(</span><span class="c-id">t</span> <span class="c-op">*</span> <span class="c-num">2</span><span class="c-punc">)</span> <span class="c-op">*</span> <span class="c-num">150</span><span class="c-punc">;</span>
+    <span class="c-kw">let</span> <span class="c-id">y</span> <span class="c-op">=</span> <span class="c-num">230</span> <span class="c-op">+</span> <span class="c-bi">sin</span><span class="c-punc">(</span><span class="c-id">t</span> <span class="c-op">*</span> <span class="c-num">3</span><span class="c-punc">)</span> <span class="c-op">*</span> <span class="c-num">80</span><span class="c-punc">;</span>
+    <span class="c-bi">circle</span><span class="c-punc">(</span><span class="c-id">x</span><span class="c-punc">,</span> <span class="c-id">y</span><span class="c-punc">,</span> <span class="c-num">26</span><span class="c-punc">,</span> <span class="c-str">"#70d6ff"</span><span class="c-punc">)</span><span class="c-punc">;</span>
+
+    <span class="c-kw">if</span> <span class="c-punc">(</span><span class="c-bi">pointerDownNow</span><span class="c-punc">(</span><span class="c-punc">)</span><span class="c-punc">)</span> <span class="c-punc">{</span>
+        <span class="c-bi">circle</span><span class="c-punc">(</span><span class="c-bi">pointerX</span><span class="c-punc">(</span><span class="c-punc">)</span><span class="c-punc">,</span> <span class="c-bi">pointerY</span><span class="c-punc">(</span><span class="c-punc">)</span><span class="c-punc">,</span> <span class="c-num">40</span><span class="c-punc">,</span> <span class="c-str">"#ff8844"</span><span class="c-punc">)</span><span class="c-punc">;</span>
+    <span class="c-punc">}</span>
+
+    <span class="c-bi">text</span><span class="c-punc">(</span><span class="c-str">"Коснись экрана пальцем"</span><span class="c-punc">,</span> <span class="c-num">300</span><span class="c-punc">,</span> <span class="c-num">400</span><span class="c-punc">,</span> <span class="c-str">"#8899bb"</span><span class="c-punc">,</span> <span class="c-num">18</span><span class="c-punc">)</span><span class="c-punc">;</span>
+<span class="c-punc">}</span>
+</code></pre>
+<textarea autocapitalize="off" autocomplete="off" autocorrect="off" enterkeyhint="next" id="codeInput" spellcheck="false" wrap="off"></textarea>
+<div class="ac-popup hidden" id="acPopup" style="left: 31.3646px; top: 141.531px;">
+<button id="acClose">✕</button>
+<div id="acList"><div class="ac-item sel" data-i="0"><span class="ac-kind k-kw">ключ</span><span class="ac-name">for</span><span class="ac-sig">for</span></div><div class="ac-item" data-i="1"><span class="ac-kind k-snip">шабл</span><span class="ac-name">for</span><span class="ac-sig">шаблон цикла for</span></div><div class="ac-item" data-i="2"><span class="ac-kind k-kw">ключ</span><span class="ac-name">from</span><span class="ac-sig">from</span></div><div class="ac-item" data-i="3"><span class="ac-kind k-snip">шабл</span><span class="ac-name">from</span><span class="ac-sig">from "файл" import имя;</span></div><div class="ac-item" data-i="4"><span class="ac-kind k-fn">встр</span><span class="ac-name">floor</span><span class="ac-sig">floor(x)</span></div><div class="ac-item" data-i="5"><span class="ac-kind k-kw">ключ</span><span class="ac-name">false</span><span class="ac-sig">false</span></div><div class="ac-item" data-i="6"><span class="ac-kind k-snip">шабл</span><span class="ac-name">forof</span><span class="ac-sig">шаблон for … of</span></div><div class="ac-item" data-i="7"><span class="ac-kind k-kw">ключ</span><span class="ac-name">function</span><span class="ac-sig">function</span></div><div class="ac-item" data-i="8"><span class="ac-kind k-kw">ключ</span><span class="ac-name">if</span><span class="ac-sig">if</span></div><div class="ac-item" data-i="9"><span class="ac-kind k-kw">ключ</span><span class="ac-name">of</span><span class="ac-sig">of</span></div><div class="ac-item" data-i="10"><span class="ac-kind k-snip">шабл</span><span class="ac-name">ifelse</span><span class="ac-sig">шаблон if / else</span></div></div>
+<div class="ac-doc" id="acDoc"><b>for</b> — Цикл: for (let i = 0; i &lt; 10; i++) { … } или for (let item of array) { … }</div>
+</div>
+</div>
+</div>
+<div class="panel code-status">
+<span id="caretPos">Строка 29, столбец 2</span>
+<span class="status-sep"></span>
+<span id="hintBar">💡 Печатай имя — появится список, тапни вариант · «📖» — шпаргалка · «🤖» — ИИ напишет код за тебя</span>
+</div>
+<div class="panel" id="debugPanel" style="display:none;margin-top:8px">
+<div class="panel-head"><b>🐞 Отладка</b><span id="debugStatus">Выключена</span></div>
+<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+<label>Строка <input id="debugLine" min="1" style="width:70px" type="number" value="1"></label>
+<button class="btn mini" id="btnToggleBreakpoint">● Точка</button>
+<button class="btn mini" id="btnClearBreakpoints">Очистить точки</button>
+<span class="chip" id="breakpointList">Нет точек</span>
+</div>
+<div class="note">Отладчик останавливает запуск перед указанной строкой и показывает локальный контекст. После остановки запусти игру заново для следующего прохода.</div>
+</div>
+</section>
+<!-- ================= SCENE ================= -->
+<section class="tab" id="tab-scene">
+<div class="scene-layout">
+<div class="panel scene-main">
+<div class="panel-head"><b>Редактор сцены</b><span>Перетаскивай объекты пальцем</span></div>
+<div class="preview-wrap"><canvas height="450" id="sceneCanvas" width="800"></canvas></div>
+<div class="props" id="propsPanel"><div class="props-empty">Выбери объект в списке или тапни по нему на предпросмотре. Объекты можно перетаскивать пальцем прямо на холсте.</div></div>
+</div>
+<div class="panel scene-side">
+<h3>Добавить объект</h3>
+<div class="add-btns">
+<button class="btn" data-add="rect">▰ Прямоуг.</button>
+<button class="btn" data-add="circle">● Круг</button>
+<button class="btn" data-add="text">T Текст</button>
+</div>
+<h3>Объекты сцены <span id="sceneCount"></span></h3>
+<div class="obj-list" id="objList">Сцена пуста. Добавь объект или попроси ИИ-агента создать сцену.</div>
+<div class="row-btns">
+<button class="btn ghost danger" id="btnSceneClear">Очистить</button>
+<button class="btn ghost" id="btnSceneExport">⬇ Сцена</button>
+<button class="btn ghost" id="btnSceneToCode">⌘ В код</button>
+<button class="btn ghost" id="btnSceneImport">⬆ Сцена</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= FILES ================= -->
+<section class="tab active" id="tab-files">
+<div class="files-layout">
+<div class="panel files-main">
+<div class="panel-head" style="margin:-12px -12px 4px"><b>Файлы проекта</b><span>Локальные ресурсы</span></div>
+<h4>Исходники</h4>
+<div id="codeFilesList" style="display:flex;flex-direction:column;gap:6px"><div class="file-row active">📄main.mrr точка входа0.6 КБ<button class="btn mini">Открыть</button></div></div>
+<button class="btn" id="btnNewPxl">＋ Новый .mrr</button>
+<h4>Спрайты</h4>
+<div id="spriteList" style="display:flex;flex-direction:column;gap:6px">Спрайтов пока нет. Импортируй PNG — имя файла без расширения станет именем ресурса для sprite("имя", …). Если игру делает ИИ — он напишет, какие картинки нужны.</div>
+<button class="btn" id="btnImportPng">＋ Импорт PNG-спрайта</button>
+<div class="row-btns" style="margin-top:6px">
+<button class="btn ghost" id="btnExportGameHtml">🎮 Сборка HTML</button>
+<button class="btn ghost" id="btnExportProject">⬇ Проект</button>
+<button class="btn ghost" id="btnImportProject">⬆ Проект</button>
+<button class="btn ghost" id="btnSaveProjectLocal">💾 Автосейв</button>
+</div>
+<div class="note" id="filesNote">Восстановлен последний локальный проект.</div>
+</div>
+<div class="panel files-info">
+<p><b>Как это работает</b></p>
+<p><b>main.mrr — точка входа:</b> «Запуск» всегда выполняет его и открывает игру на весь экран.</p>
+<p><b>Связывай файлы импортами:</b> создай <code>player.mrr</code> с функцией <code>spawnPlayer()</code>, а в main.mrr напиши <code>from "player" import spawnPlayer;</code></p>
+<p><b>🤖 ИИ-агент</b> умеет сам создавать файлы и менять сцену — кнопка «🤖 ИИ» в шапке.</p>
+<p>Имя PNG без расширения = имя ресурса для <code>sprite("имя", x, y, w, h)</code>. Повторный импорт того же файла заменяет спрайт (без дубликатов).</p>
+<p>Данные хранятся в памяти страницы — экспортируй проект (.json), чтобы не потерять их.</p>
+</div>
+</div>
+</section>
+<!-- ================= HELP ================= -->
+<section class="tab" id="tab-help">
+<div class="help-wrap">
 <div class="panel doc-section">
-        <h2><span class="num">1</span>Как устроен проект <span class="mrr-cat-paw">🐾</span></h2>
-        <p><b>Игра</b> — запущенный на весь экран устройства экран. <b>Код</b> — логика на MrrCode. <b>Сцена</b> — прямоугольники, круги и текстовые объекты. <b>Файлы</b> — код и PNG-спрайты. <b>🤖 ИИ</b> — агент, который пишет код за тебя. Точка входа — <code>main.mrr</code>. Координаты игрового поля всегда <b>800×450</b> — движок сам масштабирует картинку под любой экран.</p>
-      </div>
-
-      <div class="panel doc-section">
-        <h2><span class="num">2</span>Переменные и типы <span class="mrr-cat-paw">🐾</span></h2>
-        <pre class="doc-code"><span class="k">let</span> health = <span class="n">100</span>;
+<h2><span class="num">1</span>Как устроен проект <span class="mrr-cat-paw">🐾</span></h2>
+<p><b>Игра</b> — запущенный на весь экран устройства экран. <b>Код</b> — логика на MrrCode. <b>Сцена</b> — прямоугольники, круги и текстовые объекты. <b>Файлы</b> — код и PNG-спрайты. <b>🤖 ИИ</b> — агент, который пишет код за тебя. Точка входа — <code>main.mrr</code>. Координаты игрового поля всегда <b>800×450</b> — движок сам масштабирует картинку под любой экран.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">2</span>Переменные и типы <span class="mrr-cat-paw">🐾</span></h2>
+<pre class="doc-code"><span class="k">let</span> health = <span class="n">100</span>;
 <span class="k">let</span> title = <span class="s">"Моя игра"</span>;
 <span class="k">let</span> alive = <span class="k">true</span>;
 <span class="k">let</span> inventory = [<span class="s">"ключ"</span>, <span class="s">"зелье"</span>];
 <span class="k">let</span> stats = {speed: <span class="n">120</span>, score: <span class="n">0</span>};
 <span class="k">const</span> maxHealth = <span class="n">100</span>;</pre>
-        <p>Используй <code>let</code> для изменяемого значения и <code>const</code> для постоянного. Поддерживаются числа, строки, boolean, null, массивы и объекты.</p>
-      </div>
-
-      <div class="panel doc-section">
-        <h2><span class="num">3</span>Условия, циклы и функции <span class="mrr-cat-paw">🐾</span></h2>
-        <pre class="doc-code"><span class="k">if</span> (health &lt;= <span class="n">0</span>) {
+<p>Используй <code>let</code> для изменяемого значения и <code>const</code> для постоянного. Поддерживаются числа, строки, boolean, null, массивы и объекты.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">3</span>Условия, циклы и функции <span class="mrr-cat-paw">🐾</span></h2>
+<pre class="doc-code"><span class="k">if</span> (health &lt;= <span class="n">0</span>) {
     <span class="f">print</span>(<span class="s">"Игра окончена"</span>);
 } <span class="k">else if</span> (health &lt; <span class="n">30</span>) {
     <span class="f">print</span>(<span class="s">"Опасно!"</span>);
@@ -590,12 +816,11 @@ body.mrr-app-mode { margin:0; }
     health -= amount;
     <span class="k">return</span> health;
 }</pre>
-        <p>Операторы: <code>+ - * / % **</code>, сравнения <code>== != &lt; &gt; &lt;= &gt;=</code>, логические <code>&amp;&amp; || !</code>, присваивания <code>= += -= *= /= %=</code>, инкремент <code>++ --</code>. Вставлять их удобно кнопками на панели над редактором.</p>
-      </div>
-
-      <div class="panel doc-section">
-        <h2><span class="num">4</span>Игровые события и управление касаниями <span class="mrr-cat-paw">🐾</span></h2>
-        <pre class="doc-code"><span class="k">function</span> <span class="f">start</span>() {
+<p>Операторы: <code>+ - * / % **</code>, сравнения <code>== != &lt; &gt; &lt;= &gt;=</code>, логические <code>&amp;&amp; || !</code>, присваивания <code>= += -= *= /= %=</code>, инкремент <code>++ --</code>. Вставлять их удобно кнопками на панели над редактором.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">4</span>Игровые события и управление касаниями <span class="mrr-cat-paw">🐾</span></h2>
+<pre class="doc-code"><span class="k">function</span> <span class="f">start</span>() {
     <span class="c">// один раз при старте</span>
 }
 <span class="k">function</span> <span class="f">update</span>(dt) {
@@ -604,15 +829,15 @@ body.mrr-app-mode { margin:0; }
 <span class="k">function</span> <span class="f">pointerDown</span>(x, y) { <span class="f">print</span>(<span class="s">"Палец коснулся"</span>, x, y); }
 <span class="k">function</span> <span class="f">pointerMove</span>(x, y) { <span class="c">// палец движется по полю</span> }
 <span class="k">function</span> <span class="f">pointerUp</span>(x, y)   { <span class="c">// палец отпущен</span> }</pre>
-        <p>Состояние касаний прямо в <code>update</code>:</p>
-        <pre class="doc-code"><span class="f">pointerX</span>()        <span class="c">// X последнего касания (0..800)</span>
+<p>Состояние касаний прямо в <code>update</code>:</p>
+<pre class="doc-code"><span class="f">pointerX</span>()        <span class="c">// X последнего касания (0..800)</span>
 <span class="f">pointerY</span>()        <span class="c">// Y последнего касания (0..450)</span>
 <span class="f">pointerDownNow</span>()  <span class="c">// true, пока палец держит поле</span>
 <span class="f">touchCount</span>()      <span class="c">// сколько пальцев сейчас на поле</span>
 <span class="f">touchX</span>(i)         <span class="c">// X i-го пальца (0 … touchCount()-1)</span>
 <span class="f">touchY</span>(i)         <span class="c">// Y i-го пальца</span></pre>
-        <p>Мультитач — кружок под каждым пальцем:</p>
-        <pre class="doc-code"><span class="k">function</span> <span class="f">update</span>(dt) {
+<p>Мультитач — кружок под каждым пальцем:</p>
+<pre class="doc-code"><span class="k">function</span> <span class="f">update</span>(dt) {
     <span class="f">clear</span>(<span class="s">"#101827"</span>);
     <span class="k">let</span> i = <span class="n">0</span>;
     <span class="k">while</span> (i &lt; <span class="f">touchCount</span>()) {
@@ -620,23 +845,21 @@ body.mrr-app-mode { margin:0; }
         i += <span class="n">1</span>;
     }
 }</pre>
-        <p>Клавиатуры и мыши в движке нет — только касания. Типичная схема: зоны экрана (левая треть — влево, правая — вправо, тап в центре — прыжок).</p>
-      </div>
-
-      <div class="panel doc-section">
-        <h2><span class="num">5</span>Рисование</h2>
-        <pre class="doc-code"><span class="f">clear</span>(<span class="s">"#101827"</span>);
+<p>Клавиатуры и мыши в движке нет — только касания. Типичная схема: зоны экрана (левая треть — влево, правая — вправо, тап в центре — прыжок).</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">5</span>Рисование</h2>
+<pre class="doc-code"><span class="f">clear</span>(<span class="s">"#101827"</span>);
 <span class="f">rect</span>(<span class="n">20</span>, <span class="n">30</span>, <span class="n">120</span>, <span class="n">60</span>, <span class="s">"#ff8844"</span>);
 <span class="f">circle</span>(<span class="n">220</span>, <span class="n">100</span>, <span class="n">30</span>, <span class="s">"#70d6ff"</span>);
 <span class="f">line</span>(<span class="n">10</span>, <span class="n">10</span>, <span class="n">300</span>, <span class="n">200</span>, <span class="s">"#ffffff"</span>, <span class="n">2</span>);
 <span class="f">text</span>(<span class="s">"Привет!"</span>, <span class="n">20</span>, <span class="n">140</span>, <span class="s">"#ffffff"</span>, <span class="n">20</span>);</pre>
-        <p>Движок <b>сам очищает экран в начале каждого кадра</b> — старая графика не наслаивается. Вызови <code>clear(color)</code> в начале <code>update</code> для цвета фона. Для «следа» от пальца копи точки в массив и перерисовывай их каждый кадр.</p>
-      </div>
-
-      <div class="panel doc-section">
-        <h2><span class="num">6</span>Объекты вкладки «Сцена»</h2>
-        <p>Выбери объект и задай уникальное имя <code>name</code>, например <code>hero</code>:</p>
-        <pre class="doc-code"><span class="k">let</span> hero = <span class="f">object</span>(<span class="s">"hero"</span>);
+<p>Движок <b>сам очищает экран в начале каждого кадра</b> — старая графика не наслаивается. Вызови <code>clear(color)</code> в начале <code>update</code> для цвета фона. Для «следа» от пальца копи точки в массив и перерисовывай их каждый кадр.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">6</span>Объекты вкладки «Сцена»</h2>
+<p>Выбери объект и задай уникальное имя <code>name</code>, например <code>hero</code>:</p>
+<pre class="doc-code"><span class="k">let</span> hero = <span class="f">object</span>(<span class="s">"hero"</span>);
 
 <span class="k">function</span> <span class="f">update</span>(dt) {
     <span class="k">if</span> (<span class="f">pointerDownNow</span>()) {
@@ -644,28 +867,26 @@ body.mrr-app-mode { margin:0; }
         hero.y = <span class="f">pointerY</span>() - <span class="n">32</span>;
     }
 }</pre>
-        <p>Прямоугольник: <code>x, y, w, h, color</code>; круг: <code>x, y, r, color</code>; текст: <code>x, y, text, size, color</code>. Объекты сцены рисуются поверх игрового кадра. Сцену может создавать и ИИ-агент.</p>
-      </div>
-
-      <div class="panel doc-section">
-        <h2><span class="num">7</span>PNG-спрайты</h2>
-        <p>Открой «Файлы» → «Импорт PNG-спрайта» и используй имя ресурса в <code>sprite(name, x, y, width, height)</code>:</p>
-        <pre class="doc-code"><span class="k">function</span> <span class="f">update</span>(dt) {
+<p>Прямоугольник: <code>x, y, w, h, color</code>; круг: <code>x, y, r, color</code>; текст: <code>x, y, text, size, color</code>. Объекты сцены рисуются поверх игрового кадра. Сцену может создавать и ИИ-агент.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">7</span>PNG-спрайты</h2>
+<p>Открой «Файлы» → «Импорт PNG-спрайта» и используй имя ресурса в <code>sprite(name, x, y, width, height)</code>:</p>
+<pre class="doc-code"><span class="k">function</span> <span class="f">update</span>(dt) {
     <span class="f">clear</span>(<span class="s">"#182235"</span>);
     <span class="f">sprite</span>(<span class="s">"heroSprite"</span>, <span class="n">100</span>, <span class="n">120</span>, <span class="n">64</span>, <span class="n">64</span>);
 }</pre>
-        <p>Имя спрайта — имя файла без расширения. Повторный импорт того же файла <b>заменяет</b> спрайт. Если игру делает ИИ, он напишет в чат список изображений, которые нужно импортировать, и их имена.</p>
-      </div>
-
-      <div class="panel doc-section">
-        <h2><span class="num">8</span>Импорт из других файлов (модули)</h2>
-        <p>Создай <code>player.mrr</code> («Файлы» → «Новый .mrr»):</p>
-        <pre class="doc-code"><span class="c">// файл player.mrr</span>
+<p>Имя спрайта — имя файла без расширения. Повторный импорт того же файла <b>заменяет</b> спрайт. Если игру делает ИИ, он напишет в чат список изображений, которые нужно импортировать, и их имена.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">8</span>Импорт из других файлов (модули)</h2>
+<p>Создай <code>player.mrr</code> («Файлы» → «Новый .mrr»):</p>
+<pre class="doc-code"><span class="c">// файл player.mrr</span>
 <span class="k">function</span> <span class="f">spawnPlayer</span>() {
     <span class="f">print</span>(<span class="s">"Игрок появился!"</span>);
 }</pre>
-        <p>В <code>main.mrr</code> импортируй имена:</p>
-        <pre class="doc-code"><span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> spawnPlayer;
+<p>В <code>main.mrr</code> импортируй имена:</p>
+<pre class="doc-code"><span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> spawnPlayer;
 <span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> spawnPlayer, movePlayer;
 <span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> spawnPlayer <span class="k">as</span> spawn;
 <span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> *;
@@ -673,106 +894,116 @@ body.mrr-app-mode { margin:0; }
 <span class="k">function</span> <span class="f">start</span>() {
     spawnPlayer();
 }</pre>
-        <p>«Запуск» всегда выполняет <b>main.mrr</b>. Имя файла можно писать без <code>.mrr</code> и без кавычек. Код модуля выполняется один раз при первом импорте; циклические импорты запрещены. События (<code>update</code>, <code>pointerDown</code>…) должны быть в main.mrr или импортированы в него.</p>
-      </div>
-
-      <div class="panel doc-section">
-        <h2><span class="num">9</span>Полезные встроенные функции</h2>
-        <div class="api-chips" id="apiChips"></div>
-        <p>Полный список с описаниями и кнопкой «Вставить» — в «📖 Шпаргалке» на вкладке «Код».</p>
-      </div>
-
-      <div class="panel doc-section">
-        <h2><span class="num">10</span>Редактор на сенсоре, сохранение и ограничения</h2>
-        <p><b>Всё делается пальцем:</b> панель над редактором вставляет скобки, операторы, шаблоны и функции; пока печатаешь имя — всплывает список дополнений (тапни вариант); после <code>from "</code> подсказываются файлы, после <code>import</code> — функции из файла, после <code>object("</code> и <code>sprite("</code> — имена сцены и спрайтов. «📖 Шпаргалка» — поиск по функциям с кнопкой «Вставить».</p>
-        <p>Используй «⬇ .mrr» для кода и «⬇ Проект» для пакета исходников и ресурсов. Данные хранятся в памяти страницы — экспортируй проект, чтобы не потерять. MrrCode — ограниченный собственный язык, а не полный JavaScript. Выполнение имеет лимит операций для защиты от зависания.</p>
-      </div>
-
-      <div class="panel doc-section">
-        <h2><span class="num">11</span>Визуальный выбор цвета</h2>
-        <p>В редакторе кода можно менять HEX-цвета без ручного ввода. Установи курсор внутри значения вида <code>#70d6ff</code> и нажми <b>🎨 Цвет</b>. Выбери нужный оттенок — редактор заменит HEX-код прямо в текущем месте.</p>
-        <p>Поддерживаются цвета <code>#RGB</code>, <code>#RGBA</code>, <code>#RRGGBB</code> и <code>#RRGGBBAA</code>. Также можно дважды тапнуть по HEX-цвету в коде, чтобы открыть выбор цвета.</p>
-        <pre class="doc-code"><span class="f">clear</span>(<span class="s">"#101827"</span>);
+<p>«Запуск» всегда выполняет <b>main.mrr</b>. Имя файла можно писать без <code>.mrr</code> и без кавычек. Код модуля выполняется один раз при первом импорте; циклические импорты запрещены. События (<code>update</code>, <code>pointerDown</code>…) должны быть в main.mrr или импортированы в него.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">9</span>Полезные встроенные функции</h2>
+<div class="api-chips" id="apiChips">pointerX()pointerY()pointerDownNow()touchCount()touchX(i)touchY(i)clear(color?)rect(x, y, w, h, color)circle(x, y, r, color)line(x1, y1, x2, y2, color, width?)text(str, x, y, color, size?)sprite(name, x, y, w?, h?)object(name)random()rand(min, max)abs(x)sqrt(x)sin(a)cos(a)floor(x)ceil(x)round(x)min(a, b)max(a, b)clamp(value, min, max)length(value)push(array, value)pop(array)time()dt()rgba(r, g, b, a)print(...values)lerp(a, b, t)map(value, inMin, inMax, outMin, outMax)sign(x)randomInt(min, max)toString(value)toNumber(value)contains(text, part)join(array, separator)split(text, separator)save(key, value)load(key, defaultValue)playTone(frequency, duration, volume?)stopSound()</div>
+<p>Полный список с описаниями и кнопкой «Вставить» — в «📖 Шпаргалке» на вкладке «Код».</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">10</span>Редактор на сенсоре, сохранение и ограничения</h2>
+<p><b>Всё делается пальцем:</b> панель над редактором вставляет скобки, операторы, шаблоны и функции; пока печатаешь имя — всплывает список дополнений (тапни вариант); после <code>from "</code> подсказываются файлы, после <code>import</code> — функции из файла, после <code>object("</code> и <code>sprite("</code> — имена сцены и спрайтов. «📖 Шпаргалка» — поиск по функциям с кнопкой «Вставить».</p>
+<p>Используй «⬇ .mrr» для кода и «⬇ Проект» для пакета исходников и ресурсов. Данные хранятся в памяти страницы — экспортируй проект, чтобы не потерять. MrrCode — ограниченный собственный язык, а не полный JavaScript. Выполнение имеет лимит операций для защиты от зависания.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">11</span>Визуальный выбор цвета</h2>
+<p>В редакторе кода можно менять HEX-цвета без ручного ввода. Установи курсор внутри значения вида <code>#70d6ff</code> и нажми <b>🎨 Цвет</b>. Выбери нужный оттенок — редактор заменит HEX-код прямо в текущем месте.</p>
+<p>Поддерживаются цвета <code>#RGB</code>, <code>#RGBA</code>, <code>#RRGGBB</code> и <code>#RRGGBBAA</code>. Также можно дважды тапнуть по HEX-цвету в коде, чтобы открыть выбор цвета.</p>
+<pre class="doc-code"><span class="f">clear</span>(<span class="s">"#101827"</span>);
 <span class="f">rect</span>(<span class="n">20</span>, <span class="n">30</span>, <span class="n">120</span>, <span class="n">60</span>, <span class="s">"#ff8844"</span>);</pre>
-      </div>
-
-      <div class="panel doc-section">
-        <h2><span class="num">12</span>ИИ-агент</h2>
-        <p>Кнопка <b>«🤖 ИИ»</b> в шапке открывает агента. Подключение — на тебе:</p>
-        <p>1. Нажми «⚙ Подключение».<br>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">12</span>ИИ-агент</h2>
+<p>Кнопка <b>«🤖 ИИ»</b> в шапке открывает агента. Подключение — на тебе:</p>
+<p>1. Нажми «⚙ Подключение».<br>
         2. <b>Base URL</b> — адрес OpenAI-совместимого API без завершающего <code>/chat/completions</code> (например <code>https://api.openai.com/v1</code>, OpenRouter, Together, локальный LM Studio и т.п.).<br>
         3. <b>API-ключ</b> и <b>имя модели</b> (например <code>gpt-4o-mini</code>).<br>
         4. «💾 Сохранить» — ключ хранится только в твоём браузере (localStorage), запросы идут напрямую провайдеру.</p>
-        <p>Напиши задачу, например: «Сделай игру: зелёный квадрат бегает за пальцем и собирает жёлтые монеты, со счётом». ИИ получит <b>контекст проекта</b>: код всех файлов, список спрайтов и сцену. Он может:</p>
-        <p>• создавать и перезаписывать <b>файлы кода</b> (.mrr), включая модули с импортами;<br>
+<p>Напиши задачу, например: «Сделай игру: зелёный квадрат бегает за пальцем и собирает жёлтые монеты, со счётом». ИИ получит <b>контекст проекта</b>: код всех файлов, список спрайтов и сцену. Он может:</p>
+<p>• создавать и перезаписывать <b>файлы кода</b> (.mrr), включая модули с импортами;<br>
         • работать <b>со сценой как агент</b> — создавать/заменять объекты (прямоугольники, круги, текст);<br>
         • сообщать, <b>какие изображения нужно импортировать</b> (имя PNG + описание) — картинки ИИ не генерирует, их импортируешь ты во вкладке «Файлы».</p>
-        <p>Все изменения применяются сразу и помечаются в чате тегами. Провайдер должен разрешать запросы из браузера (CORS); при ошибке сообщение появится в чате.</p>
-      </div>
-
-      <div class="panel doc-section">
-        <h2>Примеры</h2>
-        <div class="examples-grid" id="examplesGrid"></div>
-      </div>
-    </div>
-  </section>
+<p>Все изменения применяются сразу и помечаются в чате тегами. Провайдер должен разрешать запросы из браузера (CORS); при ошибке сообщение появится в чате.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">13</span>Актуальная документация для ИИ</h2>
+<p>ИИ получает встроенную спецификацию MrrCode 0.2.0 перед запросом. Она содержит расширение <code>.mrr</code>, ключевые слова и встроенные команды.</p>
+<p>ИИ также должен учитывать текущий код проекта: пользовательские переменные, функции и параметры извлекаются из текущего файла и используются как контекст.</p>
+</div><div class="panel doc-section">
+<h2><span class="num">14</span>Новые возможности языка 0.2.0+</h2>
+<p><b>Массивы:</b> <code>push</code>, <code>pop</code>, <code>splice</code>, <code>shift</code>, <code>unshift</code>, <code>length</code>, <code>join</code>, <code>split</code>, <code>contains</code>, <code>indexOf</code>, <code>slice</code>.</p>
+<p><b>Математика:</b> <code>min</code>, <code>max</code>, <code>clamp</code>, <code>floor</code>, <code>ceil</code>, <code>round</code>, <code>pow</code>.</p>
+<p><b>Строки:</b> <code>trim</code>, <code>upper</code>, <code>lower</code>, <code>startsWith</code>, <code>endsWith</code>, <code>replace</code>.</p>
+<p><b>Типы:</b> <code>typeof</code>.</p>
+<p>Массивы используют функции языка, а не JavaScript-подобные методы через точку. Например: <code>splice(items, 2, 1)</code>, а не <code>items.splice(2, 1)</code>.</p>
+</div><div class="panel doc-section">
+<h2>Примеры</h2>
+<div class="examples-grid" id="examplesGrid"><button class="ex-btn">📦Модули: from … importspawnPlayer() и movePlayer() живут в player.mrr; игрок идёт за пальцем.</button><button class="ex-btn">🧱Бег и прыжок касаниямиЗоны экрана: держи слева/справа — бег, тап в центре — прыжок. Мультитач!</button><button class="ex-btn">🧩Объекты сцены из кодаОбъект «hero» идёт за пальцем, а без касания летает сам.</button><button class="ex-btn">☝Своя сенсорная кнопкаТап по нарисованной кнопке — счётчик очков.</button><button class="ex-btn">⚽Мяч и гравитацияТап — подбросить мяч к месту касания.</button><button class="ex-btn">🪐ОрбитаКруговое движение через sin и cos.</button><button class="ex-btn">✍Рисование пальцемРисуй касанием; кнопка «Очистить» на самом холсте.</button><button class="ex-btn">📦Модули: from … importspawnPlayer() и movePlayer() живут в player.mrr; игрок идёт за пальцем.</button><button class="ex-btn">🧱Бег и прыжок касаниямиЗоны экрана: держи слева/справа — бег, тап в центре — прыжок. Мультитач!</button><button class="ex-btn">🧩Объекты сцены из кодаОбъект «hero» идёт за пальцем, а без касания летает сам.</button><button class="ex-btn">☝Своя сенсорная кнопкаТап по нарисованной кнопке — счётчик очков.</button><button class="ex-btn">⚽Мяч и гравитацияТап — подбросить мяч к месту касания.</button><button class="ex-btn">🪐ОрбитаКруговое движение через sin и cos.</button><button class="ex-btn">✍Рисование пальцемРисуй касанием; кнопка «Очистить» на самом холсте.</button><button class="ex-btn">📦Модули: from … importspawnPlayer() и movePlayer() живут в player.mrr; игрок идёт за пальцем.</button><button class="ex-btn">🧱Бег и прыжок касаниямиЗоны экрана: держи слева/справа — бег, тап в центре — прыжок. Мультитач!</button><button class="ex-btn">🧩Объекты сцены из кодаОбъект «hero» идёт за пальцем, а без касания летает сам.</button><button class="ex-btn">☝Своя сенсорная кнопкаТап по нарисованной кнопке — счётчик очков.</button><button class="ex-btn">⚽Мяч и гравитацияТап — подбросить мяч к месту касания.</button><button class="ex-btn">🪐ОрбитаКруговое движение через sin и cos.</button><button class="ex-btn">✍Рисование пальцемРисуй касанием; кнопка «Очистить» на самом холсте.</button><button class="ex-btn">📦Модули: from … importspawnPlayer() и movePlayer() живут в player.mrr; игрок идёт за пальцем.</button><button class="ex-btn">🧱Бег и прыжок касаниямиЗоны экрана: держи слева/справа — бег, тап в центре — прыжок. Мультитач!</button><button class="ex-btn">🧩Объекты сцены из кодаОбъект «hero» идёт за пальцем, а без касания летает сам.</button><button class="ex-btn">☝Своя сенсорная кнопкаТап по нарисованной кнопке — счётчик очков.</button><button class="ex-btn">⚽Мяч и гравитацияТап — подбросить мяч к месту касания.</button><button class="ex-btn">🪐ОрбитаКруговое движение через sin и cos.</button><button class="ex-btn">✍Рисование пальцемРисуй касанием; кнопка «Очистить» на самом холсте.</button></div>
+</div>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">15</span>MrrCode 0.2.0</h2>
+<p><b>Проекты:</b> локальное автосохранение, undo/redo, многофайловые .mrr-проекты, PNG-спрайты и импорт/экспорт проекта.</p>
+<p><b>Отладка:</b> кнопка 🐞 Debug открывает точки останова по строкам и показывает место остановки в консоли.</p>
+<p><b>Графика:</b> rect, circle, line, text, sprite и управление объектами сцены через object("name"). Сцену можно преобразовать обратно в MrrCode.</p>
+<p><b>Ввод:</b> pointerDown, pointerMove, pointerUp, pointerX, pointerY, pointerDownNow, touchCount, touchX, touchY.</p>
+<p><b>Новые возможности языка:</b> for-of, массивы и объекты, доступ к свойствам, **, +=/-=/\*=, lerp, map, sign, randomInt, преобразования строк/чисел, contains/join/split, сохранения и синтезированный звук.</p>
+</div>
+</section>
 </main>
-
 <!-- шпаргалка -->
 <div class="sheet-backdrop hidden" id="sheetBackdrop">
-  <div class="sheet">
-    <div class="sheet-head"><b>📖 Шпаргалка MrrCode</b>
-      <div class="sh-btns"><button class="btn mini" id="btnCloseSheet">✕ Закрыть</button></div>
-    </div>
-    <input id="sheetSearch" placeholder="Поиск функции… (print, rect, touch)">
-    <div class="sheet-list" id="sheetList"></div>
-  </div>
+<div class="sheet">
+<div class="sheet-head"><b>📖 Шпаргалка MrrCode</b>
+<div class="sh-btns"><button class="btn mini" id="btnCloseSheet">✕ Закрыть</button></div>
 </div>
-
+<input id="sheetSearch" placeholder="Поиск функции… (print, rect, touch)">
+<div class="sheet-list" id="sheetList"></div>
+</div>
+</div>
 <!-- ИИ-агент -->
 <div class="sheet-backdrop hidden" id="aiBackdrop">
-  <div class="sheet ai-sheet">
-    <div class="sheet-head"><b>🤖 ИИ-агент проекта</b>
-      <div class="sh-btns">
-        <button class="btn mini ghost" id="btnAiSettings">⚙ Подключение</button>
-        <button class="btn mini ghost" id="btnAiClear">Очистить</button>
-        <button class="btn mini" id="btnAiClose">✕</button>
-      </div>
-    </div>
-    <div class="ai-settings hidden" id="aiSettingsPanel">
-      <label>Base URL (OpenAI-совместимый, без /chat/completions)
-        <input id="aiBaseUrl" placeholder="https://api.openai.com/v1" autocomplete="off">
-      </label>
-      <label>API-ключ
-        <input id="aiApiKey" type="password" placeholder="sk-…" autocomplete="off">
-      </label>
-      <label>Имя модели
-        <input id="aiModel" placeholder="например: gpt-4o-mini" autocomplete="off">
-      </label>
-      <div class="row-btns">
-        <button class="btn mini primary" id="btnAiSave">💾 Сохранить</button>
-        <span class="ai-status" id="aiStatus"></span>
-      </div>
-      <div class="ai-hint">Ключ хранится только в этом браузере (localStorage) и отправляется напрямую твоему провайдеру. Провайдер должен разрешать запросы из браузера (CORS).</div>
-    </div>
-    <div class="ai-chat" id="aiChat"></div>
-    <div class="ai-input">
-      <textarea id="aiPrompt" rows="2" placeholder="Опиши игру или изменение… Например: «Сделай платформер: персонаж бегает за пальцем и прыгает по тапу, добавь монеты и счёт»"></textarea>
-      <button class="btn primary ai-send" id="btnAiSend">➤</button>
-    </div>
-  </div>
+<div class="sheet ai-sheet">
+<div class="sheet-head"><b>🤖 ИИ-агент проекта</b>
+<div class="sh-btns">
+<button class="btn mini ghost" id="btnAiSettings">⚙ Подключение</button>
+<button class="btn mini ghost" id="btnAiClear">Очистить</button>
+<button class="btn mini" id="btnAiClose">✕</button>
 </div>
-
-<input type="file" id="pngInput" accept="image/png,image/*" multiple hidden>
-<input type="file" id="mrrInput" accept=".mrr,.txt,text/plain" hidden>
-<input type="file" id="projInput" accept=".json,application/json" hidden>
-<input type="file" id="sceneInput" accept=".json,application/json" hidden>
-
+</div>
+<div class="ai-settings hidden" id="aiSettingsPanel">
+<label>Base URL (OpenAI-совместимый, без /chat/completions)
+        <input autocomplete="off" id="aiBaseUrl" placeholder="https://api.openai.com/v1">
+</label>
+<label>API-ключ
+        <input autocomplete="off" id="aiApiKey" placeholder="sk-…" type="password">
+</label>
+<label>Имя модели
+        <input autocomplete="off" id="aiModel" placeholder="например: gpt-4o-mini">
+</label>
+<div class="row-btns">
+<button class="btn mini primary" id="btnAiSave">💾 Сохранить</button>
+<span class="ai-status" id="aiStatus"></span>
+</div>
+<div class="ai-hint">Ключ хранится только в этом браузере (localStorage) и отправляется напрямую твоему провайдеру. Провайдер должен разрешать запросы из браузера (CORS).</div>
+</div>
+<div class="ai-chat" id="aiChat"></div>
+<div class="ai-input">
+<textarea id="aiPrompt" placeholder="Опиши игру или изменение… Например: «Сделай платформер: персонаж бегает за пальцем и прыгает по тапу, добавь монеты и счёт»" rows="2"></textarea>
+<button class="btn primary ai-send" id="btnAiSend">➤</button>
+</div>
+</div>
+</div>
+<input accept="image/png,image/*" hidden="" id="pngInput" multiple="" type="file">
+<input accept=".mrr,.txt,text/plain" hidden="" id="mrrInput" type="file">
+<input accept=".json,application/json" hidden="" id="projInput" type="file">
+<input accept=".json,application/json" hidden="" id="sceneInput" type="file">
 <script>
 
 "use strict";
 /* =====================================================================
-   MrrCode v0.1.0 — сенсор + ИИ-агент
+   MrrCode v0.2.0 — сенсор + ИИ-агент
    - компактная мобильная раскладка (тулбары в одну скроллируемую строку)
    - ИИ-агент: OpenAI-совместимый API (Base URL + ключ + модель),
      получает контекст проекта, пишет код/файлы, меняет сцену,
@@ -853,7 +1084,21 @@ const API={
   pop:{kind:'fn',sig:'pop(array)',doc:'Убирает и возвращает последний элемент массива.'},
   time:{kind:'fn',sig:'time()',doc:'Число секунд с момента запуска игры.'},
   dt:{kind:'fn',sig:'dt()',doc:'Секунды с прошлого кадра (то же, что аргумент update).'},
-  print:{kind:'fn',sig:'print(...values)',doc:'Выводит значения в консоль.'}
+  rgba:{kind:'fn',sig:'rgba(r, g, b, a)',doc:'Возвращает CSS-цвет rgba() из красного, зелёного, синего и альфа-канала.'},
+  print:{kind:'fn',sig:'print(...values)',doc:'Выводит значения в консоль.'},
+  lerp:{kind:'fn',sig:'lerp(a, b, t)',doc:'Линейно смешивает a и b по t от 0 до 1.'},
+  map:{kind:'fn',sig:'map(value, inMin, inMax, outMin, outMax)',doc:'Переносит число из одного диапазона в другой.'},
+  sign:{kind:'fn',sig:'sign(x)',doc:'Возвращает -1, 0 или 1.'},
+  randomInt:{kind:'fn',sig:'randomInt(min, max)',doc:'Случайное целое в диапазоне включительно.'},
+  toString:{kind:'fn',sig:'toString(value)',doc:'Преобразует значение в строку.'},
+  toNumber:{kind:'fn',sig:'toNumber(value)',doc:'Преобразует значение в число.'},
+  contains:{kind:'fn',sig:'contains(text, part)',doc:'Проверяет наличие подстроки.'},
+  join:{kind:'fn',sig:'join(array, separator)',doc:'Объединяет элементы массива в строку.'},
+  split:{kind:'fn',sig:'split(text, separator)',doc:'Разделяет строку на массив.'},
+  save:{kind:'fn',sig:'save(key, value)',doc:'Сохраняет значение игры в локальное хранилище.'},
+  load:{kind:'fn',sig:'load(key, defaultValue)',doc:'Загружает значение игры из локального хранилища.'},
+  playTone:{kind:'fn',sig:'playTone(frequency, duration, volume?)',doc:'Проигрывает короткий синтезированный тон.'},
+  stopSound:{kind:'fn',sig:'stopSound()',doc:'Останавливает активные синтезированные звуки.'}
 };
 const KEYWORDS=['let','const','if','else','while','for','of','function','return','break','continue','true','false','null','from','import','as'];
 const KEYWORD_DOCS={
@@ -900,6 +1145,26 @@ function tokenize(src){
       if(!closed)throw new PFError('Незакрытый комментарий /* … */',line);
       continue;
     }
+    if(c==='$'&&src[i+1]==='{'){
+      T.push({t:'interp',v:'${',line});i+=2;continue;
+    }
+    if(c==='`'){
+      const startLine=line;i++;let s='',closed=false;
+      const ESC={n:'\n',t:'\t',r:'\r','\\':'\\','`':'`','$':'$'};
+      while(i<src.length){
+        const ch=src[i];
+        if(ch==='`'){closed=true;i++;break;}
+        if(ch==='\\'){
+          const nx=src[i+1];
+          s+=(ESC[nx]!==undefined?ESC[nx]:nx);
+          i+=2;continue;
+        }
+        if(ch==='\n')line++;
+        s+=ch;i++;
+      }
+      if(!closed)throw new PFError('Незакрытый шаблонный литерал `…`',startLine);
+      T.push({t:'template',v:s,line:startLine});continue;
+    }
     if(c==='"'||c==="'"){
       const q=c;i++;let s='',closed=false;
       const ESC={n:'\n',t:'\t',r:'\r','\\':'\\','"':'"',"'":"'"};
@@ -931,6 +1196,7 @@ function tokenize(src){
     const two=src.substr(i,2);
     if(TWO_OPS.includes(two)){T.push({t:'op',v:two,line});i+=2;continue;}
     if('(){}[],;.:'.includes(c)){T.push({t:'punc',v:c,line});i++;continue;}
+    if(c==='?'){T.push({t:'op',v:'?',line});i++;continue;}
     if('+-*/%=<>!'.includes(c)){T.push({t:'op',v:c,line});i++;continue;}
     throw new PFError('Неизвестный символ «'+c+'»',line);
   }
@@ -1072,12 +1338,23 @@ function parse(tokens){
   }
   function parseExpr(){return parseAssign();}
   function parseAssign(){
-    const left=parseOr();
+    const left=parseConditional();
     if(is('op')&&['=','+=','-=','*=','/=','%=','**='].includes(peek().v)){
       const op=next().v;const right=parseAssign();
       return {n:'Assign',target:left,op,right,line:left.line};
     }
     return left;
+  }
+  function parseConditional(){
+    const test=parseOr();
+    if(is('op','?')){
+      next();
+      const cons=parseExpr();
+      eat('punc',':');
+      const alt=parseConditional();
+      return {n:'Conditional',test,cons,alt,line:test.line};
+    }
+    return test;
   }
   function parseOr(){let l=parseAnd();while(is('op','||')){next();const r=parseAnd();l={n:'Logical',op:'||',l,r,line:l.line};}return l;}
   function parseAnd(){let l=parseEq();while(is('op','&&')){next();const r=parseEq();l={n:'Logical',op:'&&',l,r,line:l.line};}return l;}
@@ -1123,6 +1400,8 @@ function parse(tokens){
     const tk=peek();
     if(tk.t==='num'){next();return {n:'Literal',v:tk.v,line:tk.line};}
     if(tk.t==='str'){next();return {n:'Literal',v:tk.v,line:tk.line};}
+    if(tk.t==='template'){next();return {n:'Template',v:tk.v,line:tk.line};}
+    if(tk.t==='interp'){next();const e=parseExpr();eat('punc','}');return e;}
     if(tk.t==='kw'&&(tk.v==='true'||tk.v==='false')){next();return {n:'Literal',v:tk.v==='true',line:tk.line};}
     if(tk.t==='kw'&&tk.v==='null'){next();return {n:'Literal',v:null,line:tk.line};}
     if(tk.t==='kw'&&tk.v==='function')return parseFunc(false);
@@ -1154,6 +1433,87 @@ function parse(tokens){
   return parseProgram();
 }
 
+/* ---------------- строгая проверка «закрытого мира» ----------------
+   Парсер — единственный источник допустимой грамматики. Встроенные имена
+   берутся из MRRCODE_AI_SPEC; неизвестные идентификаторы и вызовы запрещены.
+   Вызовы через свойства запрещены, пока их сигнатуры явно не описаны в спецификации.
+*/
+window.MrrCodeValidate = function(code, options){
+  const src=String(code||'');
+  const opts=options||{};
+  const spec=window.MRRCODE_AI_SPEC||{};
+  const builtins=new Set((spec.builtins||[]).map(x=>Array.isArray(x)?x[0]:String(x)));
+  for(const group of ['arrayFunctions','mathFunctions','stringFunctions','utilityFunctions','persistence','audio','math','strings']){
+    for(const item of (spec[group]||[])){
+      const m=/^\s*([A-Za-z_$][\w$]*)\s*\(/.exec(String(item));
+      if(m)builtins.add(m[1]);
+    }
+  }
+  const parsed=parse(tokenize(src));
+  const projectFiles=opts.projectFiles||{};
+  const asts=[parsed];
+  const moduleAsts=new Map();
+  // Parse project files only to discover declarations and exports; never evaluate them.
+  for(const [name,text] of Object.entries(projectFiles)){
+    if(typeof text!=='string'||!name.endsWith('.mrr'))continue;
+    try{moduleAsts.set(name,parse(tokenize(text)));}catch(_){/* unrelated invalid files do not bless any API */}
+  }
+  const declared=new Set(builtins);
+  const functions=new Set(builtins);
+  const imports=[];
+  function visit(node,fn){
+    if(!node||typeof node!=='object')return;
+    if(Array.isArray(node)){for(const x of node)visit(x,fn);return;}
+    if(typeof node.n==='string')fn(node);
+    for(const [k,v] of Object.entries(node)){
+      if(k==='line'||k==='name'||k==='kind'||k==='op'||k==='source'||k==='prop'&&typeof v==='string'||k==='key')continue;
+      if(v&&typeof v==='object')visit(v,fn);
+    }
+  }
+  function gather(ast){visit(ast,n=>{
+    if(n.n==='VarDecl')for(const d of n.decls)declared.add(d.name);
+    if(n.n==='FuncDecl'){declared.add(n.name);functions.add(n.name);for(const p of (n.params||[]))declared.add(p);}
+    if(n.n==='FuncExpr'&&n.name){declared.add(n.name);functions.add(n.name);for(const p of (n.params||[]))declared.add(p);}
+    if(n.n==='FuncExpr'&&!n.name){for(const p of (n.params||[]))declared.add(p);}
+    if(n.n==='Import')imports.push(n);
+    if(n.n==='ForOf'&&n.name)declared.add(n.name);
+  });}
+  gather(parsed);
+  // Other files are not globally visible: their names become visible only through import.
+  const importedNames=new Set();
+  for(const im of imports){
+    const source=String(im.source||'');
+    const candidates=[source,source+'.mrr'];
+    const file=candidates.find(n=>Object.prototype.hasOwnProperty.call(projectFiles,n));
+    if(!file)throw new Error('Строка '+im.line+': импорт «'+source+'» не найден среди файлов проекта.');
+    const mod=moduleAsts.get(file);
+    if(!mod)throw new Error('Строка '+im.line+': файл модуля «'+file+'» не проходит синтаксическую проверку.');
+    const exports=new Map();
+    visit(mod,n=>{if(n.n==='FuncDecl')exports.set(n.name,'function');if(n.n==='VarDecl')for(const d of n.decls)exports.set(d.name,'variable');});
+    if(im.star){for(const [n,kind] of exports){declared.add(n);if(kind==='function')functions.add(n);importedNames.add(n);}}
+    else for(const item of im.names){
+      if(!exports.has(item.name))throw new Error('Строка '+im.line+': модуль «'+source+'» не экспортирует «'+item.name+'».');
+      const alias=item.alias||item.name;declared.add(alias);importedNames.add(alias);
+      if(exports.get(item.name)==='function')functions.add(alias);
+    }
+  }
+  // A declared function is valid; a variable cannot be presumed callable just because JS permits it.
+  visit(parsed,n=>{
+    if(n.n==='Call'){
+      if(n.callee&&n.callee.n==='Member'){
+        const prop=n.callee.computed?'[вычисляемое свойство]':'.'+n.callee.prop;
+        throw new Error('Строка '+n.line+': вызов через свойство '+prop+'() не описан как встроенный API MrrCode. Используй документированную функцию или объяви и импортируй функцию явно.');
+      }
+      if(!n.callee||n.callee.n!=='Ident')throw new Error('Строка '+n.line+': разрешены только вызовы по имени функции, описанной в спецификации или объявленной в проекте.');
+      if(!functions.has(n.callee.name))throw new Error('Строка '+n.line+': функция «'+n.callee.name+'()» не найдена в MRRCODE_AI_SPEC и не объявлена как функция проекта.');
+    }
+    if(n.n==='Ident'&&!declared.has(n.name)){
+      throw new Error('Строка '+n.line+': имя «'+n.name+'» отсутствует в спецификации и не объявлено в проекте.');
+    }
+  });
+  return true;
+};
+
 /* ---------------- MrrCode: интерпретатор ---------------- */
 const LIMIT_TOTAL=5000000, LIMIT_FRAME=2000000, MAX_DEPTH=250;
 function createEnv(parent){return {vars:new Map(),parent:parent||null};}
@@ -1166,6 +1526,46 @@ function envSet(env,name,val,line){
   throw new PFError('Переменная не объявлена: «'+name+'» (используй let)',line);
 }
 function truthy(v){return !!v;}
+
+function evalTemplateLiteral(raw,env,ctx,line){
+  let out='',i=0;
+  while(i<raw.length){
+    if(raw[i]==='$'&&raw[i+1]==='{'){
+      let j=i+2,depth=1,quote=null,esc=false;
+      for(;j<raw.length;j++){
+        const ch=raw[j];
+        if(quote){
+          if(esc){esc=false;continue;}
+          if(ch==='\\'){esc=true;continue;}
+          if(ch===quote)quote=null;
+          continue;
+        }
+        if(ch==='"'||ch==="'"||ch==='`'){quote=ch;continue;}
+        if(ch==='{')depth++;
+        else if(ch==='}'){
+          depth--;
+          if(depth===0)break;
+        }
+      }
+      if(depth!==0)throw new PFError('Незакрытое ${...} в шаблонной строке',line);
+      const expr=raw.slice(i+2,j).trim();
+      if(!expr)throw new PFError('Пустое выражение ${...}',line);
+      let ast;
+      try{
+        const program=parse(tokenize(expr));
+        ast=program.body[0]&&program.body[0].e;
+      }catch(e){
+        throw new PFError('Ошибка в ${...}: '+(e.message||e),line);
+      }
+      if(!ast)throw new PFError('Некорректное выражение в ${...}',line);
+      const value=evalNode(ast,env,ctx);
+      out+=value===null||value===undefined?'':String(value);
+      i=j+1;continue;
+    }
+    out+=raw[i++];
+  }
+  return out;
+}
 function toNum(v,line){
   if(typeof v==='number')return v;
   if(typeof v==='boolean')return v?1:0;
@@ -1207,6 +1607,7 @@ function applyBinary(op,l,r,line){
 function makeFunc(nd,env){return {__pf:'func',name:nd.name||'',params:nd.params,body:nd.body,closure:env};}
 
 function evalNode(nd,env,ctx){
+  if(Engine.debugEnabled && !Engine.debugHit && nd && nd.line && Engine.debugBreakpoints.has(nd.line)){Engine.debugHit=true;setRunStatus('Пауза · строка '+nd.line);logConsole('[Debug] Остановка на строке '+nd.line+'.','warn');throw new Signal('debugBreak');}
   if(++ctx.ops>ctx.limit)throw new PFError('Лимит операций превышен — возможен бесконечный цикл',nd.line);
   switch(nd.n){
     case 'Program':{let r=null;for(const s of nd.body)r=evalNode(s,env,ctx);return r;}
@@ -1218,6 +1619,7 @@ function evalNode(nd,env,ctx){
       return null;
     }
     case 'Literal':return nd.v;
+    case 'Template':return evalTemplateLiteral(nd.v,env,ctx,nd.line);
     case 'Ident':return envGet(env,nd.name,nd.line);
     case 'ArrayLit':return nd.els.map(e=>evalNode(e,env,ctx));
     case 'ObjectLit':{const o={};for(const pr of nd.props)o[pr.key]=evalNode(pr.value,env,ctx);return o;}
@@ -1316,6 +1718,7 @@ function evalNode(nd,env,ctx){
       if(nd.op==='-')return -toNum(v,nd.line);
       return toNum(v,nd.line);
     }
+    case 'Conditional':return truthy(evalNode(nd.test,env,ctx))?evalNode(nd.cons,env,ctx):evalNode(nd.alt,env,ctx);
     case 'Logical':{
       const l=evalNode(nd.l,env,ctx);
       if(nd.op==='&&')return truthy(l)?evalNode(nd.r,env,ctx):l;
@@ -1660,7 +2063,7 @@ const Engine={
   pointer:{x:0,y:0,down:false},
   touches:[],
   runtimeScene:[],handlers:{},env:null,baseEnv:null,warnedSprites:new Set(),
-  modules:new Map(),loadingModules:new Set()
+  modules:new Map(),loadingModules:new Set(),debugEnabled:false,debugBreakpoints:new Set(),debugHit:false
 };
 
 function spriteByName(name){return state.sprites.find(s=>s.name===name)||null;}
@@ -1669,12 +2072,26 @@ function buildGlobalEnv(){
   const env=createEnv(null);
   const N=(name,fn)=>env.vars.set(name,{__pf:'native',f:fn});
   N('print',(a)=>{logConsole(a.map(fmtValue).join(' '));return null;});
+  N('lerp',(a)=>{const x=numArg(a[0]),y=numArg(a[1]),t=numArg(a[2]);return x+(y-x)*t;});
+  N('map',(a)=>{const v=numArg(a[0]),a1=numArg(a[1]),a2=numArg(a[2]),b1=numArg(a[3]),b2=numArg(a[4]);if(a2===a1)return b1;return b1+(v-a1)*(b2-b1)/(a2-a1);});
+  N('sign',(a)=>Math.sign(numArg(a[0])));
+  N('randomInt',(a)=>{const lo=Math.ceil(numArg(a[0])),hi=Math.floor(numArg(a[1]));return Math.floor(Math.random()*(hi-lo+1))+lo;});
+  N('toString',(a)=>fmtValue(a[0]));
+  N('toNumber',(a)=>Number(a[0]));
+  N('contains',(a)=>Array.isArray(a[0])?a[0].some(v=>v===a[1]):String(a[0]??'').includes(String(a[1]??'')));
+  N('join',(a)=>Array.isArray(a[0])?a[0].map(fmtValue).join(String(a[1]??',')):String(a[0]??''));
+  N('split',(a)=>String(a[0]??'').split(String(a[1]??',')));
+  N('save',(a)=>{try{localStorage.setItem('mrr-save:'+String(a[0]),JSON.stringify(a[1]));return true;}catch(_){return false;}});
+  N('load',(a)=>{try{const raw=localStorage.getItem('mrr-save:'+String(a[0]));return raw===null?(a.length>1?a[1]:null):JSON.parse(raw);}catch(_){return a.length>1?a[1]:null;}});
+  N('playTone',(a)=>{try{const freq=Math.max(20,numArg(a[0],440)),dur=Math.max(.01,numArg(a[1],.12)),vol=Math.max(0,Math.min(.25,numArg(a[2],.08))); if(!window.__mrrAudio)window.__mrrAudio=new (window.AudioContext||window.webkitAudioContext)(); const ac=window.__mrrAudio; if(ac.state==='suspended')ac.resume(); const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=freq;g.gain.setValueAtTime(vol,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+dur);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+dur);return null;}catch(err){logConsole('[Звук] '+err.message,'warn');return null;}});
+  N('stopSound',()=>{try{if(window.__mrrAudio)window.__mrrAudio.suspend();}catch(_){}return null;});
   N('random',()=>Math.random());
   N('rand',(a)=>{const mn=numArg(a[0],0),mx=numArg(a[1],1);return mn+Math.random()*(mx-mn);});
   N('abs',(a)=>Math.abs(numArg(a[0])));
   N('sqrt',(a)=>Math.sqrt(numArg(a[0])));
   N('sin',(a)=>Math.sin(numArg(a[0])));
   N('cos',(a)=>Math.cos(numArg(a[0])));
+  N('rgba',(a)=>{const r=numArg(a[0],0),g=numArg(a[1],0),b=numArg(a[2],0),alpha=a.length>3?numArg(a[3],1):1;return `rgba(${r},${g},${b},${alpha})`;});
   N('floor',(a)=>Math.floor(numArg(a[0])));
   N('ceil',(a)=>Math.ceil(numArg(a[0])));
   N('round',(a)=>Math.round(numArg(a[0])));
@@ -1738,6 +2155,11 @@ function buildGlobalEnv(){
   N('touchCount',()=>Engine.touches.length);
   N('touchX',(a)=>{const t=Engine.touches[Math.floor(numArg(a[0]))];return t?t.x:0;});
   N('touchY',(a)=>{const t=Engine.touches[Math.floor(numArg(a[0]))];return t?t.y:0;});
+  // Подключаем документированную стандартную библиотеку как реальные MrrCode-функции.
+  // Существующие engine-функции имеют приоритет, чтобы не менять их поведение.
+  for(const [name,fn] of Object.entries(window.MrrCodeStdlib020||{})){
+    if(!env.vars.has(name))N(name,(args)=>fn(...args));
+  }
   return env;
 }
 function drawPlaceholder(x,y,w,h,nm){
@@ -1883,12 +2305,13 @@ document.addEventListener('webkitfullscreenchange',onFsChange);
 function syncCodeToFile(){state.files[state.activeFile]=codeInput.value;}
 
 function startGame(){
-  syncCodeToFile();
+  syncCodeToFile();Engine.debugHit=false;
   closeAC();
   const src=state.files[ENTRY_FILE]||'';
   let ast;
-  try{ast=parse(tokenize(src));}
+  try{window.MrrCodeValidate(src,{projectFiles:state.files,currentFile:ENTRY_FILE});ast=parse(tokenize(src));}
   catch(err){
+    if(err instanceof Signal&&err.kind==='debugBreak'){Engine.running=false;setRunStatus('Пауза');return;}
     logConsole('[main.mrr] '+fmtError(err),'error');
     setRunStatus('Ошибка кода','error');
     switchTab('code');
@@ -1907,6 +2330,7 @@ function startGame(){
   ctx.loadModule=(source,line)=>loadModule(source,line,ctx);
   try{evalNode(ast,Engine.env,ctx);}
   catch(err){
+    if(err instanceof Signal&&err.kind==='debugBreak'){Engine.running=false;setRunStatus('Пауза');return;}
     if(err instanceof Signal)logConsole('[main.mrr] Ошибка: «'+err.kind+'» вне функции/цикла','error');
     else logConsole(fmtError(err),'error');
     setRunStatus('Ошибка запуска','error');
@@ -1952,6 +2376,7 @@ function frameLoop(ts){
     if(Engine.handlers.update)callFunc(Engine.handlers.update,[dt],newCtx(LIMIT_FRAME));
     for(const o of Engine.runtimeScene)drawSceneObj(gctx,o);
   }catch(err){
+    if(err instanceof Signal&&err.kind==='debugBreak'){Engine.running=false;setRunStatus('Пауза · строка остановки');return;}
     logConsole(fmtError(err),'error');
     stopGame();
     return;
@@ -1962,7 +2387,7 @@ function frameLoop(ts){
 function stopGame(silent){
   if(Engine.raf)cancelAnimationFrame(Engine.raf);
   const was=Engine.running;
-  Engine.running=false;Engine.raf=0;Engine.handlers={};
+  Engine.running=false;Engine.raf=0;Engine.handlers={};Engine.debugHit=false;
   document.getElementById('btnRun').disabled=false;
   document.getElementById('btnStop').disabled=true;
   document.getElementById('fpsLabel').textContent='';
@@ -2092,6 +2517,15 @@ function updateCaretPos(){
   document.getElementById('caretPos').textContent='Строка '+lines.length+', столбец '+(lines[lines.length-1].length+1);
 }
 function saveCode(){state.files[state.activeFile]=codeInput.value;}
+let editUndo=[],editRedo=[],editTimer=0,restoringEdit=false;
+function pushEditSnapshot(){if(restoringEdit)return;const v=codeInput.value;if(editUndo.length&&editUndo[editUndo.length-1]===v)return;editUndo.push(v);if(editUndo.length>80)editUndo.shift();editRedo=[];}
+function scheduleEditSnapshot(){clearTimeout(editTimer);editTimer=setTimeout(pushEditSnapshot,300);}
+function undoEdit(){if(editUndo.length<2)return;const cur=editUndo.pop();editRedo.push(cur);restoringEdit=true;codeInput.value=editUndo[editUndo.length-1];restoringEdit=false;saveCode();refreshEditor();updateAC(true);updateHint();}
+function redoEdit(){if(!editRedo.length)return;const v=editRedo.pop();editUndo.push(v);restoringEdit=true;codeInput.value=v;restoringEdit=false;saveCode();refreshEditor();updateAC(true);updateHint();}
+function projectData(){syncCodeToFile();return {app:'MrrCode',format:'mrrcode-project',version:8,activeFile:state.activeFile,files:state.files,sprites:state.sprites.map(s=>({name:s.name,dataUrl:s.dataUrl})),scene:state.scene.map(o=>{const c=Object.assign({},o);delete c.id;return c;})};}
+function saveProjectLocal(){try{localStorage.setItem('mrrcode-project-v2',JSON.stringify(projectData()));setNote('Проект сохранён в браузере.');logConsole('[MrrCode] Автосохранение выполнено.','sys');}catch(err){setNote('Не удалось сохранить проект: '+err.message);}}
+function restoreProjectLocal(){if(window.__MRRCODE_STANDALONE__)return false;try{const raw=localStorage.getItem('mrrcode-project-v2');if(!raw)return false;const data=JSON.parse(raw);if(!data||!data.files)return false;state.files={};for(const k of Object.keys(data.files))state.files[k]=String(data.files[k]);if(!state.files[ENTRY_FILE])state.files[ENTRY_FILE]=DEFAULT_CODE;state.activeFile=state.files[data.activeFile]?data.activeFile:ENTRY_FILE;state.sprites=(data.sprites||[]).map(s=>{const img=new Image();img.src=s.dataUrl;return {name:String(s.name),dataUrl:s.dataUrl,img,sizeKb:Math.max(1,Math.round((s.dataUrl||'').length*.75/1024))};});state.scene=sanitizeScene(data.scene||[]);codeInput.value=state.files[state.activeFile];document.getElementById('codeFileName').textContent=state.activeFile;renderObjList();renderProps();renderScenePreview();renderFiles();return true;}catch(_){return false;}}
+setInterval(()=>{try{localStorage.setItem('mrrcode-project-v2',JSON.stringify(projectData()));}catch(_){}},15000);
 function getHexAtCaret(){
   const v=codeInput.value, pos=codeInput.selectionStart;
   const re=/#([0-9a-fA-F]{3,8})/g;
@@ -2614,24 +3048,20 @@ function setAiSendState(busy){
 }
 
 function buildSystemPrompt(){
-  return 'Ты — ИИ-агент внутри MrrCode v0.1.0, среды создания мобильных игр на языке MrrCode.\n'+
-'Движок ТОЛЬКО для телефонов и планшетов: НЕТ мыши и клавиатуры. Управление — только касания.\n'+
-'\n'+
-'ЯЗЫК PIXELSCRIPT (упрощённый, НЕ JavaScript):\n'+
-'- Переменные: let x = 10; const y = 2; числа, строки ("…"), true/false/null, массивы [1, 2], объекты {a: 1}.\n'+
-'- Операторы: + -  / %  == !=  = && || ! = += -= = /= ++ --\n'+
-'- Условия: if (…) { } else if (…) { } else { }\n'+
-'- Циклы: while (…) { }, for (let i = 0; i < 10; i++) { } — не используй бесконечные циклы.\n'+
-'- Рисование: clear(color), rect(x,y,w,h,color), circle(x,y,r,color), line(x1,y1,x2,y2,color,width), text(value,x,y,color,size), sprite(name,x,y,w,h).\n'+
-'- События: function start() {}, function update(dt) {}, function pointerDown(x,y) {}, function pointerMove(x,y) {}, function pointerUp(x,y) {}.\n'+
-'- Встроенные функции: используй только функции, описанные в справке проекта.\n'+
-'ПРОТОКОЛ ИЗМЕНЕНИЙ: всегда возвращай JSON-объект с полями message, files, scene, spritesNeeded.\n'+
-'files — объект вида {\"main.mrr\": \"ПОЛНЫЙ НОВЫЙ ИСХОДНЫЙ КОД\"}. Если меняешь код, ОБЯЗАТЕЛЬНО передай полный код изменённого файла, а не описание изменений и не фрагмент. Для main.mrr используй именно ключ main.mrr.\n'+
-'scene — null, если пользователь НЕ просил менять объекты редакторской сцены. Никогда не создавай объекты сцены только потому, что в коде есть rect(), circle(), text() или переменная вроде bgRect. Если пользователь просит изменить сцену, тогда передай полный массив объектов сцены.\n'+
-'spritesNeeded — массив имён PNG, только если действительно нужны новые изображения.\n'+
-'Если задача относится к игровому коду, сначала измени files. Не подменяй изменение кода созданием объектов сцены. Не добавляй Markdown и не добавляй пояснения вне JSON.';
-}
-function buildContextMessage(){
+  const spec = JSON.stringify(window.MRRCODE_AI_SPEC || {});
+  return [
+    'Ты — помощник по языку MrrCode 0.2.0.',
+    'ОБЯЗАТЕЛЬНЫЙ РЕЖИМ ЗАКРЫТОГО МИРА: актуальный MRRCODE_AI_SPEC ниже — единственный источник встроенных функций, сигнатур и возможностей языка. Парсер MrrCode приложения задаёт допустимую грамматику.',
+    'Запрещено выводить поддержку из JavaScript, Python, браузера или другого языка. Знакомый синтаксис не означает, что он поддерживается MrrCode.',
+    'Используй только синтаксис, который описан спецификацией и принимается грамматикой MrrCode, встроенные вызовы только из MRRCODE_AI_SPEC.builtins и явно объявленные в проекте функции. Не придумывай API, параметры, события, свойства, операторы и методы.',
+    'Вызовы через свойства объекта вида value.map(...) не являются встроенным API MrrCode, если отдельная сигнатура не указана в спецификации. Не используй методы JavaScript-массивов/строк/объектов.',
+    'Если возможности нет в спецификации или проекте, прямо скажи, что она не документирована, и не генерируй код с ней. Не делай предположений о семантике и сигнатурах.',
+    'Перед ответом проверь код по спецификации и парсеру. Если сомневаешься — исключи конструкцию и объясни ограничение.',
+    'Не подменяй MrrCode JavaScript. Не меняй файлы, не относящиеся к запросу. Для файлов возвращай полный текст.',
+    'Ответ строго JSON: {"message":"...","files":{"имя.mrr":"полный код"},"scene":[],"spritesNeeded":[]}. Не добавляй Markdown вокруг JSON.',
+    'АКТУАЛЬНАЯ СПЕЦИФИКАЦИЯ:', spec
+  ].join('\n\n');
+}function buildContextMessage(){
   let ctx='ТЕКУЩИЕ ФАЙЛЫ ПРОЕКТА:\n';
   for(const nm of Object.keys(state.files)){
     let code=String(state.files[nm]||'');
@@ -2725,6 +3155,13 @@ function applyAIReply(reply){
       // ИИ должен присылать полный файл. Не меняем проект пустым/обрезанным значением.
       const nextCode=data.files[nm];
       if(!nextCode.trim())continue;
+      // Закрытый мир: применяем только код, прошедший доступную статическую проверку.
+      try {
+        if(typeof window.MrrCodeValidate === 'function') window.MrrCodeValidate(nextCode,{projectFiles:Object.assign({},state.files,data.files),currentFile:nm});
+      } catch(validationError) {
+        aiAdd('err','Файл «'+nm+'» не применён: проверка MrrCode обнаружила неподдерживаемую конструкцию. '+validationError.message);
+        continue;
+      }
       state.files[nm]=nextCode;
       applied.push('📄 '+nm);
       if(nm===ENTRY_FILE)openName=ENTRY_FILE;
@@ -2786,7 +3223,7 @@ codeInput.addEventListener('keydown',e=>{
   }
 });
 codeInput.addEventListener('input',()=>{
-  refreshEditor();saveCode();updateAC(false);updateHint();
+  refreshEditor();saveCode();scheduleEditSnapshot();updateAC(false);updateHint();
 });
 codeInput.addEventListener('scroll',()=>{syncScroll();if(AC.open)positionAC();});
 codeInput.addEventListener('click',()=>{closeAC();updateCaretPos();updateHint();updateCodeColorUI();});
@@ -3010,6 +3447,15 @@ document.getElementById('btnSceneClear').addEventListener('click',()=>{
     renderObjList();renderProps();renderScenePreview();
   }
 });
+function sceneToCode(){
+  const lines=['// Код сгенерирован из текущей сцены'];
+  for(const o of state.scene){
+    if(o.type==='rect')lines.push(`rect(${fmtNum(o.x)}, ${fmtNum(o.y)}, ${fmtNum(o.w)}, ${fmtNum(o.h)}, "${o.color}");`);
+    else if(o.type==='circle')lines.push(`circle(${fmtNum(o.x)}, ${fmtNum(o.y)}, ${fmtNum(o.r)}, "${o.color}");`);
+    else if(o.type==='text')lines.push(`text("${String(o.text||'').replace(/"/g,'\\"')}", ${fmtNum(o.x)}, ${fmtNum(o.y)}, "${o.color}", ${fmtNum(o.size||18)});`);
+  }
+  codeInput.value=lines.join('\n');saveCode();refreshEditor();updateHint();pushEditSnapshot();switchTab('code');setNote('Сцена преобразована в код MrrCode.');
+}
 document.getElementById('btnSceneExport').addEventListener('click',()=>{
   download('scene.json',JSON.stringify(state.scene.map(o=>{const c=Object.assign({},o);delete c.id;return c;}),null,2),'application/json');
 });
@@ -3199,6 +3645,9 @@ document.getElementById('mrrInput').addEventListener('change',e=>{
   reader.readAsText(f);
 });
 
+/* ---------------- восстановление проекта ---------------- */
+setTimeout(()=>{if(!window.__MRRCODE_STANDALONE__&&restoreProjectLocal()){setNote('Восстановлен последний локальный проект.');logConsole('[MrrCode] Локальный проект восстановлен.','sys');}pushEditSnapshot();},0);
+
 /* ---------------- примеры ---------------- */
 function buildExamplesUI(){
   const sel=document.getElementById('examplesSelect');
@@ -3240,6 +3689,14 @@ function loadExample(ex){
 }
 
 /* ---------------- привязка кнопок ---------------- */
+document.getElementById('btnUndo').addEventListener('click',undoEdit);
+document.getElementById('btnRedo').addEventListener('click',redoEdit);
+document.getElementById('btnSaveNow').addEventListener('click',saveProjectLocal);
+document.getElementById('btnSaveProjectLocal').addEventListener('click',saveProjectLocal);
+document.getElementById('btnSceneToCode').addEventListener('click',sceneToCode);
+document.getElementById('btnDebug').addEventListener('click',()=>{const p=document.getElementById('debugPanel');const on=p.style.display==='none';p.style.display=on?'block':'none';Engine.debugEnabled=on;document.getElementById('debugStatus').textContent=on?'Включена':'Выключена';setNote(on?'🐞 Режим отладки включён.':'Режим отладки выключен.');});
+document.getElementById('btnToggleBreakpoint').addEventListener('click',()=>{const n=Math.max(1,parseInt(document.getElementById('debugLine').value||'1',10));if(Engine.debugBreakpoints.has(n))Engine.debugBreakpoints.delete(n);else Engine.debugBreakpoints.add(n);document.getElementById('breakpointList').textContent=Engine.debugBreakpoints.size?[...Engine.debugBreakpoints].sort((a,b)=>a-b).join(', '):'Нет точек';});
+document.getElementById('btnClearBreakpoints').addEventListener('click',()=>{Engine.debugBreakpoints.clear();document.getElementById('breakpointList').textContent='Нет точек';});
 document.getElementById('btnRun').addEventListener('click',startGame);
 document.getElementById('btnStop').addEventListener('click',()=>stopGame());
 document.getElementById('btnRunCode').addEventListener('click',startGame);
@@ -3280,6 +3737,57 @@ document.getElementById('btnAiClear').addEventListener('click',()=>{
   aiAdd('sys','Чат очищен. Контекст проекта ИИ получает заново с каждым сообщением.');
 });
 
+/* ---------------- экспорт автономной HTML-сборки ---------------- */
+function exportGameHtml(){
+  try{
+    const p=projectData();
+    const source=String((p.files&&p.files[ENTRY_FILE])||'');
+    if(!source.trim()) throw new Error('Файл main.mrr пуст.');
+    // Экспортируем только проектный код и небольшой нативный Canvas API — без редактора и интерпретатора MrrCode.
+    const pageData={title:'Игра',source,scene:p.scene||[],sprites:(p.sprites||[]).map(s=>({name:s.name,dataUrl:s.dataUrl}))};
+    const encoded=JSON.stringify(pageData).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
+    const html='<!doctype html>\n'+`<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Игра</title><style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101827}body{display:grid;place-items:center;touch-action:none}#game{display:block;width:min(100vw,177.7778vh);height:min(100vh,56.25vw);background:#101827;touch-action:none}#error{position:fixed;left:12px;right:12px;bottom:12px;padding:12px;background:#3b1720;color:#fff;border-radius:8px;font:14px/1.4 system-ui;white-space:pre-wrap;display:none}
+</style></head><body><canvas id="game" width="800" height="450" aria-label="Игра"></canvas><div id="error" role="alert"></div><script>
+(()=>{'use strict';
+const project=${encoded};
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),errorBox=document.getElementById('error');
+let pointer={x:0,y:0,down:false},last=0,startTime=performance.now(),handlers={},images={};
+for(const s of project.sprites||[]){const im=new Image();im.src=s.dataUrl||'';images[s.name]=im;}
+function coords(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*800/r.width,y:(e.clientY-r.top)*450/r.height};}
+canvas.addEventListener('pointerdown',e=>{pointer=Object.assign(coords(e),{down:true});canvas.setPointerCapture?.(e.pointerId);call('pointerDown',pointer.x,pointer.y);});
+canvas.addEventListener('pointermove',e=>{const q=coords(e);pointer.x=q.x;pointer.y=q.y;if(pointer.down)call('pointerMove',q.x,q.y);});
+function up(e){const q=coords(e);pointer.x=q.x;pointer.y=q.y;pointer.down=false;call('pointerUp',q.x,q.y);}
+canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+function clear(color='#101827'){ctx.fillStyle=typeof color==='string'?color:'#101827';ctx.fillRect(0,0,800,450);}
+function rect(x,y,w,h,color='#70d6ff'){ctx.fillStyle=String(color);ctx.fillRect(Number(x)||0,Number(y)||0,Number(w)||0,Number(h)||0);}
+function circle(x,y,r,color='#70d6ff'){ctx.fillStyle=String(color);ctx.beginPath();ctx.arc(Number(x)||0,Number(y)||0,Math.max(0,Number(r)||0),0,Math.PI*2);ctx.fill();}
+function line(x1,y1,x2,y2,color='#fff',width=2){ctx.strokeStyle=String(color);ctx.lineWidth=Number(width)||2;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+function text(value,x,y,color='#fff',size=16){ctx.fillStyle=String(color);ctx.font='600 '+(Number(size)||16)+'px system-ui,sans-serif';ctx.textBaseline='top';ctx.fillText(String(value??''),Number(x)||0,Number(y)||0);}
+function sprite(name,x,y,w,h){const im=images[String(name)];if(im&&im.complete&&im.naturalWidth){ctx.drawImage(im,x,y,w||im.naturalWidth,h||im.naturalHeight);}}
+function print(...a){console.log(...a)}
+const api={clear,rect,circle,line,text,sprite,print,lerp:(a,b,t)=>a+(b-a)*t,map:(v,a,b,c,d)=>a===b?c:c+(v-a)*(d-c)/(b-a),sign:Math.sign,randomInt:(a,b)=>Math.floor(Math.random()*(b-a+1))+a,random:Math.random,rand:(a=0,b=1)=>a+Math.random()*(b-a),abs:Math.abs,sqrt:Math.sqrt,sin:Math.sin,cos:Math.cos,floor:Math.floor,ceil:Math.ceil,round:Math.round,min:Math.min,max:Math.max,clamp:(v,a,b)=>Math.min(Math.max(v,a),b),toString:String,toNumber:Number,length:v=>v==null?0:(v.length??Object.keys(v).length),contains:(a,b)=>Array.isArray(a)?a.includes(b):String(a??'').includes(String(b??'')),join:(a,sep=',')=>Array.isArray(a)?a.join(sep):String(a??''),split:(a,sep=',')=>String(a??'').split(sep),push:(a,v)=>(a.push(v),a),pop:a=>a.pop(),time:()=>((performance.now()-startTime)/1000),dt:()=>last,pointerX:()=>pointer.x,pointerY:()=>pointer.y,pointerDownNow:()=>pointer.down,playTone:()=>{},stopSound:()=>{}};
+function call(name,...args){try{if(typeof handlers[name]==='function')handlers[name](...args);}catch(e){showError(name+': '+(e.stack||e.message||e));}}
+function showError(msg){errorBox.style.display='block';errorBox.textContent='Ошибка игры: '+msg;console.error(msg);}
+try{
+const factory=new Function(...Object.keys(api),project.source+String.fromCharCode(10)+';return {start:typeof start==="function"?start:null,update:typeof update==="function"?update:null,pointerDown:typeof pointerDown==="function"?pointerDown:null,pointerMove:typeof pointerMove==="function"?pointerMove:null,pointerUp:typeof pointerUp==="function"?pointerUp:null};');
+handlers=factory(...Object.values(api));
+// Draw basic scene objects in the native page, so editor scene primitives survive export.
+const scene=project.scene||[];
+if(handlers.start) handlers.start();
+if(!handlers.update){clear();for(const o of scene){if(o.type==='rect')rect(o.x,o.y,o.w,o.h,o.color);else if(o.type==='circle')circle(o.x,o.y,o.r,o.color);else if(o.type==='text')text(o.text||o.name,o.x,o.y,o.color,o.size);}}
+}catch(e){showError(e.stack||e.message||e);return;}
+function frame(ts){const dt=Math.min(.05,Math.max(0,(ts-lastFrame)/1000||0));lastFrame=ts;last=dt;if(handlers.update){try{handlers.update(dt);}catch(e){showError(e.stack||e.message||e);return;}}requestAnimationFrame(frame);}
+let lastFrame=performance.now();requestAnimationFrame(frame);
+})();
+</scr`+'ipt></body></html>';
+    download('MrrCode-game.html',html,'text/html;charset=utf-8');
+    setNote('Создан нативный HTML: только Canvas, CSS и JavaScript игры — без интерфейса и движка редактора.');
+    logConsole('[Сборка] Создан MrrCode-game.html (нативный HTML/CSS/JS).','sys');
+  }catch(err){setNote('Не удалось собрать HTML: '+err.message);logConsole('[Сборка] '+err.message,'error');}
+}
+document.getElementById('btnExportGameHtml').addEventListener('click',exportGameHtml);
+
 /* ---------------- инициализация ---------------- */
 (function init(){
   codeInput.value=state.files[state.activeFile];
@@ -3294,14 +3802,11 @@ document.getElementById('btnAiClear').addEventListener('click',()=>{
   logConsole('v0.1.0 · только сенсор · 🤖 ИИ-агент (кнопка «ИИ»): подключи Base URL, API-ключ и модель — ИИ напишет код, создаст файлы и сцену.','sys');
 })();
 </script>
-
 <!-- MrrCode game overlay -->
-<div id="mrrGameOverlay" aria-hidden="true">
-  <button id="mrrGameBack" type="button" aria-label="Назад в MrrCode">← Назад</button>
-  <iframe id="mrrGameFrame" title="Игра MrrCode" sandbox="allow-scripts allow-pointer-lock"></iframe>
+<div aria-hidden="true" id="mrrGameOverlay">
+<button aria-label="Назад в MrrCode" id="mrrGameBack" type="button">← Назад</button>
+<iframe id="mrrGameFrame" sandbox="allow-scripts allow-pointer-lock" title="Игра MrrCode"></iframe>
 </div>
-
-
 <script>
 (function(){
   const overlay = document.getElementById('mrrGameOverlay');
@@ -3352,15 +3857,11 @@ document.getElementById('btnAiClear').addEventListener('click',()=>{
   });
 })();
 </script>
-
-
 <script>
 window.MrrCodeUI = window.MrrCodeUI || {};
 window.MrrCodeUI.showGame = function(html){ return window.mrrOpenGame(html); };
 window.MrrCodeUI.hideGame = function(){ return window.mrrBackToEditor(); };
 </script>
-
-
 <script>
 (function(){
   const closeBtn = document.getElementById('mrrCloseSite');
@@ -3388,8 +3889,6 @@ window.MrrCodeUI.hideGame = function(){ return window.mrrBackToEditor(); };
   });
 })();
 </script>
-
-
 <script>
 (function(){
   const builtin = [
@@ -3560,8 +4059,6 @@ window.MrrCodeUI.hideGame = function(){ return window.mrrBackToEditor(); };
   }, true);
 })();
 </script>
-
-
 <script>
 window.MrrCodeAutocomplete = window.MrrCodeAutocomplete || {
   refresh: function(){
@@ -3572,6 +4069,22 @@ window.MrrCodeAutocomplete = window.MrrCodeAutocomplete || {
   }
 };
 </script>
+<script>
+window.mrrBuildAIPrompt = function(userPrompt, currentCode){
+  return [
+    "You are the MrrCode 0.2.0 coding agent.",
+    JSON.stringify(window.MRRCODE_AI_SPEC),
+    "CURRENT main.mrr:\n" + (currentCode || ""),
+    "CLOSED WORLD: Only names and signatures in MRRCODE_AI_SPEC are built-in. The parser grammar is authoritative for syntax. Never infer MrrCode support from JavaScript or Python. Do not use undocumented member-method calls or invented APIs.",
+    "USER REQUEST:\n" + (userPrompt || "")
+  ].join("\n\n");
+};
+</script>
 
-</body>
-</html>
+
+
+
+<div id="mrrFallbackCompletions" style="position: fixed; z-index: 100020; display: none; min-width: 180px; max-width: 300px; max-height: 240px; overflow: auto; padding: 5px; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 10px; background: rgba(25, 29, 38, 0.98); color: rgb(255, 255, 255); box-shadow: rgba(0, 0, 0, 0.35) 0px 8px 28px; left: 174.667px; top: 105px;"><button type="button" style="display: block; width: 100%; padding: 7px 9px; text-align: left; border: 0px; background: transparent; color: inherit; border-radius: 7px;">fill</button><button type="button" style="display: block; width: 100%; padding: 7px 9px; text-align: left; border: 0px; background: transparent; color: inherit; border-radius: 7px;">for</button><button type="button" style="display: block; width: 100%; padding: 7px 9px; text-align: left; border: 0px; background: transparent; color: inherit; border-radius: 7px;">false</button><button type="button" style="display: block; width: 100%; padding: 7px 9px; text-align: left; border: 0px; background: transparent; color: inherit; border-radius: 7px;">function</button></div><script>window.addEventListener("load",function(){setTimeout(function(){try{startGame();}catch(e){console.error("MrrCode build:",e);}},80);});</script>
+<script>window.addEventListener("load",function(){setTimeout(function(){try{startGame();}catch(e){console.error("MrrCode build:",e);}},80);});</script>
+<script>window.addEventListener("load",function(){setTimeout(function(){try{startGame();}catch(e){console.error("MrrCode build:",e);}},80);});</script>
+</body></html>
