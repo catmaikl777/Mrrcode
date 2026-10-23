@@ -2,7 +2,7 @@
 <html lang="ru"><head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
-<title>MrrCode</title>
+<title>MrrCode — Игра</title>
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-400-normal.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-600-normal.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-800-normal.css" rel="stylesheet">
@@ -1002,13 +1002,30 @@ function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;
 function escapeRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
 let uidCounter=0;
 function uid(){return 'o'+(++uidCounter)+'_'+Math.random().toString(36).slice(2,7);}
-function download(name,content,mime){
-  const blob=new Blob([content],{type:mime||'text/plain;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);a.download=name;
-  document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+function showDownloadFallback(name,content){
+  let panel=document.getElementById('mrrDownloadFallback');
+  if(!panel){
+    panel=document.createElement('div');panel.id='mrrDownloadFallback';
+    panel.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:14px;';
+    panel.innerHTML='<section style="width:min(900px,100%);max-height:95%;display:flex;flex-direction:column;gap:10px;background:#111827;color:#f9fafb;border:1px solid #475569;border-radius:12px;padding:14px;font:14px system-ui"><strong id="mrrFallbackTitle">Экспорт файла</strong><div id="mrrFallbackHelp">Встроенное окно приложения не поддерживает скачивание этого типа ссылки. Скопируйте содержимое и сохраните его под указанным именем.</div><textarea id="mrrFallbackText" spellcheck="false" style="width:100%;min-height:45vh;resize:vertical;background:#020617;color:#e2e8f0;border:1px solid #475569;border-radius:8px;padding:10px;font:12px monospace"></textarea><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="mrrFallbackCopy" style="padding:10px 14px;border:0;border-radius:8px;background:#2563eb;color:white">Копировать код</button><button id="mrrFallbackSelect" style="padding:10px 14px;border:0;border-radius:8px;background:#334155;color:white">Выделить весь код</button><button id="mrrFallbackClose" style="padding:10px 14px;border:0;border-radius:8px;background:#475569;color:white">Закрыть</button><span id="mrrFallbackStatus" style="align-self:center"></span></div></section>';
+    document.body.appendChild(panel);
+    panel.querySelector('#mrrFallbackClose').onclick=()=>panel.remove();
+    panel.querySelector('#mrrFallbackSelect').onclick=()=>{const t=panel.querySelector('#mrrFallbackText');t.focus();t.select();};
+    panel.querySelector('#mrrFallbackCopy').onclick=async()=>{const t=panel.querySelector('#mrrFallbackText'),status=panel.querySelector('#mrrFallbackStatus');try{await navigator.clipboard.writeText(t.value);status.textContent='Скопировано';}catch(_){t.focus();t.select();try{status.textContent=document.execCommand('copy')?'Скопировано':'Код выделен — нажмите «Копировать» в меню устройства';}catch(__){status.textContent='Код выделен — скопируйте вручную';}}};
+  }
+  panel.querySelector('#mrrFallbackTitle').textContent='Экспорт: '+name;
+  panel.querySelector('#mrrFallbackText').value=String(content);
+  panel.querySelector('#mrrFallbackStatus').textContent='';
+  panel.style.display='flex';
+  setNote('Прямое скачивание недоступно в этом окне. Код '+name+' показан для копирования.');
 }
+function download(name,content,mime){
+  // Встроенный WebView приложения может отклонять blob: URL на уровне нативного загрузчика.
+  // Поэтому используем встроенное окно копирования для ВСЕХ экспортов (.mrr, JSON, HTML и др.),
+  // не создавая blob: ссылку, которая вызывает ошибку «Can only download HTTP/HTTPS URIs».
+  showDownloadFallback(name,String(content));
+}
+
 function fmtNum(v){
   if(!isFinite(v))return String(v);
   if(Number.isInteger(v))return String(v);
@@ -3055,6 +3072,12 @@ function buildSystemPrompt(){
   ctx+='СПРАЙТЫ (PNG-ресурсы): '+(state.sprites.length?state.sprites.map(s=>s.name+' ('+(s.img.naturalWidth||'?')+'×'+(s.img.naturalHeight||'?')+')').join(', '):'нет')+'\n';
   ctx+='СЦЕНА (JSON): '+JSON.stringify(state.scene.map(o=>{const c=Object.assign({},o);delete c.id;return c;}))+'\n';
   return ctx;
+}
+// Удаляет Markdown-ограждения, если модель вернула код в ```...```.
+function stripFences(value){
+  const text = String(value == null ? '' : value).trim();
+  const match = text.match(/^```(?:[a-z0-9_-]+)?\s*\n?([\s\S]*?)\n?```$/i);
+  return (match ? match[1] : text).trim();
 }
 function extractJSON(text){
   const m=text.match(/```(?:json)?\s*([\s\S]*?)```/i);
