@@ -3063,16 +3063,19 @@ function stripFences(value){
   return (match ? match[1] : text).trim();
 }
 function extractJSON(text){
-  // Accept plain JSON, fenced JSON, and harmless surrounding prose/parentheses.
-  const raw=String(text==null?'':text).trim();
-  const fence=raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  // Принимаем обычный JSON, Markdown-блоки, JSON внутри строки и текст вокруг объекта.
+  const raw=String(text==null?'':text).replace(/^\uFEFF/,'').trim();
+  const fence=raw.match(/```(?:json|javascript|js)?\s*([\s\S]*?)```/i);
   const candidates=[fence?fence[1].trim():raw,raw];
   for(const candidate of candidates){
     try{
-      const direct=JSON.parse(candidate);
+      let direct=JSON.parse(candidate);
+      if(typeof direct==='string'){
+        try{direct=JSON.parse(direct);}catch(_){}
+      }
       if(direct&&typeof direct==='object'&&!Array.isArray(direct))return direct;
     }catch(_){}
-    // Try each balanced top-level object so trailing wrappers do not break parsing.
+    // Извлекаем первый сбалансированный JSON-объект, не считая скобки внутри строк.
     for(let start=0;start<candidate.length;start++){
       if(candidate[start]!=='{')continue;
       let depth=0,inString=false,escaped=false;
@@ -3089,8 +3092,9 @@ function extractJSON(text){
         else if(ch==='}'){
           depth--;
           if(depth===0){
+            const piece=candidate.slice(start,i+1);
             try{
-              const parsed=JSON.parse(candidate.slice(start,i+1));
+              const parsed=JSON.parse(piece);
               if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))return parsed;
             }catch(_){}
             break;
@@ -3151,9 +3155,9 @@ function applyAIReply(reply){
   const data=extractJSON(reply);
   if(!data){
     const cleaned=stripFences(reply).replace(/^\s*\(|\)\s*$/g,'').trim();
-    const el=aiAdd('bot',cleaned.slice(0,4000)||'(пустой ответ)');
-    // Do not offer to insert JSON/protocol payload as source code.
-    const looksLikeProtocol=/^[{\s]*[\"']?message[\"']?\s*:/.test(cleaned)||/^[{\s]*[\"']?files[\"']?\s*:/.test(cleaned);
+    const looksLikeProtocol=/^[{\s]*[\"']?message[\"']?\s*:/.test(cleaned)||/^[{\s]*[\"']?files[\"']?\s*:/.test(cleaned)||(/\"message\"\s*:/.test(cleaned)&&/\"files\"\s*:/.test(cleaned));
+    const el=aiAdd('bot',looksLikeProtocol?'Не удалось разобрать JSON-ответ ИИ. Попробуй повторить запрос: изменения не применены.':(cleaned.slice(0,4000)||'(пустой ответ)'));
+    // Никогда не вставляем протокол JSON в редактор как исходный код.
     const code=looksLikeProtocol?'':cleaned;
     if(code){
       const b=document.createElement('button');
@@ -3174,11 +3178,11 @@ function applyAIReply(reply){
   const applied=[];
   let openName=null;
   if(data.files&&typeof data.files==='object'&&!Array.isArray(data.files)){
-    for(let nm of Object.keys(data.files)){
-      if(typeof data.files[nm]!=='string')continue;
-      if(!nm.endsWith('.mrr'))nm+='.mrr';
-      // ИИ должен присылать полный файл. Не меняем проект пустым/обрезанным значением.
-      const nextCode=data.files[nm];
+    for(const originalName of Object.keys(data.files)){
+      if(typeof data.files[originalName]!=='string')continue;
+      const nm=originalName.endsWith('.mrr')?originalName:(originalName+'.mrr');
+      // Имя нормализуется отдельно; код читается по исходному ключу JSON.
+      const nextCode=data.files[originalName];
       if(!nextCode.trim())continue;
       // Закрытый мир: применяем только код, прошедший доступную статическую проверку.
       try {
