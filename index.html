@@ -364,22 +364,6 @@ body.mrr-app-mode { margin:0; }
 }
 
 
-/* Close-site control */
-#mrrCloseSite {
-  position:fixed;
-  right:max(12px, env(safe-area-inset-right));
-  top:max(12px, env(safe-area-inset-top));
-  z-index:100010;
-  border:1px solid rgba(255,255,255,.16);
-  border-radius:12px;
-  padding:9px 12px;
-  background:rgba(20,25,35,.88);
-  color:#fff;
-  font:600 14px system-ui,sans-serif;
-  box-shadow:0 2px 14px rgba(0,0,0,.35);
-  backdrop-filter:blur(8px);
-}
-#mrrCloseSite:active { transform:scale(.97); }
 
 </style>
 <style id="mrr-cat-decor">
@@ -578,7 +562,7 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 </script>
 
 </head>
-<body><button aria-label="Закрыть MrrCode" id="mrrCloseSite" type="button">✕ Закрыть</button>
+<body>
 
 <header>
 <div class="logo">🎮 MrrCode <small>MrrCode Studio · v0.2.0 · сенсор + ИИ <span class="mrr-cat">ฅ^•ﻌ•^ฅ</span></small></div>
@@ -3862,33 +3846,7 @@ window.MrrCodeUI = window.MrrCodeUI || {};
 window.MrrCodeUI.showGame = function(html){ return window.mrrOpenGame(html); };
 window.MrrCodeUI.hideGame = function(){ return window.mrrBackToEditor(); };
 </script>
-<script>
-(function(){
-  const closeBtn = document.getElementById('mrrCloseSite');
-  if (!closeBtn) return;
 
-  closeBtn.addEventListener('click', function(){
-    // If the page is currently fullscreen, leave it first.
-    try {
-      if (document.fullscreenElement) document.exitFullscreen();
-    } catch (_) {}
-
-    // A normal browser page cannot always close itself unless it was
-    // opened by script. Try that first.
-    try { window.close(); } catch (_) {}
-
-    // If the browser refuses window.close(), show a clear fallback.
-    setTimeout(function(){
-      if (!document.hidden) {
-        const ok = confirm('Браузер не разрешил странице закрыть себя. Закрыть вкладку вручную?');
-        if (ok) {
-          try { window.history.back(); } catch (_) {}
-        }
-      }
-    }, 120);
-  });
-})();
-</script>
 <script>
 (function(){
   const builtin = [
