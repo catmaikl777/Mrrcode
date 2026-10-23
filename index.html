@@ -2,7 +2,7 @@
 <html lang="ru"><head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
-<title>MrrCode</title>
+<title>MrrCode — Игра</title>
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-400-normal.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-600-normal.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-800-normal.css" rel="stylesheet">
@@ -1002,30 +1002,13 @@ function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;
 function escapeRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
 let uidCounter=0;
 function uid(){return 'o'+(++uidCounter)+'_'+Math.random().toString(36).slice(2,7);}
-function showDownloadFallback(name,content){
-  let panel=document.getElementById('mrrDownloadFallback');
-  if(!panel){
-    panel=document.createElement('div');panel.id='mrrDownloadFallback';
-    panel.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:14px;';
-    panel.innerHTML='<section style="width:min(900px,100%);max-height:95%;display:flex;flex-direction:column;gap:10px;background:#111827;color:#f9fafb;border:1px solid #475569;border-radius:12px;padding:14px;font:14px system-ui"><strong id="mrrFallbackTitle">Экспорт файла</strong><div id="mrrFallbackHelp">Встроенное окно приложения не поддерживает скачивание этого типа ссылки. Скопируйте содержимое и сохраните его под указанным именем.</div><textarea id="mrrFallbackText" spellcheck="false" style="width:100%;min-height:45vh;resize:vertical;background:#020617;color:#e2e8f0;border:1px solid #475569;border-radius:8px;padding:10px;font:12px monospace"></textarea><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="mrrFallbackCopy" style="padding:10px 14px;border:0;border-radius:8px;background:#2563eb;color:white">Копировать код</button><button id="mrrFallbackSelect" style="padding:10px 14px;border:0;border-radius:8px;background:#334155;color:white">Выделить весь код</button><button id="mrrFallbackClose" style="padding:10px 14px;border:0;border-radius:8px;background:#475569;color:white">Закрыть</button><span id="mrrFallbackStatus" style="align-self:center"></span></div></section>';
-    document.body.appendChild(panel);
-    panel.querySelector('#mrrFallbackClose').onclick=()=>panel.remove();
-    panel.querySelector('#mrrFallbackSelect').onclick=()=>{const t=panel.querySelector('#mrrFallbackText');t.focus();t.select();};
-    panel.querySelector('#mrrFallbackCopy').onclick=async()=>{const t=panel.querySelector('#mrrFallbackText'),status=panel.querySelector('#mrrFallbackStatus');try{await navigator.clipboard.writeText(t.value);status.textContent='Скопировано';}catch(_){t.focus();t.select();try{status.textContent=document.execCommand('copy')?'Скопировано':'Код выделен — нажмите «Копировать» в меню устройства';}catch(__){status.textContent='Код выделен — скопируйте вручную';}}};
-  }
-  panel.querySelector('#mrrFallbackTitle').textContent='Экспорт: '+name;
-  panel.querySelector('#mrrFallbackText').value=String(content);
-  panel.querySelector('#mrrFallbackStatus').textContent='';
-  panel.style.display='flex';
-  setNote('Прямое скачивание недоступно в этом окне. Код '+name+' показан для копирования.');
-}
 function download(name,content,mime){
-  // Встроенный WebView приложения может отклонять blob: URL на уровне нативного загрузчика.
-  // Поэтому используем встроенное окно копирования для ВСЕХ экспортов (.mrr, JSON, HTML и др.),
-  // не создавая blob: ссылку, которая вызывает ошибку «Can only download HTTP/HTTPS URIs».
-  showDownloadFallback(name,String(content));
+  const blob=new Blob([content],{type:mime||'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
 }
-
 function fmtNum(v){
   if(!isFinite(v))return String(v);
   if(Number.isInteger(v))return String(v);
@@ -3080,11 +3063,43 @@ function stripFences(value){
   return (match ? match[1] : text).trim();
 }
 function extractJSON(text){
-  const m=text.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  const cand=m?m[1]:text;
-  const start=cand.indexOf('{'),end=cand.lastIndexOf('}');
-  if(start<0||end<start)return null;
-  try{return JSON.parse(cand.slice(start,end+1));}catch(_){return null;}
+  // Accept plain JSON, fenced JSON, and harmless surrounding prose/parentheses.
+  const raw=String(text==null?'':text).trim();
+  const fence=raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidates=[fence?fence[1].trim():raw,raw];
+  for(const candidate of candidates){
+    try{
+      const direct=JSON.parse(candidate);
+      if(direct&&typeof direct==='object'&&!Array.isArray(direct))return direct;
+    }catch(_){}
+    // Try each balanced top-level object so trailing wrappers do not break parsing.
+    for(let start=0;start<candidate.length;start++){
+      if(candidate[start]!=='{')continue;
+      let depth=0,inString=false,escaped=false;
+      for(let i=start;i<candidate.length;i++){
+        const ch=candidate[i];
+        if(inString){
+          if(escaped)escaped=false;
+          else if(ch==='\\')escaped=true;
+          else if(ch==='"')inString=false;
+          continue;
+        }
+        if(ch==='"'){inString=true;continue;}
+        if(ch==='{')depth++;
+        else if(ch==='}'){
+          depth--;
+          if(depth===0){
+            try{
+              const parsed=JSON.parse(candidate.slice(start,i+1));
+              if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))return parsed;
+            }catch(_){}
+            break;
+          }
+        }
+      }
+    }
+  }
+  return null;
 }
 async function aiSend(){
   if(AI.busy)return;
@@ -3135,8 +3150,11 @@ async function aiSend(){
 function applyAIReply(reply){
   const data=extractJSON(reply);
   if(!data){
-    const el=aiAdd('bot',stripFences(reply).slice(0,4000)||'(пустой ответ)');
-    const code=stripFences(reply);
+    const cleaned=stripFences(reply).replace(/^\s*\(|\)\s*$/g,'').trim();
+    const el=aiAdd('bot',cleaned.slice(0,4000)||'(пустой ответ)');
+    // Do not offer to insert JSON/protocol payload as source code.
+    const looksLikeProtocol=/^[{\s]*[\"']?message[\"']?\s*:/.test(cleaned)||/^[{\s]*[\"']?files[\"']?\s*:/.test(cleaned);
+    const code=looksLikeProtocol?'':cleaned;
     if(code){
       const b=document.createElement('button');
       b.className='btn mini ai-insert';b.textContent='⬇ Вставить в редактор';
