@@ -3179,7 +3179,19 @@ function applyAIReply(reply){
   if(!data){
     const cleaned=stripFences(reply).replace(/^\s*\(|\)\s*$/g,'').trim();
     const looksLikeProtocol=/^[{\s]*[\"']?message[\"']?\s*:/.test(cleaned)||/^[{\s]*[\"']?files[\"']?\s*:/.test(cleaned)||(/\"message\"\s*:/.test(cleaned)&&/\"files\"\s*:/.test(cleaned));
-    const el=aiAdd('bot',looksLikeProtocol?'Не удалось разобрать JSON-ответ ИИ. Попробуй повторить запрос: изменения не применены.':(cleaned.slice(0,4000)||'(пустой ответ)'));
+    const el=aiAdd('bot',looksLikeProtocol?'Не удалось разобрать JSON-ответ ИИ. Изменения не применены. Ниже показан сырой ответ, чтобы определить точный формат.':(cleaned.slice(0,4000)||'(пустой ответ)'));
+    // Диагностика: показываем сырой ответ, но не вставляем протокол JSON в редактор.
+    if(looksLikeProtocol){
+      const pre=document.createElement('pre');
+      pre.className='ai-raw-response';
+      pre.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto;font-size:11px;padding:8px;margin-top:8px;border:1px solid var(--border,#555);border-radius:6px;';
+      pre.textContent=String(reply||'').slice(0,12000);
+      el.appendChild(pre);
+      const copyBtn=document.createElement('button');
+      copyBtn.className='btn mini';copyBtn.textContent='📋 Копировать сырой ответ';
+      copyBtn.addEventListener('click',()=>{const value=String(reply||'').slice(0,12000);if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(value).then(()=>setNote('Сырой ответ скопирован.')).catch(()=>setNote('Не удалось скопировать — выдели текст ответа вручную.'));}else{setNote('Выдели сырой ответ вручную и скопируй его.');}});
+      el.appendChild(copyBtn);
+    }
     // Никогда не вставляем протокол JSON в редактор как исходный код.
     const code=looksLikeProtocol?'':cleaned;
     if(code){
