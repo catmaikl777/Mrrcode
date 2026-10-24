@@ -139,7 +139,7 @@ select.sel{background:var(--panel);border:1px solid var(--border);color:var(--te
 .c-punc{color:#6b7a99}
 
 /* autocomplete */
-.ac-popup{position:relative;z-index:80;width:min(100%,480px);margin:8px 0 0;left:auto;top:auto;background:#141c33;border:1px solid var(--border2);
+.ac-popup{position:fixed;z-index:180;width:min(34vw,340px);min-width:240px;max-width:calc(100vw - 16px);margin:0;left:auto;top:auto;background:#141c33;border:1px solid var(--border2);
   border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.55);overflow:hidden}
 #acClose{position:absolute;top:6px;right:6px;z-index:5;width:32px;height:32px;border-radius:8px;
   background:#1c2745;border:1px solid var(--border2);color:var(--muted);font-size:14px;cursor:pointer}
@@ -159,6 +159,7 @@ select.sel{background:var(--panel);border:1px solid var(--border);color:var(--te
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%}
 .ac-doc{padding:9px 12px;border-top:1px solid #23314f;color:#9fb0d0;font-size:12.5px;background:#0f1730;
   max-height:80px;overflow:auto;line-height:1.45}
+@media(max-width:640px){.ac-popup{width:44vw;min-width:190px;max-width:calc(100vw - 16px)}.ac-item{gap:5px;padding:9px 30px 9px 7px;font-size:12px}.ac-kind{min-width:26px;padding:3px 4px}.ac-name{overflow:hidden;text-overflow:ellipsis}.ac-sig{font-size:10px;max-width:42%}}
 .code-status{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 14px;font-size:13px;flex-wrap:wrap}
 .code-status .status-sep{width:1px;height:16px;background:var(--border)}
 #caretPos{color:var(--muted);white-space:nowrap;font-family:var(--font-code);font-size:12px}
@@ -3185,10 +3186,24 @@ function renderAC(){
   positionAC();
 }
 function positionAC(){
-  // Keep autocomplete in normal document flow, directly below the line/column status bar.
+  // Show a compact autocomplete panel along the right edge of the code editor.
   acPopup.classList.remove('hidden');
-  acPopup.style.left='auto';
-  acPopup.style.top='auto';
+  const area=document.getElementById('editorArea');
+  if(!area)return;
+  const ar=area.getBoundingClientRect();
+  const pr=acPopup.getBoundingClientRect();
+  const margin=8;
+  const width=Math.min(pr.width||340,window.innerWidth-margin*2);
+  const left=Math.max(margin,Math.min(ar.right-width-margin,window.innerWidth-width-margin));
+  let top=ar.top+margin;
+  try{
+    const caret=caretCoords(codeInput);
+    top=codeInput.getBoundingClientRect().top+caret.y;
+  }catch(_e){}
+  const maxTop=Math.max(margin,window.innerHeight-Math.min(pr.height||300,window.innerHeight-margin*2)-margin);
+  top=Math.max(ar.top+margin,Math.min(top,maxTop));
+  acPopup.style.left=Math.round(left)+'px';
+  acPopup.style.top=Math.round(top)+'px';
 }
 function caretCoords(ta){
   const cs=getComputedStyle(ta);
@@ -3702,6 +3717,7 @@ codeInput.addEventListener('input',()=>{
   refreshEditor();saveCode();scheduleEditSnapshot();updateHint();
 });
 codeInput.addEventListener('scroll',()=>{syncScroll();if(AC.open)positionAC();});
+window.addEventListener('resize',()=>{if(AC.open)positionAC();});
 codeInput.addEventListener('focus',()=>{updateAC(true);});
 codeInput.addEventListener('click',()=>{updateCaretPos();updateHint();updateCodeColorUI();updateAC(false);});
 codeInput.addEventListener('keyup',e=>{
