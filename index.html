@@ -1,15 +1,16 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="ru"><head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
 <title>MrrCode — Игра</title>
-<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-400-normal.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-600-normal.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-800-normal.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/latin-400-normal.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/cyrillic-400-normal.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/cyrillic-700-normal.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/latin-400-normal.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-400-normal.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-600-normal.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-800-normal.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/latin-400-normal.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/cyrillic-400-normal.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/cyrillic-700-normal.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/latin-400-normal.css" rel="stylesheet"/>
 <style>
 :root{
   --bg:#0a0e1a; --panel:#10162a; --panel2:#0d1426; --border:#1e2a45; --border2:#2b3a5e;
@@ -20,8 +21,9 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-body{background:radial-gradient(1200px 700px at 80% -10%,#16204a 0%,var(--bg) 55%);color:var(--text);
-  font-family:var(--font-ui);font-size:15px;overscroll-behavior:none}
+body{background-color:var(--bg);background-image:radial-gradient(1200px 700px at 80% -10%,#16204a 0%,var(--bg) 55%);background-repeat:no-repeat;background-attachment:fixed;color:var(--text);
+  font-family:var(--font-ui);font-size:15px;overscroll-behavior:none;isolation:isolate}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-repeat:no-repeat;background-image:radial-gradient(circle,transparent 56%,rgba(102,132,206,.17) 58%,rgba(102,132,206,.17) 60%,transparent 62%),radial-gradient(circle,transparent 55%,rgba(56,214,255,.11) 57%,rgba(56,214,255,.11) 60%,transparent 62%),radial-gradient(circle,transparent 54%,rgba(124,108,255,.15) 56%,rgba(124,108,255,.15) 59%,transparent 61%),radial-gradient(circle,transparent 55%,rgba(102,132,206,.12) 57%,rgba(102,132,206,.12) 60%,transparent 62%),radial-gradient(circle,transparent 55%,rgba(56,214,255,.10) 57%,rgba(56,214,255,.10) 60%,transparent 62%);background-size:170px 170px,100px 100px,220px 220px,130px 130px,80px 80px;background-position:4% 12%,88% 18%,73% 68%,16% 82%,97% 92%;opacity:.85}
 button{font-family:var(--font-ui);touch-action:manipulation;user-select:none;-webkit-user-select:none}
 input,select,textarea{font-size:16px}
 code,pre{font-family:var(--font-code)}
@@ -137,11 +139,11 @@ select.sel{background:var(--panel);border:1px solid var(--border);color:var(--te
 .c-punc{color:#6b7a99}
 
 /* autocomplete */
-.ac-popup{position:absolute;z-index:80;width:min(94%,480px);background:#141c33;border:1px solid var(--border2);
+.ac-popup{position:relative;z-index:80;width:min(100%,480px);margin:8px 0 0;left:auto;top:auto;background:#141c33;border:1px solid var(--border2);
   border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.55);overflow:hidden}
 #acClose{position:absolute;top:6px;right:6px;z-index:5;width:32px;height:32px;border-radius:8px;
   background:#1c2745;border:1px solid var(--border2);color:var(--muted);font-size:14px;cursor:pointer}
-#acList{max-height:240px;overflow:auto;-webkit-overflow-scrolling:touch}
+#acList{max-height:min(360px,48vh);overflow:auto;-webkit-overflow-scrolling:touch}
 .ac-item{display:flex;gap:8px;align-items:center;padding:11px 40px 11px 10px;cursor:pointer;font-size:14px;
   border-bottom:1px solid rgba(30,42,69,.5)}
 .ac-item.sel{background:linear-gradient(90deg,rgba(124,108,255,.28),rgba(56,214,255,.08))}
@@ -294,6 +296,15 @@ select.sel{background:var(--panel);border:1px solid var(--border);color:var(--te
 .ex-btn .ex-icon{font-size:21px}
 .ex-btn small{color:var(--muted);font-weight:400;font-size:12px;line-height:1.45}
 
+
+/* Документация API: читаемые группы вместо сплошного текста */
+.api-groups{display:flex;flex-direction:column;gap:13px;margin:12px 0 14px}
+.api-group{padding:12px;border:1px solid rgba(66,86,128,.42);border-radius:12px;background:linear-gradient(135deg,rgba(17,26,46,.72),rgba(12,19,34,.58))}
+.api-group h3{font-size:12px;letter-spacing:.025em;color:#c8d5f2;margin-bottom:9px;font-weight:700}
+.api-group .api-chips{display:flex;flex-wrap:wrap;gap:7px;margin:0}
+.api-group .api-chips code{display:inline-flex;align-items:center;max-width:100%;overflow-wrap:anywhere;background:rgba(8,14,27,.8);border:1px solid rgba(70,92,140,.5);border-radius:8px;padding:6px 9px;font-size:11.5px;line-height:1.4;color:#7de2ff}
+.api-group .api-chips code:first-child{border-color:rgba(124,108,255,.4)}
+
 /* ---------- компактная мобильная адаптация ---------- */
 @media (max-width:640px){
   header{padding:6px 9px;padding-top:calc(6px + env(safe-area-inset-top));gap:7px}
@@ -325,7 +336,7 @@ select.sel{background:var(--panel);border:1px solid var(--border);color:var(--te
   .props-grid{grid-template-columns:1fr 1fr}
 }
 @media (min-width:920px){
-  .scene-layout{display:grid;grid-template-columns:320px 1fr;align-items:start}
+  .scene-layout{display:flex;flex-direction:column;align-items:stretch;gap:12px}
   .files-layout{display:grid;grid-template-columns:1fr 330px;align-items:start}
   .run-controls{width:auto;margin-left:auto;flex:none}
   #runStatus{min-width:110px;flex:none}
@@ -333,6 +344,12 @@ select.sel{background:var(--panel);border:1px solid var(--border);color:var(--te
   main{padding:18px 16px 60px}
   .row-btns .btn{flex:none;padding:10px 14px;font-size:13.5px}
 }
+
+/* Scene editor: canvas first and full width; object tools below it on every screen size */
+#tab-scene .scene-layout{display:flex;flex-direction:column;align-items:stretch;gap:12px;width:100%}
+#tab-scene .scene-main,#tab-scene .scene-side{width:100%;min-width:0;max-width:none}
+#tab-scene .scene-main .preview-wrap{width:100%}
+#tab-scene #sceneCanvas{width:100%;height:auto;aspect-ratio:16/9}
 
 /* MrrCode app-like window + in-engine game overlay */
 html.mrr-app-mode, html.mrr-app-mode body {
@@ -416,6 +433,7 @@ window.MRRCODE_AI_SPEC = {
     "Before returning code, check every array operation and remove unsupported dot-method calls.",
     "Physics helpers: overlapRect(ax,ay,aw,ah,bx,by,bw,bh) returns true only when two axis-aligned rectangles overlap; touching edges alone is not overlap.",
     "moveBody(body,dt,gravity) mutates and returns body with x,y,vx,vy numeric properties. dt is clamped to 0..0.1 seconds; gravity is added to vy before position is advanced.",
+    "Background: background(color) sets the persistent game clear color; call it in start(). clear(color) paints only the current frame and does not change the persistent background.",
     "Camera: camera(x,y) sets the camera offset for subsequent rect/circle/line/text/sprite/spriteAnim drawing; use camera(0,0) to reset. Input coordinates remain canvas coordinates.",
     "spriteAnim(name,x,y,w,h,frameW,frameH,fps) animates a grid of frames from an imported PNG sprite sheet. frameW/frameH are source-image pixels; the image must be imported in Files under the same name.",
     "Editor features are UI tools, not MrrCode language functions: drag/resize scene objects, optional grid snapping, project version history, and resource reference checking.",
@@ -444,11 +462,16 @@ window.MRRCODE_AI_SPEC = {
     ["floor","floor(value)"], ["ceil","ceil(value)"], ["round","round(value)"], ["min","min(a,b)"],
     ["max","max(a,b)"], ["clamp","clamp(value,min,max)"], ["length","length(value)"],
     ["push","push(array,value)"], ["pop","pop(array)"], ["time","time()"], ["dt","dt()"],
-    ["clear","clear(color)"], ["rect","rect(x,y,width,height,color?)"], ["circle","circle(x,y,radius,color?)"],
+    ["background","background(color)"], ["clear","clear(color?)"], ["rect","rect(x,y,width,height,color?)"], ["circle","circle(x,y,radius,color?)"],
     ["line","line(x1,y1,x2,y2,color?,lineWidth?)"], ["text","text(value,x,y,color?,size?)"],
     ["sprite","sprite(name,x,y,width?,height?)"], ["spriteAnim","spriteAnim(name,x,y,w,h,frameW,frameH,fps)"], ["camera","camera(x,y)"], ["overlapRect","overlapRect(ax,ay,aw,ah,bx,by,bw,bh)"], ["moveBody","moveBody(body,dt,gravity)"], ["object","object(name)"],
     ["pointerX","pointerX()"], ["pointerY","pointerY()"], ["pointerDownNow","pointerDownNow()"],
-    ["touchCount","touchCount()"], ["touchX","touchX(index)"], ["touchY","touchY(index)"]
+    ["touchCount","touchCount()"], ["touchX","touchX(index)"], ["touchY","touchY(index)"],
+    ["splice","splice(array,start,count,...items)"], ["shift","shift(array)"], ["unshift","unshift(array,value)"],
+    ["indexOf","indexOf(array,value)"], ["slice","slice(array,start,end?)"], ["pow","pow(a,b)"],
+    ["trim","trim(text)"], ["upper","upper(text)"], ["lower","lower(text)"],
+    ["startsWith","startsWith(text,prefix)"], ["endsWith","endsWith(text,suffix)"],
+    ["replace","replace(text,from,to)"], ["typeof","typeof(value)"]
   ],
   userSymbols: "Extract variables, constants, functions and function parameters from the current .mrr file.",
   validation: "Never invent an undocumented command; if an API feature is missing, say so.",
@@ -567,10 +590,158 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
   window.MrrCodeStdlib020Version = "0.2.0+";
 })();
 </script>
-
+<style id="mrrcode-polish">
+  :root { color-scheme: dark; }
+  button, input, select, textarea { outline-offset: 3px; }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--cyan); outline-offset: 2px;
+  }
+  .panel { box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+  .panel-head { min-height: 46px; }
+  .btn { min-height: 38px; }
+  .btn:hover:not(:disabled), .tab-btn:hover:not(.active), .pal-btn:hover {
+    border-color: var(--accent); filter: brightness(1.08);
+  }
+  .tab-btn.active { box-shadow: 0 4px 16px rgba(80,120,255,.22); }
+  .file-row, .obj-row, .ex-btn { transition: border-color .15s ease, background .15s ease, transform .15s ease; }
+  .file-row:hover, .obj-row:hover { border-color: var(--border2); }
+  .empty-note { text-wrap: pretty; }
+  #consoleOut { scrollbar-color: #2b3a5e #0b1120; }
+  .editor-wrap { border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  #codeInput { spellcheck: false; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  }
+  @media (min-width: 920px) {
+    .panel { border-radius: 16px; }
+    .canvas-wrap { padding: 14px; }
+  }
+</style>
+<style id="mrrcode-ui-refresh">
+/* Спокойная визуальная полировка: единые поверхности, отступы и состояния */
+:root{
+  --panel: #11182b;
+  --panel2: #0e1527;
+  --border: #24314d;
+  --border2: #344465;
+  --accent: #897bff;
+  --focus-ring: rgba(137,123,255,.32);
+}
+body{
+  /* Один закреплённый градиент вместо второго фонового слоя, который двигался при прокрутке */
+  background-color:var(--bg);
+  background-image:radial-gradient(1200px 700px at 80% -10%,#16204a 0%,var(--bg) 55%);
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+  line-height:1.45;
+}
+header{
+  gap: 10px;
+  border-bottom-color: rgba(70,88,128,.42);
+  box-shadow: 0 6px 24px rgba(0,0,0,.12);
+}
+.logo{letter-spacing:-.025em}
+.logo small{letter-spacing:0}
+.tabs{background:rgba(9,14,27,.72);border-color:rgba(65,82,120,.48)}
+.tab-btn{transition:background .16s ease,color .16s ease,box-shadow .16s ease}
+.tab-btn.active{background:linear-gradient(135deg,#7165ed,#399fe0);box-shadow:0 3px 10px rgba(80,120,255,.18)}
+.btn{
+  border-color:rgba(66,84,125,.78);
+  background:linear-gradient(180deg,rgba(31,44,72,.96),rgba(21,31,53,.96));
+  transition:transform .12s ease,border-color .16s ease,background .16s ease,filter .16s ease;
+}
+.btn.primary{background:linear-gradient(135deg,#36d47b,#20ad63);color:#06180d}
+.btn.ai{background:linear-gradient(135deg,#7465f3,#9559e8)}
+.btn.ghost{background:rgba(12,18,33,.36)}
+.btn:hover:not(:disabled){filter:brightness(1.08);border-color:#596b96}
+.btn:active:not(:disabled){transform:translateY(1px) scale(.985)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;box-shadow:0 0 0 3px var(--focus-ring)
+}
+main{max-width:1240px}
+.tab.active{animation:fadeIn .16s ease}
+.panel{
+  background:linear-gradient(180deg,rgba(18,26,46,.98),rgba(15,22,39,.98));
+  border-color:rgba(53,69,105,.72);
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+}
+.panel-head{background:rgba(12,19,35,.66);border-bottom-color:rgba(53,69,105,.58)}
+.canvas-wrap{padding:12px}
+#gameCanvas,#sceneCanvas{box-shadow:0 0 0 1px rgba(75,96,143,.45),0 8px 24px rgba(0,0,0,.18)}
+.code-toolbar{scroll-padding-inline:8px}
+.file-chip,.chip{box-shadow:inset 0 1px rgba(255,255,255,.025)}
+.palette{background:rgba(13,20,37,.82);border-color:rgba(53,69,105,.7)}
+.pal-btn{transition:background .14s ease,border-color .14s ease,transform .12s ease}
+.pal-btn:hover{border-color:var(--accent);background:#202b49}
+.pal-btn:active{transform:scale(.96)}
+.editor-wrap{box-shadow:inset 0 1px rgba(255,255,255,.025);border-color:#2a3857}
+.gutter{background:#0b1120}
+.editor-area{background:#0d1424}
+#codeInput{caret-color:#70e5ff}
+.ac-popup{border-color:#3b4c73;background:#131c32;box-shadow:0 16px 44px rgba(0,0,0,.42)}
+.ac-item{transition:background .1s ease}
+.ac-item:hover{background:rgba(124,108,255,.13)}
+.ac-item.sel{background:linear-gradient(90deg,rgba(124,108,255,.24),rgba(56,214,255,.07))}
+.code-status{border-radius:11px;background:rgba(13,20,37,.6);border:1px solid rgba(53,69,105,.5)}
+#consoleOut{background:#0a1020;border-radius:0 0 13px 13px}
+.file-row,.obj-row,.sheet-item,.ex-btn{
+  border-color:rgba(53,69,105,.72);
+  transition:border-color .16s ease,background .16s ease,transform .12s ease;
+}
+.file-row:hover,.obj-row:hover,.sheet-item:hover{border-color:#465a86}
+.file-row.active,.obj-row.selected{box-shadow:inset 3px 0 0 var(--accent)}
+.fr-thumb{background:#0b1120}
+.props{border-top-color:rgba(53,69,105,.65)}
+.pf input,.ai-settings input,.ai-input textarea,#sheetSearch,select.sel{
+  border-color:#2a3857;transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
+}
+.pf input:focus,.ai-settings input:focus,.ai-input textarea:focus,#sheetSearch:focus,select.sel:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px rgba(137,123,255,.12)
+}
+.note{background:rgba(10,16,31,.72);border-color:#293957}
+.doc-section{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.doc-section h2{letter-spacing:-.015em}
+.doc-code{background:#0a1020;border-color:#273654;border-radius:12px}
+.api-chips code{background:#0c1426}
+.ex-btn{background:linear-gradient(180deg,#111a2e,#0e1628)}
+.ex-btn:hover{border-color:#4a5f91;transform:translateY(-1px)}
+.sheet-backdrop{background:rgba(3,6,14,.7);backdrop-filter:blur(4px)}
+.sheet{background:#11182b;border-color:#344465;box-shadow:0 -12px 44px rgba(0,0,0,.25)}
+.sheet-head{background:rgba(13,20,37,.72);border-bottom-color:#293957}
+.sheet-item{background:#0e1628}
+.ai-msg.bot{background:#151f36}
+.ai-msg.user{background:linear-gradient(135deg,#6259dd,#328fce)}
+.ai-input{background:rgba(13,20,37,.7);border-top-color:#293957}
+::selection{background:rgba(124,108,255,.35)}
+*{scrollbar-width:thin;scrollbar-color:#344465 transparent}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-thumb{background:#344465;border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+*::-webkit-scrollbar-track{background:transparent}
+@media (min-width:920px){
+  header{padding-inline:22px}
+  main{padding-top:20px}
+  .panel{border-radius:15px}
+}
+@media (max-width:640px){
+  header{gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.12)}
+  .tabs{padding:3px;border-radius:11px}
+  .tab-btn{border-radius:8px}
+  main{padding-top:10px}
+  .panel{border-radius:12px}
+  .panel-head{padding:10px 12px}
+  .canvas-wrap{padding:8px}
+  .editor-wrap{border-radius:9px}
+  .sheet{border-radius:17px 17px 0 0}
+  .sheet-head{padding:12px}
+  .sheet-list{padding-inline:11px}
+  .btn:active:not(:disabled),.ex-btn:active{transform:scale(.985)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
 </head>
 <body>
-
 <header>
 <div class="logo">🎮 MrrCode <small>MrrCode Studio · v0.2.0 · сенсор + ИИ <span class="mrr-cat">ฅ^•ﻌ•^ฅ</span></small></div>
 <nav class="tabs">
@@ -583,8 +754,8 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <div class="run-controls">
 <button class="btn ai" id="btnAI" title="ИИ-агент">🤖 ИИ</button>
 <button class="btn primary" id="btnRun" title="Запуск main.mrr на весь экран">▶ Запуск</button>
-<button class="btn stop" id="btnStop" disabled="">■ Стоп</button>
-<span id="runStatus" class="">Остановлено</span>
+<button class="btn stop" disabled="" id="btnStop">■ Стоп</button>
+<span class="" id="runStatus">Остановлено</span>
 </div>
 </header>
 <main>
@@ -616,7 +787,7 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <span class="chip accent">MrrCode</span>
 <span class="chip">Точка входа: main.mrr</span>
 <span class="spacer"></span>
-<select class="sel" id="examplesSelect" title="Примеры"><option value="">Примеры…</option><option value="modules">📦 Модули: from … import</option><option value="touch-platformer">🧱 Бег и прыжок касаниями</option><option value="scene-objects">🧩 Объекты сцены из кода</option><option value="touch-button">☝ Своя сенсорная кнопка</option><option value="ball-gravity">⚽ Мяч и гравитация</option><option value="orbit">🪐 Орбита</option><option value="paint">✍ Рисование пальцем</option><option value="modules">📦 Модули: from … import</option><option value="touch-platformer">🧱 Бег и прыжок касаниями</option><option value="scene-objects">🧩 Объекты сцены из кода</option><option value="touch-button">☝ Своя сенсорная кнопка</option><option value="ball-gravity">⚽ Мяч и гравитация</option><option value="orbit">🪐 Орбита</option><option value="paint">✍ Рисование пальцем</option><option value="modules">📦 Модули: from … import</option><option value="touch-platformer">🧱 Бег и прыжок касаниями</option><option value="scene-objects">🧩 Объекты сцены из кода</option><option value="touch-button">☝ Своя сенсорная кнопка</option><option value="ball-gravity">⚽ Мяч и гравитация</option><option value="orbit">🪐 Орбита</option><option value="paint">✍ Рисование пальцем</option><option value="modules">📦 Модули: from … import</option><option value="touch-platformer">🧱 Бег и прыжок касаниями</option><option value="scene-objects">🧩 Объекты сцены из кода</option><option value="touch-button">☝ Своя сенсорная кнопка</option><option value="ball-gravity">⚽ Мяч и гравитация</option><option value="orbit">🪐 Орбита</option><option value="paint">✍ Рисование пальцем</option></select>
+<select class="sel" id="examplesSelect" title="Примеры"><option value="">Примеры…</option></select>
 <button class="btn" id="btnSheet" title="Шпаргалка по языку">📖</button>
 <button class="btn ai" id="btnAiCode" title="ИИ-агент">🤖</button>
 <button class="btn primary" id="btnRunCode" title="Запуск main.mrr">▶</button>
@@ -628,11 +799,11 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <button class="btn" id="btnDebug" title="Режим отладки">🐞 Debug</button>
 <button class="btn" id="btnColorPicker" title="Выбрать цвет для HEX-кода">🎨 Цвет</button>
 <span class="color-tool" title="Текущий цвет в коде"><span class="color-swatch" id="codeColorSwatch" style="background: linear-gradient(135deg, rgb(255, 77, 77), rgb(77, 124, 255));"></span><span id="codeColorValue" style="font:12px var(--font-code);color:var(--muted)">—</span></span>
-<input aria-label="Выбор цвета" class="color-picker-input" id="codeColorInput" type="color" value="#70d6ff" data-start="18" data-end="26" data-original="#fffffff">
+<input aria-label="Выбор цвета" class="color-picker-input" data-end="26" data-original="#fffffff" data-start="18" id="codeColorInput" type="color" value="#70d6ff"/>
 </div>
-<div class="palette" id="touchPalette"><button type="button" class="pal-btn" title="Отступ">⇥</button><button type="button" class="pal-btn" title="Новая строка с отступом">⏎</button><div class="pal-sep"></div><button type="button" class="pal-btn">(</button><button type="button" class="pal-btn">)</button><button type="button" class="pal-btn">{</button><button type="button" class="pal-btn">}</button><button type="button" class="pal-btn">[</button><button type="button" class="pal-btn">]</button><button type="button" class="pal-btn">"</button><button type="button" class="pal-btn">,</button><button type="button" class="pal-btn">;</button><div class="pal-sep"></div><button type="button" class="pal-btn">=</button><button type="button" class="pal-btn">+</button><button type="button" class="pal-btn">-</button><button type="button" class="pal-btn">*</button><button type="button" class="pal-btn">/</button><button type="button" class="pal-btn">%</button><button type="button" class="pal-btn">&lt;</button><button type="button" class="pal-btn">&gt;</button><button type="button" class="pal-btn">==</button><button type="button" class="pal-btn">!=</button><button type="button" class="pal-btn">&lt;=</button><button type="button" class="pal-btn">&gt;=</button><button type="button" class="pal-btn">!</button><button type="button" class="pal-btn">&amp;&amp;</button><button type="button" class="pal-btn">||</button><div class="pal-sep"></div><button type="button" class="pal-btn">let</button><button type="button" class="pal-btn">const</button><button type="button" class="pal-btn">if</button><button type="button" class="pal-btn">else</button><button type="button" class="pal-btn">while</button><button type="button" class="pal-btn">for</button><button type="button" class="pal-btn">func</button><button type="button" class="pal-btn">return</button><button type="button" class="pal-btn">true</button><button type="button" class="pal-btn">false</button><button type="button" class="pal-btn">null</button><div class="pal-sep"></div><button type="button" class="pal-btn">start()</button><button type="button" class="pal-btn">update()</button><button type="button" class="pal-btn">from…import</button><div class="pal-sep"></div><button type="button" class="pal-btn">print</button><button type="button" class="pal-btn">clear</button><button type="button" class="pal-btn">rect</button><button type="button" class="pal-btn">circle</button><button type="button" class="pal-btn">line</button><button type="button" class="pal-btn">text</button><button type="button" class="pal-btn">sprite</button><button type="button" class="pal-btn">object</button><div class="pal-sep"></div><button type="button" class="pal-btn">pointerX()</button><button type="button" class="pal-btn">pointerY()</button><button type="button" class="pal-btn">pointerDownNow()</button><button type="button" class="pal-btn">touchCount()</button><button type="button" class="pal-btn">touchX()</button><button type="button" class="pal-btn">touchY()</button><div class="pal-sep"></div><button type="button" class="pal-btn">time()</button><button type="button" class="pal-btn">dt()</button><button type="button" class="pal-btn">random()</button><button type="button" class="pal-btn">rand()</button><button type="button" class="pal-btn">clamp()</button><button type="button" class="pal-btn">length()</button><button type="button" class="pal-btn">push()</button><button type="button" class="pal-btn">pop()</button><button type="button" class="pal-btn">sqrt()</button><button type="button" class="pal-btn">abs()</button><button type="button" class="pal-btn">sin()</button><button type="button" class="pal-btn">cos()</button><button type="button" class="pal-btn">floor()</button><button type="button" class="pal-btn">round()</button><button type="button" class="pal-btn">min()</button><button type="button" class="pal-btn">max()</button><button type="button" class="pal-btn" title="Отступ">⇥</button><button type="button" class="pal-btn" title="Новая строка с отступом">⏎</button><div class="pal-sep"></div><button type="button" class="pal-btn">(</button><button type="button" class="pal-btn">)</button><button type="button" class="pal-btn">{</button><button type="button" class="pal-btn">}</button><button type="button" class="pal-btn">[</button><button type="button" class="pal-btn">]</button><button type="button" class="pal-btn">"</button><button type="button" class="pal-btn">,</button><button type="button" class="pal-btn">;</button><div class="pal-sep"></div><button type="button" class="pal-btn">=</button><button type="button" class="pal-btn">+</button><button type="button" class="pal-btn">-</button><button type="button" class="pal-btn">*</button><button type="button" class="pal-btn">/</button><button type="button" class="pal-btn">%</button><button type="button" class="pal-btn">&lt;</button><button type="button" class="pal-btn">&gt;</button><button type="button" class="pal-btn">==</button><button type="button" class="pal-btn">!=</button><button type="button" class="pal-btn">&lt;=</button><button type="button" class="pal-btn">&gt;=</button><button type="button" class="pal-btn">!</button><button type="button" class="pal-btn">&amp;&amp;</button><button type="button" class="pal-btn">||</button><div class="pal-sep"></div><button type="button" class="pal-btn">let</button><button type="button" class="pal-btn">const</button><button type="button" class="pal-btn">if</button><button type="button" class="pal-btn">else</button><button type="button" class="pal-btn">while</button><button type="button" class="pal-btn">for</button><button type="button" class="pal-btn">func</button><button type="button" class="pal-btn">return</button><button type="button" class="pal-btn">true</button><button type="button" class="pal-btn">false</button><button type="button" class="pal-btn">null</button><div class="pal-sep"></div><button type="button" class="pal-btn">start()</button><button type="button" class="pal-btn">update()</button><button type="button" class="pal-btn">from…import</button><div class="pal-sep"></div><button type="button" class="pal-btn">print</button><button type="button" class="pal-btn">clear</button><button type="button" class="pal-btn">rect</button><button type="button" class="pal-btn">circle</button><button type="button" class="pal-btn">line</button><button type="button" class="pal-btn">text</button><button type="button" class="pal-btn">sprite</button><button type="button" class="pal-btn">object</button><div class="pal-sep"></div><button type="button" class="pal-btn">pointerX()</button><button type="button" class="pal-btn">pointerY()</button><button type="button" class="pal-btn">pointerDownNow()</button><button type="button" class="pal-btn">touchCount()</button><button type="button" class="pal-btn">touchX()</button><button type="button" class="pal-btn">touchY()</button><div class="pal-sep"></div><button type="button" class="pal-btn">time()</button><button type="button" class="pal-btn">dt()</button><button type="button" class="pal-btn">random()</button><button type="button" class="pal-btn">rand()</button><button type="button" class="pal-btn">clamp()</button><button type="button" class="pal-btn">length()</button><button type="button" class="pal-btn">push()</button><button type="button" class="pal-btn">pop()</button><button type="button" class="pal-btn">sqrt()</button><button type="button" class="pal-btn">abs()</button><button type="button" class="pal-btn">sin()</button><button type="button" class="pal-btn">cos()</button><button type="button" class="pal-btn">floor()</button><button type="button" class="pal-btn">round()</button><button type="button" class="pal-btn">min()</button><button type="button" class="pal-btn">max()</button><button type="button" class="pal-btn" title="Отступ">⇥</button><button type="button" class="pal-btn" title="Новая строка с отступом">⏎</button><div class="pal-sep"></div><button type="button" class="pal-btn">(</button><button type="button" class="pal-btn">)</button><button type="button" class="pal-btn">{</button><button type="button" class="pal-btn">}</button><button type="button" class="pal-btn">[</button><button type="button" class="pal-btn">]</button><button type="button" class="pal-btn">"</button><button type="button" class="pal-btn">,</button><button type="button" class="pal-btn">;</button><div class="pal-sep"></div><button type="button" class="pal-btn">=</button><button type="button" class="pal-btn">+</button><button type="button" class="pal-btn">-</button><button type="button" class="pal-btn">*</button><button type="button" class="pal-btn">/</button><button type="button" class="pal-btn">%</button><button type="button" class="pal-btn">&lt;</button><button type="button" class="pal-btn">&gt;</button><button type="button" class="pal-btn">==</button><button type="button" class="pal-btn">!=</button><button type="button" class="pal-btn">&lt;=</button><button type="button" class="pal-btn">&gt;=</button><button type="button" class="pal-btn">!</button><button type="button" class="pal-btn">&amp;&amp;</button><button type="button" class="pal-btn">||</button><div class="pal-sep"></div><button type="button" class="pal-btn">let</button><button type="button" class="pal-btn">const</button><button type="button" class="pal-btn">if</button><button type="button" class="pal-btn">else</button><button type="button" class="pal-btn">while</button><button type="button" class="pal-btn">for</button><button type="button" class="pal-btn">func</button><button type="button" class="pal-btn">return</button><button type="button" class="pal-btn">true</button><button type="button" class="pal-btn">false</button><button type="button" class="pal-btn">null</button><div class="pal-sep"></div><button type="button" class="pal-btn">start()</button><button type="button" class="pal-btn">update()</button><button type="button" class="pal-btn">from…import</button><div class="pal-sep"></div><button type="button" class="pal-btn">print</button><button type="button" class="pal-btn">clear</button><button type="button" class="pal-btn">rect</button><button type="button" class="pal-btn">circle</button><button type="button" class="pal-btn">line</button><button type="button" class="pal-btn">text</button><button type="button" class="pal-btn">sprite</button><button type="button" class="pal-btn">object</button><div class="pal-sep"></div><button type="button" class="pal-btn">pointerX()</button><button type="button" class="pal-btn">pointerY()</button><button type="button" class="pal-btn">pointerDownNow()</button><button type="button" class="pal-btn">touchCount()</button><button type="button" class="pal-btn">touchX()</button><button type="button" class="pal-btn">touchY()</button><div class="pal-sep"></div><button type="button" class="pal-btn">time()</button><button type="button" class="pal-btn">dt()</button><button type="button" class="pal-btn">random()</button><button type="button" class="pal-btn">rand()</button><button type="button" class="pal-btn">clamp()</button><button type="button" class="pal-btn">length()</button><button type="button" class="pal-btn">push()</button><button type="button" class="pal-btn">pop()</button><button type="button" class="pal-btn">sqrt()</button><button type="button" class="pal-btn">abs()</button><button type="button" class="pal-btn">sin()</button><button type="button" class="pal-btn">cos()</button><button type="button" class="pal-btn">floor()</button><button type="button" class="pal-btn">round()</button><button type="button" class="pal-btn">min()</button><button type="button" class="pal-btn">max()</button><button type="button" class="pal-btn" title="Отступ">⇥</button><button type="button" class="pal-btn" title="Новая строка с отступом">⏎</button><div class="pal-sep"></div><button type="button" class="pal-btn">(</button><button type="button" class="pal-btn">)</button><button type="button" class="pal-btn">{</button><button type="button" class="pal-btn">}</button><button type="button" class="pal-btn">[</button><button type="button" class="pal-btn">]</button><button type="button" class="pal-btn">"</button><button type="button" class="pal-btn">,</button><button type="button" class="pal-btn">;</button><div class="pal-sep"></div><button type="button" class="pal-btn">=</button><button type="button" class="pal-btn">+</button><button type="button" class="pal-btn">-</button><button type="button" class="pal-btn">*</button><button type="button" class="pal-btn">/</button><button type="button" class="pal-btn">%</button><button type="button" class="pal-btn">&lt;</button><button type="button" class="pal-btn">&gt;</button><button type="button" class="pal-btn">==</button><button type="button" class="pal-btn">!=</button><button type="button" class="pal-btn">&lt;=</button><button type="button" class="pal-btn">&gt;=</button><button type="button" class="pal-btn">!</button><button type="button" class="pal-btn">&amp;&amp;</button><button type="button" class="pal-btn">||</button><div class="pal-sep"></div><button type="button" class="pal-btn">let</button><button type="button" class="pal-btn">const</button><button type="button" class="pal-btn">if</button><button type="button" class="pal-btn">else</button><button type="button" class="pal-btn">while</button><button type="button" class="pal-btn">for</button><button type="button" class="pal-btn">func</button><button type="button" class="pal-btn">return</button><button type="button" class="pal-btn">true</button><button type="button" class="pal-btn">false</button><button type="button" class="pal-btn">null</button><div class="pal-sep"></div><button type="button" class="pal-btn">start()</button><button type="button" class="pal-btn">update()</button><button type="button" class="pal-btn">from…import</button><div class="pal-sep"></div><button type="button" class="pal-btn">print</button><button type="button" class="pal-btn">clear</button><button type="button" class="pal-btn">rect</button><button type="button" class="pal-btn">circle</button><button type="button" class="pal-btn">line</button><button type="button" class="pal-btn">text</button><button type="button" class="pal-btn">sprite</button><button type="button" class="pal-btn">object</button><div class="pal-sep"></div><button type="button" class="pal-btn">pointerX()</button><button type="button" class="pal-btn">pointerY()</button><button type="button" class="pal-btn">pointerDownNow()</button><button type="button" class="pal-btn">touchCount()</button><button type="button" class="pal-btn">touchX()</button><button type="button" class="pal-btn">touchY()</button><div class="pal-sep"></div><button type="button" class="pal-btn">time()</button><button type="button" class="pal-btn">dt()</button><button type="button" class="pal-btn">random()</button><button type="button" class="pal-btn">rand()</button><button type="button" class="pal-btn">clamp()</button><button type="button" class="pal-btn">length()</button><button type="button" class="pal-btn">push()</button><button type="button" class="pal-btn">pop()</button><button type="button" class="pal-btn">sqrt()</button><button type="button" class="pal-btn">abs()</button><button type="button" class="pal-btn">sin()</button><button type="button" class="pal-btn">cos()</button><button type="button" class="pal-btn">floor()</button><button type="button" class="pal-btn">round()</button><button type="button" class="pal-btn">min()</button><button type="button" class="pal-btn">max()</button></div>
+<div class="palette" id="touchPalette"><button class="pal-btn" title="Отступ" type="button">⇥</button><button class="pal-btn" title="Новая строка с отступом" type="button">⏎</button><div class="pal-sep"></div><button class="pal-btn" type="button">(</button><button class="pal-btn" type="button">)</button><button class="pal-btn" type="button">{</button><button class="pal-btn" type="button">}</button><button class="pal-btn" type="button">[</button><button class="pal-btn" type="button">]</button><button class="pal-btn" type="button">"</button><button class="pal-btn" type="button">,</button><button class="pal-btn" type="button">;</button><div class="pal-sep"></div><button class="pal-btn" type="button">=</button><button class="pal-btn" type="button">+</button><button class="pal-btn" type="button">-</button><button class="pal-btn" type="button">*</button><button class="pal-btn" type="button">/</button><button class="pal-btn" type="button">%</button><button class="pal-btn" type="button">&lt;</button><button class="pal-btn" type="button">&gt;</button><button class="pal-btn" type="button">==</button><button class="pal-btn" type="button">!=</button><button class="pal-btn" type="button">&lt;=</button><button class="pal-btn" type="button">&gt;=</button><button class="pal-btn" type="button">!</button><button class="pal-btn" type="button">&amp;&amp;</button><button class="pal-btn" type="button">||</button><div class="pal-sep"></div><button class="pal-btn" type="button">let</button><button class="pal-btn" type="button">const</button><button class="pal-btn" type="button">if</button><button class="pal-btn" type="button">else</button><button class="pal-btn" type="button">while</button><button class="pal-btn" type="button">for</button><button class="pal-btn" type="button">func</button><button class="pal-btn" type="button">return</button><button class="pal-btn" type="button">true</button><button class="pal-btn" type="button">false</button><button class="pal-btn" type="button">null</button><div class="pal-sep"></div><button class="pal-btn" type="button">start()</button><button class="pal-btn" type="button">update()</button><button class="pal-btn" type="button">from…import</button><div class="pal-sep"></div><button class="pal-btn" type="button">print</button><button class="pal-btn" type="button">clear</button><button class="pal-btn" type="button">rect</button><button class="pal-btn" type="button">circle</button><button class="pal-btn" type="button">line</button><button class="pal-btn" type="button">text</button><button class="pal-btn" type="button">sprite</button><button class="pal-btn" type="button">object</button><div class="pal-sep"></div><button class="pal-btn" type="button">pointerX()</button><button class="pal-btn" type="button">pointerY()</button><button class="pal-btn" type="button">pointerDownNow()</button><button class="pal-btn" type="button">touchCount()</button><button class="pal-btn" type="button">touchX()</button><button class="pal-btn" type="button">touchY()</button><div class="pal-sep"></div><button class="pal-btn" type="button">time()</button><button class="pal-btn" type="button">dt()</button><button class="pal-btn" type="button">random()</button><button class="pal-btn" type="button">rand()</button><button class="pal-btn" type="button">clamp()</button><button class="pal-btn" type="button">length()</button><button class="pal-btn" type="button">push()</button><button class="pal-btn" type="button">pop()</button><button class="pal-btn" type="button">sqrt()</button><button class="pal-btn" type="button">abs()</button><button class="pal-btn" type="button">sin()</button><button class="pal-btn" type="button">cos()</button><button class="pal-btn" type="button">floor()</button><button class="pal-btn" type="button">round()</button><button class="pal-btn" type="button">min()</button><button class="pal-btn" type="button">max()</button><button class="pal-btn" title="Отступ" type="button">⇥</button><button class="pal-btn" title="Новая строка с отступом" type="button">⏎</button><div class="pal-sep"></div><button class="pal-btn" type="button">(</button><button class="pal-btn" type="button">)</button><button class="pal-btn" type="button">{</button><button class="pal-btn" type="button">}</button><button class="pal-btn" type="button">[</button><button class="pal-btn" type="button">]</button><button class="pal-btn" type="button">"</button><button class="pal-btn" type="button">,</button><button class="pal-btn" type="button">;</button><div class="pal-sep"></div><button class="pal-btn" type="button">=</button><button class="pal-btn" type="button">+</button><button class="pal-btn" type="button">-</button><button class="pal-btn" type="button">*</button><button class="pal-btn" type="button">/</button><button class="pal-btn" type="button">%</button><button class="pal-btn" type="button">&lt;</button><button class="pal-btn" type="button">&gt;</button><button class="pal-btn" type="button">==</button><button class="pal-btn" type="button">!=</button><button class="pal-btn" type="button">&lt;=</button><button class="pal-btn" type="button">&gt;=</button><button class="pal-btn" type="button">!</button><button class="pal-btn" type="button">&amp;&amp;</button><button class="pal-btn" type="button">||</button><div class="pal-sep"></div><button class="pal-btn" type="button">let</button><button class="pal-btn" type="button">const</button><button class="pal-btn" type="button">if</button><button class="pal-btn" type="button">else</button><button class="pal-btn" type="button">while</button><button class="pal-btn" type="button">for</button><button class="pal-btn" type="button">func</button><button class="pal-btn" type="button">return</button><button class="pal-btn" type="button">true</button><button class="pal-btn" type="button">false</button><button class="pal-btn" type="button">null</button><div class="pal-sep"></div><button class="pal-btn" type="button">start()</button><button class="pal-btn" type="button">update()</button><button class="pal-btn" type="button">from…import</button><div class="pal-sep"></div><button class="pal-btn" type="button">print</button><button class="pal-btn" type="button">clear</button><button class="pal-btn" type="button">rect</button><button class="pal-btn" type="button">circle</button><button class="pal-btn" type="button">line</button><button class="pal-btn" type="button">text</button><button class="pal-btn" type="button">sprite</button><button class="pal-btn" type="button">object</button><div class="pal-sep"></div><button class="pal-btn" type="button">pointerX()</button><button class="pal-btn" type="button">pointerY()</button><button class="pal-btn" type="button">pointerDownNow()</button><button class="pal-btn" type="button">touchCount()</button><button class="pal-btn" type="button">touchX()</button><button class="pal-btn" type="button">touchY()</button><div class="pal-sep"></div><button class="pal-btn" type="button">time()</button><button class="pal-btn" type="button">dt()</button><button class="pal-btn" type="button">random()</button><button class="pal-btn" type="button">rand()</button><button class="pal-btn" type="button">clamp()</button><button class="pal-btn" type="button">length()</button><button class="pal-btn" type="button">push()</button><button class="pal-btn" type="button">pop()</button><button class="pal-btn" type="button">sqrt()</button><button class="pal-btn" type="button">abs()</button><button class="pal-btn" type="button">sin()</button><button class="pal-btn" type="button">cos()</button><button class="pal-btn" type="button">floor()</button><button class="pal-btn" type="button">round()</button><button class="pal-btn" type="button">min()</button><button class="pal-btn" type="button">max()</button><button class="pal-btn" title="Отступ" type="button">⇥</button><button class="pal-btn" title="Новая строка с отступом" type="button">⏎</button><div class="pal-sep"></div><button class="pal-btn" type="button">(</button><button class="pal-btn" type="button">)</button><button class="pal-btn" type="button">{</button><button class="pal-btn" type="button">}</button><button class="pal-btn" type="button">[</button><button class="pal-btn" type="button">]</button><button class="pal-btn" type="button">"</button><button class="pal-btn" type="button">,</button><button class="pal-btn" type="button">;</button><div class="pal-sep"></div><button class="pal-btn" type="button">=</button><button class="pal-btn" type="button">+</button><button class="pal-btn" type="button">-</button><button class="pal-btn" type="button">*</button><button class="pal-btn" type="button">/</button><button class="pal-btn" type="button">%</button><button class="pal-btn" type="button">&lt;</button><button class="pal-btn" type="button">&gt;</button><button class="pal-btn" type="button">==</button><button class="pal-btn" type="button">!=</button><button class="pal-btn" type="button">&lt;=</button><button class="pal-btn" type="button">&gt;=</button><button class="pal-btn" type="button">!</button><button class="pal-btn" type="button">&amp;&amp;</button><button class="pal-btn" type="button">||</button><div class="pal-sep"></div><button class="pal-btn" type="button">let</button><button class="pal-btn" type="button">const</button><button class="pal-btn" type="button">if</button><button class="pal-btn" type="button">else</button><button class="pal-btn" type="button">while</button><button class="pal-btn" type="button">for</button><button class="pal-btn" type="button">func</button><button class="pal-btn" type="button">return</button><button class="pal-btn" type="button">true</button><button class="pal-btn" type="button">false</button><button class="pal-btn" type="button">null</button><div class="pal-sep"></div><button class="pal-btn" type="button">start()</button><button class="pal-btn" type="button">update()</button><button class="pal-btn" type="button">from…import</button><div class="pal-sep"></div><button class="pal-btn" type="button">print</button><button class="pal-btn" type="button">clear</button><button class="pal-btn" type="button">rect</button><button class="pal-btn" type="button">circle</button><button class="pal-btn" type="button">line</button><button class="pal-btn" type="button">text</button><button class="pal-btn" type="button">sprite</button><button class="pal-btn" type="button">object</button><div class="pal-sep"></div><button class="pal-btn" type="button">pointerX()</button><button class="pal-btn" type="button">pointerY()</button><button class="pal-btn" type="button">pointerDownNow()</button><button class="pal-btn" type="button">touchCount()</button><button class="pal-btn" type="button">touchX()</button><button class="pal-btn" type="button">touchY()</button><div class="pal-sep"></div><button class="pal-btn" type="button">time()</button><button class="pal-btn" type="button">dt()</button><button class="pal-btn" type="button">random()</button><button class="pal-btn" type="button">rand()</button><button class="pal-btn" type="button">clamp()</button><button class="pal-btn" type="button">length()</button><button class="pal-btn" type="button">push()</button><button class="pal-btn" type="button">pop()</button><button class="pal-btn" type="button">sqrt()</button><button class="pal-btn" type="button">abs()</button><button class="pal-btn" type="button">sin()</button><button class="pal-btn" type="button">cos()</button><button class="pal-btn" type="button">floor()</button><button class="pal-btn" type="button">round()</button><button class="pal-btn" type="button">min()</button><button class="pal-btn" type="button">max()</button><button class="pal-btn" title="Отступ" type="button">⇥</button><button class="pal-btn" title="Новая строка с отступом" type="button">⏎</button><div class="pal-sep"></div><button class="pal-btn" type="button">(</button><button class="pal-btn" type="button">)</button><button class="pal-btn" type="button">{</button><button class="pal-btn" type="button">}</button><button class="pal-btn" type="button">[</button><button class="pal-btn" type="button">]</button><button class="pal-btn" type="button">"</button><button class="pal-btn" type="button">,</button><button class="pal-btn" type="button">;</button><div class="pal-sep"></div><button class="pal-btn" type="button">=</button><button class="pal-btn" type="button">+</button><button class="pal-btn" type="button">-</button><button class="pal-btn" type="button">*</button><button class="pal-btn" type="button">/</button><button class="pal-btn" type="button">%</button><button class="pal-btn" type="button">&lt;</button><button class="pal-btn" type="button">&gt;</button><button class="pal-btn" type="button">==</button><button class="pal-btn" type="button">!=</button><button class="pal-btn" type="button">&lt;=</button><button class="pal-btn" type="button">&gt;=</button><button class="pal-btn" type="button">!</button><button class="pal-btn" type="button">&amp;&amp;</button><button class="pal-btn" type="button">||</button><div class="pal-sep"></div><button class="pal-btn" type="button">let</button><button class="pal-btn" type="button">const</button><button class="pal-btn" type="button">if</button><button class="pal-btn" type="button">else</button><button class="pal-btn" type="button">while</button><button class="pal-btn" type="button">for</button><button class="pal-btn" type="button">func</button><button class="pal-btn" type="button">return</button><button class="pal-btn" type="button">true</button><button class="pal-btn" type="button">false</button><button class="pal-btn" type="button">null</button><div class="pal-sep"></div><button class="pal-btn" type="button">start()</button><button class="pal-btn" type="button">update()</button><button class="pal-btn" type="button">from…import</button><div class="pal-sep"></div><button class="pal-btn" type="button">print</button><button class="pal-btn" type="button">clear</button><button class="pal-btn" type="button">rect</button><button class="pal-btn" type="button">circle</button><button class="pal-btn" type="button">line</button><button class="pal-btn" type="button">text</button><button class="pal-btn" type="button">sprite</button><button class="pal-btn" type="button">object</button><div class="pal-sep"></div><button class="pal-btn" type="button">pointerX()</button><button class="pal-btn" type="button">pointerY()</button><button class="pal-btn" type="button">pointerDownNow()</button><button class="pal-btn" type="button">touchCount()</button><button class="pal-btn" type="button">touchX()</button><button class="pal-btn" type="button">touchY()</button><div class="pal-sep"></div><button class="pal-btn" type="button">time()</button><button class="pal-btn" type="button">dt()</button><button class="pal-btn" type="button">random()</button><button class="pal-btn" type="button">rand()</button><button class="pal-btn" type="button">clamp()</button><button class="pal-btn" type="button">length()</button><button class="pal-btn" type="button">push()</button><button class="pal-btn" type="button">pop()</button><button class="pal-btn" type="button">sqrt()</button><button class="pal-btn" type="button">abs()</button><button class="pal-btn" type="button">sin()</button><button class="pal-btn" type="button">cos()</button><button class="pal-btn" type="button">floor()</button><button class="pal-btn" type="button">round()</button><button class="pal-btn" type="button">min()</button><button class="pal-btn" type="button">max()</button></div>
 <div class="panel editor-wrap" id="editorWrap">
-<div class="gutter"><div class="gutter-inner" id="gutterInner" data-n="29" style="transform: translateY(0px);">1
+<div class="gutter"><div class="gutter-inner" data-n="29" id="gutterInner" style="transform: translateY(0px);">1
 2
 3
 4
@@ -694,11 +865,6 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <span class="c-punc">}</span>
 </code></pre>
 <textarea autocapitalize="off" autocomplete="off" autocorrect="off" enterkeyhint="next" id="codeInput" spellcheck="false" wrap="off"></textarea>
-<div class="ac-popup hidden" id="acPopup" style="left: 31.3646px; top: 141.531px;">
-<button id="acClose">✕</button>
-<div id="acList"><div class="ac-item sel" data-i="0"><span class="ac-kind k-kw">ключ</span><span class="ac-name">for</span><span class="ac-sig">for</span></div><div class="ac-item" data-i="1"><span class="ac-kind k-snip">шабл</span><span class="ac-name">for</span><span class="ac-sig">шаблон цикла for</span></div><div class="ac-item" data-i="2"><span class="ac-kind k-kw">ключ</span><span class="ac-name">from</span><span class="ac-sig">from</span></div><div class="ac-item" data-i="3"><span class="ac-kind k-snip">шабл</span><span class="ac-name">from</span><span class="ac-sig">from "файл" import имя;</span></div><div class="ac-item" data-i="4"><span class="ac-kind k-fn">встр</span><span class="ac-name">floor</span><span class="ac-sig">floor(x)</span></div><div class="ac-item" data-i="5"><span class="ac-kind k-kw">ключ</span><span class="ac-name">false</span><span class="ac-sig">false</span></div><div class="ac-item" data-i="6"><span class="ac-kind k-snip">шабл</span><span class="ac-name">forof</span><span class="ac-sig">шаблон for … of</span></div><div class="ac-item" data-i="7"><span class="ac-kind k-kw">ключ</span><span class="ac-name">function</span><span class="ac-sig">function</span></div><div class="ac-item" data-i="8"><span class="ac-kind k-kw">ключ</span><span class="ac-name">if</span><span class="ac-sig">if</span></div><div class="ac-item" data-i="9"><span class="ac-kind k-kw">ключ</span><span class="ac-name">of</span><span class="ac-sig">of</span></div><div class="ac-item" data-i="10"><span class="ac-kind k-snip">шабл</span><span class="ac-name">ifelse</span><span class="ac-sig">шаблон if / else</span></div></div>
-<div class="ac-doc" id="acDoc"><b>for</b> — Цикл: for (let i = 0; i &lt; 10; i++) { … } или for (let item of array) { … }</div>
-</div>
 </div>
 </div>
 <div class="panel code-status">
@@ -706,10 +872,15 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <span class="status-sep"></span>
 <span id="hintBar">💡 Печатай имя — появится список, тапни вариант · «📖» — шпаргалка · «🤖» — ИИ напишет код за тебя</span>
 </div>
+<div class="ac-popup hidden" id="acPopup" style="left: 31.3646px; top: 141.531px;">
+<button id="acClose">✕</button>
+<div id="acList"><div class="ac-item sel" data-i="0"><span class="ac-kind k-kw">ключ</span><span class="ac-name">for</span><span class="ac-sig">for</span></div><div class="ac-item" data-i="1"><span class="ac-kind k-snip">шабл</span><span class="ac-name">for</span><span class="ac-sig">шаблон цикла for</span></div><div class="ac-item" data-i="2"><span class="ac-kind k-kw">ключ</span><span class="ac-name">from</span><span class="ac-sig">from</span></div><div class="ac-item" data-i="3"><span class="ac-kind k-snip">шабл</span><span class="ac-name">from</span><span class="ac-sig">from "файл" import имя;</span></div><div class="ac-item" data-i="4"><span class="ac-kind k-fn">встр</span><span class="ac-name">floor</span><span class="ac-sig">floor(x)</span></div><div class="ac-item" data-i="5"><span class="ac-kind k-kw">ключ</span><span class="ac-name">false</span><span class="ac-sig">false</span></div><div class="ac-item" data-i="6"><span class="ac-kind k-snip">шабл</span><span class="ac-name">forof</span><span class="ac-sig">шаблон for … of</span></div><div class="ac-item" data-i="7"><span class="ac-kind k-kw">ключ</span><span class="ac-name">function</span><span class="ac-sig">function</span></div><div class="ac-item" data-i="8"><span class="ac-kind k-kw">ключ</span><span class="ac-name">if</span><span class="ac-sig">if</span></div><div class="ac-item" data-i="9"><span class="ac-kind k-kw">ключ</span><span class="ac-name">of</span><span class="ac-sig">of</span></div><div class="ac-item" data-i="10"><span class="ac-kind k-snip">шабл</span><span class="ac-name">ifelse</span><span class="ac-sig">шаблон if / else</span></div></div>
+<div class="ac-doc" id="acDoc"><b>for</b> — Цикл: for (let i = 0; i &lt; 10; i++) { … } или for (let item of array) { … }</div>
+</div>
 <div class="panel" id="debugPanel" style="display:none;margin-top:8px">
 <div class="panel-head"><b>🐞 Отладка</b><span id="debugStatus">Выключена</span></div>
 <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-<label>Строка <input id="debugLine" min="1" style="width:70px" type="number" value="1"></label>
+<label>Строка <input id="debugLine" min="1" style="width:70px" type="number" value="1"/></label>
 <button class="btn mini" id="btnToggleBreakpoint">● Точка</button>
 <button class="btn mini" id="btnClearBreakpoints">Очистить точки</button>
 <span class="chip" id="breakpointList">Нет точек</span>
@@ -722,7 +893,7 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <div class="scene-layout">
 <div class="panel scene-main">
 <div class="panel-head"><b>Редактор сцены</b><span>Перетаскивай объекты пальцем</span></div>
-<div class="row-btns" style="margin:0 0 8px"><button class="btn mini" id="sceneGridToggle" aria-pressed="true">▦ Сетка: вкл.</button><button class="btn mini" id="sceneSnapToggle" aria-pressed="false">🧲 Привязка: выкл.</button><button class="btn mini" id="sceneResizeToggle" aria-pressed="true">↘ Размер: вкл.</button></div><div class="preview-wrap"><canvas height="450" id="sceneCanvas" width="800"></canvas></div>
+<div class="row-btns" style="margin:0 0 8px"><button aria-pressed="true" class="btn mini" id="sceneGridToggle">▦ Сетка: вкл.</button><button aria-pressed="false" class="btn mini" id="sceneSnapToggle">🧲 Привязка: выкл.</button><button aria-pressed="true" class="btn mini" id="sceneResizeToggle">↘ Размер: вкл.</button></div><div class="preview-wrap"><canvas height="450" id="sceneCanvas" width="800"></canvas></div>
 <div class="props" id="propsPanel"><div class="props-empty">Выбери объект в списке или тапни по нему на предпросмотре. Объекты можно перетаскивать пальцем прямо на холсте.</div></div>
 </div>
 <div class="panel scene-side">
@@ -845,7 +1016,7 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <span class="f">circle</span>(<span class="n">220</span>, <span class="n">100</span>, <span class="n">30</span>, <span class="s">"#70d6ff"</span>);
 <span class="f">line</span>(<span class="n">10</span>, <span class="n">10</span>, <span class="n">300</span>, <span class="n">200</span>, <span class="s">"#ffffff"</span>, <span class="n">2</span>);
 <span class="f">text</span>(<span class="s">"Привет!"</span>, <span class="n">20</span>, <span class="n">140</span>, <span class="s">"#ffffff"</span>, <span class="n">20</span>);</pre>
-<p>Движок <b>сам очищает экран в начале каждого кадра</b> — старая графика не наслаивается. Вызови <code>clear(color)</code> в начале <code>update</code> для цвета фона. Для «следа» от пальца копи точки в массив и перерисовывай их каждый кадр.</p>
+<p>Движок <b>сам очищает экран в начале каждого кадра</b> — старая графика не наслаивается. Вызови <code>background(color)</code> один раз в <code>start()</code>, чтобы задать постоянный фон. <code>clear(color)</code> меняет заливку только текущего кадра; если вызывать его в каждом <code>update</code>, он будет перекрашивать каждый кадр и перекроет заданный фон. Для «следа» от пальца копи точки в массив и перерисовывай их каждый кадр.</p><p>Для прокрутки мира используй <code>camera(x,y)</code>; она сдвигает рисование, но не координаты касаний. Для столкновений прямоугольников есть <code>overlapRect(...)</code>, а <code>moveBody(body,dt,gravity)</code> обновляет объект с полями <code>x,y,vx,vy</code>. Анимированный спрайт-лист рисуется через <code>spriteAnim(...)</code>.</p>
 </div>
 <div class="panel doc-section">
 <h2><span class="num">6</span>Объекты вкладки «Сцена»</h2>
@@ -889,8 +1060,14 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 </div>
 <div class="panel doc-section">
 <h2><span class="num">9</span>Полезные встроенные функции</h2>
-<div class="api-chips" id="apiChips">pointerX()pointerY()pointerDownNow()touchCount()touchX(i)touchY(i)clear(color?)rect(x, y, w, h, color)circle(x, y, r, color)line(x1, y1, x2, y2, color, width?)text(str, x, y, color, size?)sprite(name, x, y, w?, h?)spriteAnim(name,x,y,w,h,frameW,frameH,fps)camera(x,y)overlapRect(ax,ay,aw,ah,bx,by,bw,bh)moveBody(body,dt,gravity)object(name)random()rand(min, max)abs(x)sqrt(x)sin(a)cos(a)floor(x)ceil(x)round(x)min(a, b)max(a, b)clamp(value, min, max)length(value)push(array, value)pop(array)time()dt()rgba(r, g, b, a)print(...values)lerp(a, b, t)map(value, inMin, inMax, outMin, outMax)sign(x)randomInt(min, max)toString(value)toNumber(value)contains(text, part)join(array, separator)split(text, separator)save(key, value)load(key, defaultValue)playTone(frequency, duration, volume?)stopSound()</div>
-<p>Полный список с описаниями и кнопкой «Вставить» — в «📖 Шпаргалке» на вкладке «Код».</p>
+<div class="api-groups" id="apiChips">
+<div class="api-group"><h3>🎮 Управление и события</h3><div class="api-chips"><code>start()</code><code>update(dt)</code><code>pointerDown(x,y)</code><code>pointerMove(x,y)</code><code>pointerUp(x,y)</code><code>pointerX()</code><code>pointerY()</code><code>pointerDownNow()</code><code>touchCount()</code><code>touchX(i)</code><code>touchY(i)</code></div></div>
+<div class="api-group"><h3>🎨 Рисование и фон</h3><div class="api-chips"><code>background(color)</code><code>clear(color?)</code><code>rect(x,y,w,h,color)</code><code>circle(x,y,r,color)</code><code>line(x1,y1,x2,y2,color,width?)</code><code>text(value,x,y,color,size?)</code><code>sprite(name,x,y,w?,h?)</code><code>spriteAnim(name,x,y,w,h,frameW,frameH,fps)</code><code>camera(x,y)</code><code>rgba(r,g,b,a)</code><code>object(name)</code></div></div>
+<div class="api-group"><h3>🧮 Математика и время</h3><div class="api-chips"><code>random()</code><code>rand(min,max)</code><code>randomInt(min,max)</code><code>abs(x)</code><code>sqrt(x)</code><code>sin(a)</code><code>cos(a)</code><code>atan2(y,x)</code><code>floor(x)</code><code>ceil(x)</code><code>round(x)</code><code>min(a,b)</code><code>max(a,b)</code><code>clamp(value,min,max)</code><code>pow(a,b)</code><code>lerp(a,b,t)</code><code>map(value,inMin,inMax,outMin,outMax)</code><code>sign(x)</code><code>time()</code><code>dt()</code></div></div>
+<div class="api-group"><h3>📦 Массивы и строки</h3><div class="api-chips"><code>length(value)</code><code>push(array,value)</code><code>pop(array)</code><code>splice(array,start,count,...items)</code><code>shift(array)</code><code>unshift(array,value)</code><code>indexOf(array,value)</code><code>slice(array,start,end?)</code><code>join(array,separator)</code><code>split(text,separator)</code><code>contains(collection,value)</code><code>trim(text)</code><code>upper(text)</code><code>lower(text)</code><code>startsWith(text,prefix)</code><code>endsWith(text,suffix)</code><code>replace(text,from,to)</code><code>typeof(value)</code><code>toString(value)</code><code>toNumber(value)</code></div></div>
+<div class="api-group"><h3>🛠️ Физика, данные и звук</h3><div class="api-chips"><code>overlapRect(ax,ay,aw,ah,bx,by,bw,bh)</code><code>moveBody(body,dt,gravity)</code><code>save(key,value)</code><code>load(key,defaultValue)</code><code>playTone(frequency,duration,volume?)</code><code>stopSound()</code><code>print(...values)</code></div></div>
+</div>
+<p>Функции сгруппированы по назначению. Нажми на «📖 Шпаргалка» во вкладке «Код», чтобы найти сигнатуру, прочитать описание и вставить вызов в редактор. Для фона игры используй <code>background("#182235")</code>; в отличие от <code>clear(color)</code>, этот цвет сохраняется между кадрами.</p>
 </div>
 <div class="panel doc-section">
 <h2><span class="num">10</span>Редактор на сенсоре, сохранение и ограничения</h2>
@@ -907,13 +1084,13 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <div class="panel doc-section">
 <h2><span class="num">12</span>ИИ-агент</h2>
 <p>Кнопка <b>«🤖 ИИ»</b> в шапке открывает агента. Подключение — на тебе:</p>
-<p>1. Нажми «⚙ Подключение».<br>
-        2. <b>Base URL</b> — адрес OpenAI-совместимого API без завершающего <code>/chat/completions</code> (например <code>https://api.openai.com/v1</code>, OpenRouter, Together, локальный LM Studio и т.п.).<br>
-        3. <b>API-ключ</b> и <b>имя модели</b> (например <code>gpt-4o-mini</code>).<br>
+<p>1. Нажми «⚙ Подключение».<br/>
+        2. <b>Base URL</b> — адрес OpenAI-совместимого API без завершающего <code>/chat/completions</code> (например <code>https://api.openai.com/v1</code>, OpenRouter, Together, локальный LM Studio и т.п.).<br/>
+        3. <b>API-ключ</b> и <b>имя модели</b> (например <code>gpt-4o-mini</code>).<br/>
         4. «💾 Сохранить» — ключ хранится только в твоём браузере (localStorage), запросы идут напрямую провайдеру.</p>
 <p>Напиши задачу, например: «Сделай игру: зелёный квадрат бегает за пальцем и собирает жёлтые монеты, со счётом». ИИ получит <b>контекст проекта</b>: код всех файлов, список спрайтов и сцену. Он может:</p>
-<p>• создавать и перезаписывать <b>файлы кода</b> (.mrr), включая модули с импортами;<br>
-        • работать <b>со сценой как агент</b> — создавать/заменять объекты (прямоугольники, круги, текст);<br>
+<p>• создавать и перезаписывать <b>файлы кода</b> (.mrr), включая модули с импортами;<br/>
+        • работать <b>со сценой как агент</b> — создавать/заменять объекты (прямоугольники, круги, текст);<br/>
         • сообщать, <b>какие изображения нужно импортировать</b> (имя PNG + описание) — картинки ИИ не генерирует, их импортируешь ты во вкладке «Файлы».</p>
 <p>Все изменения применяются сразу и помечаются в чате тегами. Провайдер должен разрешать запросы из браузера (CORS); при ошибке сообщение появится в чате.</p>
 </div>
@@ -922,30 +1099,125 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <p>ИИ получает встроенную спецификацию MrrCode 0.2.0 перед запросом. Она содержит расширение <code>.mrr</code>, ключевые слова и встроенные команды.</p>
 <p>ИИ также должен учитывать текущий код проекта: пользовательские переменные, функции и параметры извлекаются из текущего файла и используются как контекст.</p>
 </div><div class="panel doc-section">
-<h2><span class="num">14</span>Новые возможности языка 0.2.0+</h2>
-<p><b>Массивы и строки:</b> <code>push(array,value)</code>, <code>pop(array)</code>, <code>length(value)</code>, <code>join(array,separator)</code>, <code>split(text,separator)</code>, <code>contains(collection,value)</code>. <code>contains</code> проверяет элемент массива или подстроку в тексте.</p>
-<p><b>Математика:</b> <code>abs</code>, <code>sqrt</code>, <code>sin</code>, <code>cos</code>, <code>atan2</code>, <code>min</code>, <code>max</code>, <code>clamp</code>, <code>floor</code>, <code>ceil</code>, <code>round</code>, <code>random</code>, <code>rand</code>, <code>randomInt</code>.</p>
-<p><b>Преобразования и служебные функции:</b> <code>toString</code>, <code>toNumber</code>, <code>time</code>, <code>dt</code>, <code>save</code>, <code>load</code>, <code>playTone</code>, <code>stopSound</code>.</p>
-<p>Используй только функции, перечисленные в справочнике API и в <code>MRRCODE_AI_SPEC.builtins</code>. Не используй неподдерживаемые функции вроде <code>splice</code>, <code>indexOf</code>, <code>pow</code>, <code>trim</code> или <code>typeof</code>, пока они не добавлены в сам интерпретатор.</p>
-</div><div class="panel doc-section">
-<h2>Примеры</h2>
-<div class="examples-grid" id="examplesGrid"></div>
-</div>
+<h2><span class="num">14</span>Шпаргалка по синтаксису языка</h2>
+<p><b>Переменные и значения:</b> <code>let score = 0;</code>, <code>const speed = 120;</code>; числа, строки в кавычках, <code>true</code>, <code>false</code>, <code>null</code>, массивы <code>[10, 20]</code> и объекты <code>{x: 10, y: 20}</code>.</p>
+<p><b>Массивы и свойства:</b> <code>items[0]</code> читает первый элемент; <code>items[1] = 42</code> меняет элемент. У строк и массивов есть свойство <code>length</code>. У объекта доступны поля через <code>player.x</code> или <code>player["x"]</code>. Не вызывай методы JavaScript через точку — стандартные операции записываются функциями, например <code>push(items, value)</code>, <code>slice(items, 0, 2)</code>.</p>
+<p><b>Операторы:</b> арифметика <code>+ - * / % **</code>; сравнения <code>== != &lt; &gt; &lt;= &gt;=</code>; логика <code>! &amp;&amp; ||</code>; присваивания <code>= += -= *= /= %= **=</code>; увеличение/уменьшение <code>++ --</code>; выбор значения <code>условие ? значение1 : значение2</code>.</p>
+<p><b>Условия и циклы:</b> <code>if (условие) { ... } else { ... }</code>, <code>while (условие) { ... }</code>, счётчик <code>for (let i = 0; i &lt; 10; i++) { ... }</code>, перебор <code>for (let item of items) { ... }</code>. В циклах поддерживаются <code>break</code> и <code>continue</code>.</p>
+<p><b>Функции и шаблонные строки:</b> <code>function double(n) { return n * 2; }</code>; вызов — <code>double(4)</code>. В шаблонной строке обратные кавычки позволяют вставлять выражение: <code>`Score: ${score}`</code>.</p>
+<p><b>Строковые функции:</b> <code>trim</code>, <code>upper</code>, <code>lower</code>, <code>startsWith</code>, <code>endsWith</code>, <code>replace</code>, <code>contains</code>, <code>split</code>, <code>join</code>. Для массивов: <code>push</code>, <code>pop</code>, <code>splice</code>, <code>shift</code>, <code>unshift</code>, <code>indexOf</code>, <code>slice</code>, <code>length</code>. Также доступны <code>toString</code>, <code>toNumber</code>, <code>typeof</code>, математические функции, сохранения <code>save/load</code> и синтезированный звук <code>playTone/stopSound</code>. Ищи любую функцию в «📖 Шпаргалке» или начинай печатать имя в редакторе.</p>
 </div>
 <div class="panel doc-section">
-<h2><span class="num">15</span>MrrCode 0.2.0</h2>
-<p><b>Проекты:</b> локальное автосохранение, undo/redo, многофайловые .mrr-проекты, PNG-спрайты и импорт/экспорт проекта.</p>
-<p><b>Отладка:</b> кнопка 🐞 Debug открывает точки останова по строкам и показывает место остановки в консоли.</p>
-<p><b>Сцена:</b> объекты можно перемещать перетаскиванием и менять размер за угловой маркер. Сетка и привязка к сетке включаются отдельно; шаг привязки — 10 px. Это редактор визуальных объектов сцены, не автоматическое преобразование всех команд рисования в объекты.</p>
-<p><b>Физика:</b> <code>overlapRect(ax,ay,aw,ah,bx,by,bw,bh)</code> проверяет пересечение AABB-прямоугольников; касание только краями не считается пересечением. <code>moveBody(body,dt,gravity)</code> обновляет объект с полями <code>x,y,vx,vy</code> и возвращает его. Время шага ограничивается 0..0.1 секунды.</p>
-<p><b>Камера:</b> <code>camera(x,y)</code> задаёт смещение для последующих команд рисования <code>rect</code>, <code>circle</code>, <code>line</code>, <code>text</code>, <code>sprite</code> и <code>spriteAnim</code>. Для сброса используй <code>camera(0,0)</code>. Координаты касаний остаются координатами холста.</p>
-<p><b>Анимация:</b> <code>spriteAnim(name,x,y,w,h,frameW,frameH,fps)</code> проигрывает кадры PNG-спрайтшита слева направо и сверху вниз. <code>frameW</code> и <code>frameH</code> — размеры кадра в исходной картинке; PNG нужно импортировать во вкладке «Файлы» под тем же именем.</p>
-<p><b>История и ресурсы:</b> «🕘 Версии» сохраняет снимок проекта и позволяет восстановить выбранную версию; хранится до 12 снимков в локальном хранилище браузера. «🔎 Проверить ресурсы» ищет ссылки на отсутствующие спрайты и объекты сцены в буквальных вызовах <code>sprite("имя")</code> и <code>object("имя")</code>; динамические имена такая проверка не обнаруживает.</p>
-<p><b>ИИ:</b> перед применением предложенных изменений проект сохраняется в истории, а изменяемые файлы проверяются валидатором MrrCode. Это статическая проверка языка, а не гарантия отсутствия ошибок во время запуска.</p>
-<p><b>Графика:</b> rect, circle, line, text, sprite и управление объектами сцены через object("name"). Сцену можно преобразовать обратно в MrrCode.</p>
-<p><b>Ввод:</b> pointerDown, pointerMove, pointerUp, pointerX, pointerY, pointerDownNow, touchCount, touchX, touchY.</p>
-<p><b>Новые возможности языка:</b> for-of, массивы и объекты, доступ к свойствам, **, +=/-=/\*=, lerp, map, sign, randomInt, преобразования строк/чисел, contains/join/split, сохранения и синтезированный звук.</p>
+<h2><span class="num">15</span>Быстрый старт: от пустого проекта до игры</h2>
+<ol>
+<li>Открой вкладку <b>«Код»</b> и выбери <code>main.mrr</code>. Это главный файл, с которого начинается запуск.</li>
+<li>Напиши игровой цикл: <code>function start() { ... }</code> для начальной настройки и <code>function update(dt) { ... }</code> для рисования и логики каждого кадра.</li>
+<li>Нажми <b>▶ Запуск</b> в шапке или кнопку ▶ над редактором. Игра запускается на холсте 800×450, масштабируемом под экран.</li>
+<li>Если игра ведёт себя неправильно, посмотри вкладку <b>«Игра» → «Консоль»</b>. Ошибки и сообщения <code>print(...)</code> помогают найти причину.</li>
+<li>Сохрани проект кнопкой 💾 или экспортируй пакет через <b>«Файлы» → «⬇ Проект»</b>. Экспорт особенно важен перед крупными изменениями или переносом на другое устройство.</li>
+</ol>
+<pre class="doc-code">function start() {
+    background("#101827"); // постоянный фон игры
+    print("Игра запущена!");
+}
+function update(dt) {
+    rect(80, 80, 100, 70, "#70d6ff");
+    text("Привет, MrrCode!", 80, 190, "#ffffff", 22);
+}</pre>
 </div>
+<div class="panel doc-section">
+<h2><span class="num">16</span>Вкладка «Игра»: запуск, экран и консоль</h2>
+<p><b>▶ Запуск</b> выполняет <code>main.mrr</code>. <b>■ Стоп</b> останавливает игровой цикл. Если полноэкранный режим недоступен в текущем браузере или WebView, игра может остаться в обычном окне — это ограничение среды, а не обязательно ошибка кода.</p>
+<p><b>⛶ Во весь экран</b> просит браузер расширить игровую область; браузер может потребовать запуск по нажатию пользователя. В полноэкранном режиме есть кнопки остановки и выхода.</p>
+<p><b>Консоль</b> показывает системные сообщения, предупреждения, ошибки и вывод <code>print(...)</code>. «Очистить» удаляет видимые записи, но не исправляет причину ошибки. Смотри первую ошибку после запуска: последующие сообщения иногда являются её следствием.</p>
+<p>В движке управление игрой ориентировано на касания и мультитач. Для мобильного управления используй зоны холста или координаты <code>pointerX()</code>, <code>pointerY()</code>, <code>touchX(i)</code>, <code>touchY(i)</code>. Обычные события клавиатуры и мыши не являются документированным игровым API.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">17</span>Вкладка «Код»: инструменты редактора</h2>
+<ul>
+<li><b>Выбор файла</b> — название текущего <code>.mrr</code> видно над редактором; файлы проекта переключаются во вкладке «Файлы».</li>
+<li><b>«Примеры…»</b> — загружает пример кода в редактор. Перед заменой собственного кода сохрани его или экспортируй проект.</li>
+<li><b>📖</b> — открывает поисковую шпаргалку по встроенным функциям. Найди название и нажми «Вставить» у нужного варианта.</li>
+<li><b>🤖</b> — открывает ИИ-агента с контекстом проекта.</li>
+<li><b>▶</b> — запускает проект; <b>⬇ .mrr</b> экспортирует текущий файл, а <b>⬆ .mrr</b> импортирует кодовый файл.</li>
+<li><b>↶ / ↷</b> — отмена и повтор изменений в редакторе. Это история редактирования текста, а не то же самое, что «🕘 Версии» всего проекта.</li>
+<li><b>💾</b> — сохраняет проект в локальное хранилище браузера. <b>🐞 Debug</b> открывает инструменты отладки.</li>
+<li><b>🎨 Цвет</b> — позволяет изменить HEX-цвет рядом с курсором. Двойное касание HEX-значения тоже может открыть выбор цвета.</li>
+</ul>
+<p>На сенсорном устройстве используй панель символов над кодом для скобок, операторов и ключевых слов. При вводе имени появляются варианты автодополнения; коснись нужного. После <code>from "</code> доступны имена файлов, после <code>import</code> — экспортируемые имена модулей, а в аргументах <code>sprite("...")</code> и <code>object("...")</code> — имена ресурсов сцены.</p>
+<p>Если подсказка закрывает нужную строку, прокрути список или введи больше букв, чтобы сузить варианты. Автодополнение помогает вводить код, но не заменяет запуск и проверку консоли.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">18</span>Вкладка «Сцена»: визуальные объекты</h2>
+<ol>
+<li>Нажми «Прямоуг.», «Круг» или «Текст», чтобы добавить объект.</li>
+<li>Выбери его в списке или коснись объекта на холсте. После выбора открываются его свойства.</li>
+<li>Перетаскивай объект по холсту. Если включён режим изменения размера, потяни угловой маркер.</li>
+<li><b>Сетка</b> показывает направляющие; <b>Привязка</b> включает шаг привязки 10 пикселей; <b>Размер</b> включает/выключает изменение размера.</li>
+<li>Используй дублирование и удаление выбранного объекта, если эти кнопки доступны рядом с его свойствами.</li>
+</ol>
+<p><b>⬇ Сцена</b> экспортирует данные сцены, <b>⬆ Сцена</b> загружает сцену из файла, <b>Очистить</b> удаляет объекты сцены, а <b>⌘ В код</b> генерирует MrrCode на основе объектов. Преобразование сцены в код — отдельная операция: произвольные команды <code>rect()</code> из исходника автоматически не превращаются в редактируемые объекты сцены.</p>
+<p>Чтобы обращаться к объекту из кода, назначь ему имя, например <code>hero</code>, и используй <code>object("hero")</code>. Имена должны совпадать. Изменения в визуальной сцене и рисование непосредственно кодом — два разных рабочих процесса. Редактор сцены не преобразует произвольные вызовы <code>rect()</code> в редактируемые объекты автоматически.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">19</span>Вкладка «Файлы»: исходники, ресурсы и перенос проекта</h2>
+<p><b>Новый .mrr</b> создаёт файл исходного кода. <code>main.mrr</code> — точка входа; дополнительные файлы подключаются оператором <code>from "имя" import функция;</code>. После создания файла открой его и объяви в нём функции, которые импортируются в главный модуль.</p>
+<p><b>Импорт PNG-спрайта</b> добавляет изображение в ресурсы проекта. Имя ресурса — имя файла без расширения; например <code>hero.png</code> используется как <code>sprite("hero", x, y, w, h)</code>. Если PNG является листом кадров, используй <code>spriteAnim(...)</code> и размеры одного кадра в исходном изображении.</p>
+<p><b>⬇ Проект / ⬆ Проект</b> экспортируют и импортируют пакет проекта, в котором могут храниться исходники, спрайты и сцена. Используй этот вариант для резервной копии или переноса проекта; экспорт одного <code>.mrr</code> сохраняет только код выбранного файла.</p>
+<p><b>💾 Автосейв</b> сохраняет проект локально в этом браузере. Локальное сохранение не является резервной копией и не переносится автоматически на другое устройство или в другой браузер. Для надёжности периодически экспортируй проект в файл.</p>
+<p><b>🕘 Версии</b> открывает историю снимков проекта: можно выбрать сохранённую версию и восстановить её. История хранится локально и ограничена количеством снимков, поэтому экспорт проекта остаётся важным.</p>
+<p><b>🔎 Проверить ресурсы</b> ищет буквальные ссылки на спрайты и объекты сцены, для которых нет соответствующего ресурса. Проверка не может гарантированно обнаружить имена, которые формируются динамически во время выполнения.</p>
+<p><b>🎮 Сборка HTML</b> создаёт отдельный HTML-файл игры. Это экспорт запускаемой игры, а не редактора MrrCode Studio: интерфейс вкладок, редактор и инструменты проекта в итоговый файл не входят. Проверь готовую сборку отдельно после экспорта.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">20</span>Отладка и диагностика ошибок</h2>
+<p>Включи <b>🐞 Debug</b> в редакторе. В панели отладки можно указать номер строки и добавить точку останова; список показывает активные точки. «Очистить точки» убирает все установленные точки. Точка останова помогает остановить выполнение на выбранной строке, но не объясняет автоматически, как исправить логику.</p>
+<p>Рекомендуемый порядок поиска проблемы:</p>
+<ol>
+<li>Останови игру и запусти её снова, чтобы получить свежие сообщения.</li>
+<li>Прочитай первую ошибку в консоли и проверь указанную строку/имя функции.</li>
+<li>Убедись, что все файлы, которые импортируются, существуют, а имя функции действительно объявлено в модуле.</li>
+<li>Для невидимого спрайта проверь имя PNG, совпадение имени в <code>sprite()</code> и наличие файла в списке спрайтов.</li>
+<li>Для невидимого объекта сцены проверь его имя в <code>object("...")</code> и то, что объект существует на вкладке «Сцена».</li>
+<li>Если код синтаксически корректен, но игра ведёт себя не так, временно добавь <code>print(...)</code> и проверь значения переменных.</li>
+</ol>
+<p>Валидатор и проверка ресурсов находят часть проблем заранее, но не доказывают, что игра работает правильно во время выполнения.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">21</span>ИИ-агент: безопасный рабочий процесс</h2>
+<p>Открой «🤖 ИИ», затем «⚙ Подключение». Укажи Base URL совместимого API, API-ключ и имя модели; нажми «Сохранить». Адрес должен быть базовым адресом API без пути <code>/chat/completions</code>. Провайдер должен разрешать запросы из браузера (CORS).</p>
+<p>Формулируй запрос с конкретной целью и ограничениями: жанр игры, управление касаниями, графика, условия победы/поражения, какие файлы можно менять. Например: «Добавь счёт монет, не меняй управление и сохрани имя главного спрайта hero».</p>
+<p>Агент может учитывать код файлов, спрайты и объекты сцены; создавать или менять файлы и сцену; подсказывать, какие PNG импортировать. Он не генерирует изображения сам. После применения результата обязательно запусти игру, посмотри консоль и проверь результат глазами.</p>
+<p><b>Приватность:</b> API-ключ хранится в локальном хранилище браузера и отправляется напрямую выбранному провайдеру. Не используй ключ, который не имеешь права применять; не вставляй в запросы пароли или другие секреты. Если не доверяешь провайдеру, не отправляй ему содержимое проекта.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">22</span>Сохранение, импорт и экспорт: что выбрать</h2>
+<ul>
+<li><b>Сохранить текущий код:</b> «⬇ .mrr» в редакторе.</li>
+<li><b>Сохранить весь проект:</b> «Файлы» → «⬇ Проект».</li>
+<li><b>Продолжить на этом устройстве:</b> «💾» или «Автосейв» сохраняют локальную копию.</li>
+<li><b>Вернуться к предыдущему состоянию:</b> «🕘 Версии» восстанавливает снимок проекта, если он был сохранён.</li>
+<li><b>Получить отдельную игру:</b> «🎮 Сборка HTML» создаёт автономный HTML игры.</li>
+<li><b>Перенести визуальную сцену отдельно:</b> используй «⬇ Сцена» и затем «⬆ Сцена» в другом проекте.</li>
+</ul>
+<p>Если импорт файла не сработал, проверь, что выбран правильный тип: <code>.mrr</code> — исходник, пакет проекта — файл проекта, PNG — графический ресурс, файл сцены — экспорт сцены. Не подтверждай замену главного файла, если не хочешь перезаписать текущий <code>main.mrr</code>. Перед импортом с заменой экспортируй резервную копию.</p>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">23</span>Ограничения движка и полезные привычки</h2>
+<ul>
+<li>MrrCode — собственный язык с ограниченной грамматикой, а не полный JavaScript. Используй функции и операторы, описанные в этой справке и шпаргалке.</li>
+<li>Игровое поле использует логические координаты 800×450; движок масштабирует его под устройство.</li>
+<li>Ввод ориентирован на касания и мультитач. Для игры на мобильном устройстве проектируй удобные зоны управления и не полагайся на клавиатуру.</li>
+<li>Рисование обновляется каждый кадр. Если нужен след или постоянный рисунок, храни точки/объекты в переменных и рисуй их заново каждый кадр.</li>
+<li>Встроенный лимит операций защищает от бесконечных циклов, но сложный код всё равно может тормозить.</li>
+<li>Локальное хранилище браузера может быть очищено, а данные не гарантированно переносятся между браузерами. Делай экспорт проекта.</li>
+<li>Полноэкранный режим, загрузка файлов и сетевые запросы зависят от браузера, WebView и разрешений устройства.</li>
+</ul>
+</div>
+<div class="panel doc-section">
+<h2>Примеры</h2>
+<div class="examples-grid" id="examplesGrid"></div>
+</div></div>
 </section>
 </main>
 <!-- шпаргалка -->
@@ -954,7 +1226,7 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 <div class="sheet-head"><b>📖 Шпаргалка MrrCode</b>
 <div class="sh-btns"><button class="btn mini" id="btnCloseSheet">✕ Закрыть</button></div>
 </div>
-<input id="sheetSearch" placeholder="Поиск функции… (print, rect, touch)">
+<input id="sheetSearch" placeholder="Поиск функции… (print, rect, touch)"/>
 <div class="sheet-list" id="sheetList"></div>
 </div>
 </div>
@@ -970,13 +1242,13 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 </div>
 <div class="ai-settings hidden" id="aiSettingsPanel">
 <label>Base URL (OpenAI-совместимый, без /chat/completions)
-        <input autocomplete="off" id="aiBaseUrl" placeholder="https://api.openai.com/v1">
+        <input autocomplete="off" id="aiBaseUrl" placeholder="https://api.openai.com/v1"/>
 </label>
 <label>API-ключ
-        <input autocomplete="off" id="aiApiKey" placeholder="sk-…" type="password">
+        <input autocomplete="off" id="aiApiKey" placeholder="sk-…" type="password"/>
 </label>
 <label>Имя модели
-        <input autocomplete="off" id="aiModel" placeholder="например: gpt-4o-mini">
+        <input autocomplete="off" id="aiModel" placeholder="например: gpt-4o-mini"/>
 </label>
 <div class="row-btns">
 <button class="btn mini primary" id="btnAiSave">💾 Сохранить</button>
@@ -991,10 +1263,10 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
 </div>
 </div>
 </div>
-<input accept="image/png,image/*" hidden="" id="pngInput" multiple="" type="file">
-<input hidden id="mrrInput" type="file" accept=".mrr">
-<input accept=".json,application/json" hidden="" id="projInput" type="file">
-<input accept=".json,application/json" hidden="" id="sceneInput" type="file">
+<input accept="image/png,image/*" hidden="" id="pngInput" multiple="" type="file"/>
+<input accept=".mrr,text/plain,application/octet-stream" hidden="" id="mrrInput" type="file"/>
+<input accept=".json,application/json" hidden="" id="projInput" type="file"/>
+<input accept=".json,application/json" hidden="" id="sceneInput" type="file"/>
 <script>
 
 "use strict";
@@ -1007,7 +1279,7 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
    - только касания (мультитач); полный экран; «назад» — выход
    - модули from "файл" import имя; автоочистка кадра; PNG без дубликатов
 ===================================================================== */
-const ENTRY_FILE='main.mrr';
+let ENTRY_FILE='main.mrr';
 
 /* ---------------- утилиты ---------------- */
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -1056,7 +1328,8 @@ const API={
   touchCount:{kind:'fn',sig:'touchCount()',doc:'Сколько пальцев сейчас касается поля (мультитач).'},
   touchX:{kind:'fn',sig:'touchX(i)',doc:'X-координата i-го пальца (0 … touchCount()-1), диапазон 0..800.'},
   touchY:{kind:'fn',sig:'touchY(i)',doc:'Y-координата i-го пальца (0 … touchCount()-1), диапазон 0..450.'},
-  clear:{kind:'fn',sig:'clear(color?)',doc:'Очищает экран и заливает его цветом color (по умолчанию "#0f172a"). Движок и сам очищает экран в начале каждого кадра — старые кадры не накладываются.'},
+  background:{kind:'fn',sig:'background(color)',doc:'Задаёт постоянный цвет фона игры. Установи один раз в start(); фон будет заливаться этим цветом в начале каждого кадра.'},
+  clear:{kind:'fn',sig:'clear(color?)',doc:'Очищает текущий кадр и заливает его цветом color (по умолчанию "#0f172a"). Для постоянного фона используй background(color).'},
   rect:{kind:'fn',sig:'rect(x, y, w, h, color)',doc:'Прямоугольник: левый верхний угол (x, y), размер w×h.'},
   circle:{kind:'fn',sig:'circle(x, y, r, color)',doc:'Круг с центром (x, y) и радиусом r.'},
   line:{kind:'fn',sig:'line(x1, y1, x2, y2, color, width?)',doc:'Линия из (x1, y1) в (x2, y2). width — толщина, по умолчанию 2.'},
@@ -1099,7 +1372,20 @@ const API={
   save:{kind:'fn',sig:'save(key, value)',doc:'Сохраняет значение игры в локальное хранилище.'},
   load:{kind:'fn',sig:'load(key, defaultValue)',doc:'Загружает значение игры из локального хранилища.'},
   playTone:{kind:'fn',sig:'playTone(frequency, duration, volume?)',doc:'Проигрывает короткий синтезированный тон.'},
-  stopSound:{kind:'fn',sig:'stopSound()',doc:'Останавливает активные синтезированные звуки.'}
+  stopSound:{kind:'fn',sig:'stopSound()',doc:'Останавливает активные синтезированные звуки.'},
+  splice:{kind:'fn',sig:'splice(array, start, count, ...items)',doc:'Удаляет count элементов массива начиная с start и вставляет вместо них items. Изменяет исходный массив и возвращает удалённые элементы.'},
+  shift:{kind:'fn',sig:'shift(array)',doc:'Удаляет и возвращает первый элемент массива; массив изменяется.'},
+  unshift:{kind:'fn',sig:'unshift(array, value)',doc:'Добавляет value в начало массива и возвращает новую длину массива.'},
+  indexOf:{kind:'fn',sig:'indexOf(array, value)',doc:'Индекс первого точного совпадения в массиве или -1, если элемент не найден.'},
+  slice:{kind:'fn',sig:'slice(array, start, end?)',doc:'Возвращает копию части массива от start до end (end не включается); исходный массив не меняется.'},
+  pow:{kind:'fn',sig:'pow(a, b)',doc:'Возводит a в степень b. Также доступен оператор **.'},
+  trim:{kind:'fn',sig:'trim(text)',doc:'Убирает пробельные символы в начале и конце строки.'},
+  upper:{kind:'fn',sig:'upper(text)',doc:'Возвращает строку в верхнем регистре.'},
+  lower:{kind:'fn',sig:'lower(text)',doc:'Возвращает строку в нижнем регистре.'},
+  startsWith:{kind:'fn',sig:'startsWith(text, prefix)',doc:'Проверяет, начинается ли строка с prefix; возвращает true/false.'},
+  endsWith:{kind:'fn',sig:'endsWith(text, suffix)',doc:'Проверяет, заканчивается ли строка на suffix; возвращает true/false.'},
+  replace:{kind:'fn',sig:'replace(text, from, to)',doc:'Заменяет все вхождения подстроки from на to и возвращает новую строку.'},
+  typeof:{kind:'fn',sig:'typeof(value)',doc:'Возвращает название типа строкой; массивы распознаются отдельно как "array". Для null результат соответствует правилам JavaScript и равен "object".'}
 };
 const KEYWORDS=['let','const','if','else','while','for','of','function','return','break','continue','true','false','null','from','import','as'];
 const KEYWORD_DOCS={
@@ -2095,12 +2381,14 @@ function update(dt) {
 /* ---------------- движок игры (только сенсор) ---------------- */
 const gameCanvas=document.getElementById('gameCanvas');
 const gctx=gameCanvas.getContext('2d');
+gctx.imageSmoothingEnabled=false;
 const sceneCanvas=document.getElementById('sceneCanvas');
 const sctx=sceneCanvas.getContext('2d');
+sctx.imageSmoothingEnabled=false;
 const gameStage=document.getElementById('gameStage');
 
 const Engine={
-  running:false,raf:0,lastTs:0,startTime:0,curDt:0,frames:0,
+  running:false,raf:0,lastTs:0,startTime:0,curDt:0,frames:0,backgroundColor:'#0f172a',
   pointer:{x:0,y:0,down:false},
   touches:[],
   runtimeScene:[],handlers:{},env:null,baseEnv:null,warnedSprites:new Set(),camera:{x:0,y:0},
@@ -2145,6 +2433,7 @@ function buildGlobalEnv(){
   N('pop',(a,line)=>{if(!Array.isArray(a[0]))throw new PFError('pop() ожидает массив первым аргументом',line);return a[0].length?a[0].pop():null;});
   N('time',()=>(performance.now()-Engine.startTime)/1000);
   N('dt',()=>Engine.curDt);
+  N('background',(a)=>{const c=typeof a[0]==='string'?a[0]:'#0f172a';Engine.backgroundColor=c;gctx.fillStyle=c;gctx.fillRect(0,0,800,450);return null;});
   N('clear',(a)=>{const c=typeof a[0]==='string'?a[0]:'#0f172a';gctx.fillStyle=c;gctx.fillRect(0,0,800,450);return null;});
   N('rect',(a)=>{gctx.fillStyle=typeof a[4]==='string'?a[4]:'#70d6ff';gctx.fillRect(numArg(a[0])-Engine.camera.x,numArg(a[1])-Engine.camera.y,numArg(a[2]),numArg(a[3]));return null;});
   N('circle',(a)=>{gctx.fillStyle=typeof a[3]==='string'?a[3]:'#70d6ff';gctx.beginPath();gctx.arc(numArg(a[0])-Engine.camera.x,numArg(a[1])-Engine.camera.y,Math.max(0,numArg(a[2])),0,Math.PI*2);gctx.fill();return null;});
@@ -2175,6 +2464,7 @@ function buildGlobalEnv(){
     }
     const w=a[3]==null?img.naturalWidth:numArg(a[3]);
     const h=a[4]==null?img.naturalHeight:numArg(a[4]);
+    gctx.imageSmoothingEnabled=false;
     gctx.drawImage(img,x-Engine.camera.x,y-Engine.camera.y,w,h);
     return null;
   });
@@ -2387,7 +2677,7 @@ function startGame(){
     const v=Engine.env.vars.get(ev);
     if(v&&v.__pf==='func')Engine.handlers[ev]=v;
   }
-  Engine.running=true;Engine.frames=0;Engine.camera={x:0,y:0};
+  Engine.running=true;Engine.frames=0;Engine.camera={x:0,y:0};Engine.backgroundColor='#0f172a';
   Engine.startTime=performance.now();Engine.lastTs=Engine.startTime;Engine.curDt=0;
   if(state.activeFile!==ENTRY_FILE)
     logConsole('[MrrCode] Выполняется точка входа main.mrr (в редакторе открыт '+state.activeFile+').','warn');
@@ -2416,7 +2706,7 @@ function frameLoop(ts){
   }
   /* фикс наложения: каждый кадр начинается с чистой поверхности */
   gctx.setTransform(1,0,0,1,0,0);
-  gctx.fillStyle='#0f172a';
+  gctx.fillStyle=Engine.backgroundColor||'#0f172a';
   gctx.fillRect(0,0,800,450);
   try{
     if(Engine.handlers.update)callFunc(Engine.handlers.update,[dt],newCtx(LIMIT_FRAME));
@@ -2682,7 +2972,7 @@ function updateHint(){
   hint.innerHTML='💡 Печатай имя — появится список, тапни вариант · «📖» — шпаргалка · «🤖» — ИИ напишет код за тебя';
 }
 
-/* ---------------- редактор: автодополнение ---------------- */
+/* ---------------- редактор: автодополнение — синхронизировано со спецификацией языка ---------------- */
 const AC={open:false,items:[],idx:0,wordStart:0};
 const acPopup=document.getElementById('acPopup');
 const acList=document.getElementById('acList');
@@ -2695,7 +2985,15 @@ const SNIPPETS=[
   {name:'ifelse',kind:'snip',sig:'шаблон if / else',doc:'Условие с веткой «иначе».',insert:'if (§условие§) {\n    \n} else {\n    \n}'},
   {name:'whileloop',kind:'snip',sig:'шаблон цикла while',doc:'Цикл с условием.',insert:'while (§условие§) {\n    \n}'},
   {name:'forof',kind:'snip',sig:'шаблон for … of',doc:'Перебор массива.',insert:'for (let item of §array§) {\n    print(item);\n}'},
-  {name:'touchloop',kind:'snip',sig:'перебор всех пальцев',doc:'Мультитач: цикл по всем касаниям через touchCount()/touchX(i)/touchY(i).',insert:'let i = 0;\nwhile (i < touchCount()) {\n    let tx = touchX(i);\n    let ty = touchY(i);\n    §circle(tx, ty, 20, "#70d6ff");§\n    i += 1;\n}'}
+  {name:'touchloop',kind:'snip',sig:'перебор всех пальцев',doc:'Мультитач: цикл по всем касаниям через touchCount()/touchX(i)/touchY(i).',insert:'let i = 0;\nwhile (i < touchCount()) {\n    let tx = touchX(i);\n    let ty = touchY(i);\n    §circle(tx, ty, 20, "#70d6ff");§\n    i += 1;\n}'},
+  {name:'start',kind:'snip',sig:'function start()',doc:'Шаблон кода, который запускается один раз при старте игры.',insert:'function start() {\n    §print("Игра началась");§\n}'},
+  {name:'update',kind:'snip',sig:'function update(dt)',doc:'Шаблон игрового кадра. dt — время с прошлого кадра в секундах.',insert:'function update(dt) {\n    clear("#101827");\n    §\n}'},
+  {name:'array',kind:'snip',sig:'массив',doc:'Создать массив и пройти по элементам циклом for-of.',insert:'let items = [1, 2, 3];\nfor (let item of items) {\n    §print(item);§\n}'},
+  {name:'objectlit',kind:'snip',sig:'объект с полями',doc:'Создать объект-данные и читать/менять его свойства через точку.',insert:'let body = {x: 100, y: 80, vx: 0, vy: 0};\nbody.x += 1;\n§print(body.x, body.y);§'},
+  {name:'collision',kind:'snip',sig:'проверка столкновения прямоугольников',doc:'Проверяет пересечение двух прямоугольников через overlapRect.',insert:'if (overlapRect(player.x, player.y, player.w, player.h, coin.x, coin.y, coin.w, coin.h)) {\n    §print("Столкновение!");§\n}'},
+  {name:'physics',kind:'snip',sig:'движение с гравитацией',doc:'Обновляет объект {x,y,vx,vy}; dt ограничивается движком до 0..0.1 сек.',insert:'let body = {x: 100, y: 80, vx: 60, vy: 0};\nfunction update(dt) {\n    moveBody(body, dt, 300);\n    clear("#101827");\n    §rect(body.x, body.y, 24, 24, "#70d6ff");§\n}'},
+  {name:'savegame',kind:'snip',sig:'сохранение и загрузка',doc:'Сохранить значение по ключу и загрузить его с запасным значением.',insert:'save("bestScore", score);\nlet bestScore = load("bestScore", 0);\n§print(bestScore);§'},
+  {name:'sound',kind:'snip',sig:'синтезированный звук',doc:'Проигрывает короткий тон; звук обычно следует запускать в ответ на действие пользователя.',insert:'playTone(660, 0.15, 0.08);\n§\n'}
 ];
 const GENERIC_PROPS=[
   {name:'x',doc:'Координата X (0..800).'},
@@ -2741,9 +3039,42 @@ function collectSymbols(){
   while((m=reVar.exec(codeInput.value))){
     if(!seen.has(m[1])){seen.add(m[1]);items.push({name:m[1],kind:'var',sig:m[1],doc:'Переменная из твоего кода.'});}
   }
+  // Function parameters are local names too, so suggest them while editing a function.
+  const paramRe=/\bfunction\s+[A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*\s*\(([^)]*)\)/g;
+  while((m=paramRe.exec(codeInput.value))){
+    for(const part of m[1].split(',')){
+      const pm=/^\s*([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)/.exec(part);
+      if(pm&&!seen.has(pm[1])){seen.add(pm[1]);items.push({name:pm[1],kind:'var',sig:pm[1],doc:'Параметр функции из твоего кода.'});}
+    }
+  }
+  // Loop variables introduced by for (let item of items).
+  const loopRe=/\bfor\s*\(\s*let\s+([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)\s+of\b/g;
+  while((m=loopRe.exec(codeInput.value))){
+    if(!seen.has(m[1])){seen.add(m[1]);items.push({name:m[1],kind:'var',sig:m[1],doc:'Переменная цикла for … of.'});}
+  }
   const imported=getImportedNames();
   for(const [nm,file] of imported){
     if(!seen.has(nm)){seen.add(nm);items.push({name:nm,kind:'imp',sig:nm+' ← '+file,doc:'Импортировано из файла '+file+(file.endsWith('.mrr')?'':'.mrr')+'.'});}
+  }
+  // Keep autocomplete synchronized with the authoritative runtime/validator specification.
+  // API entries provide richer descriptions; this adds any documented built-ins not yet in API.
+  const spec=window.MRRCODE_AI_SPEC||{};
+  const specs=[];
+  for(const x of (spec.builtins||[])){
+    if(Array.isArray(x)&&x[0])specs.push({name:String(x[0]),sig:String(x[1]||x[0]+'()')});
+    else if(typeof x==='string')specs.push({name:x,sig:x+'()'});
+  }
+  for(const group of ['arrayFunctions','mathFunctions','stringFunctions','utilityFunctions','persistence','audio','math','strings']){
+    for(const x of (spec[group]||[])){
+      const sig=String(x),mm=/^\s*([A-Za-z_$][\w$]*)\s*\(/.exec(sig);
+      if(mm)specs.push({name:mm[1],sig});
+    }
+  }
+  for(const x of specs){
+    if(!seen.has(x.name)){
+      seen.add(x.name);
+      items.push({name:x.name,kind:'fn',sig:x.sig,doc:'Встроенная функция MrrCode из спецификации языка.'});
+    }
   }
   for(const sn of SNIPPETS)items.push(sn);
   return items;
@@ -2784,7 +3115,7 @@ function filterItems(all,word){
     else if(n.includes(w))incl.push(it);
   }
   starts.sort((a,b)=>a.name.length-b.name.length);
-  return starts.concat(incl).slice(0,14);
+  return starts.concat(incl).slice(0,40);
 }
 function updateAC(force){
   const pos=codeInput.selectionStart;
@@ -2854,15 +3185,10 @@ function renderAC(){
   positionAC();
 }
 function positionAC(){
+  // Keep autocomplete in normal document flow, directly below the line/column status bar.
   acPopup.classList.remove('hidden');
-  const area=document.getElementById('editorArea');
-  const cc=caretCoords(codeInput);
-  const pw=acPopup.offsetWidth,ph=acPopup.offsetHeight;
-  let left=Math.min(Math.max(4,cc.x),area.clientWidth-pw-8);
-  let top=cc.y+cc.lineH+4;
-  if(top+ph>area.clientHeight-4)top=Math.max(4,cc.y-ph-4);
-  acPopup.style.left=left+'px';
-  acPopup.style.top=top+'px';
+  acPopup.style.left='auto';
+  acPopup.style.top='auto';
 }
 function caretCoords(ta){
   const cs=getComputedStyle(ta);
@@ -2941,6 +3267,7 @@ const PALETTE=[
   {label:'from…import',snippet:'from "§player§" import §spawnPlayer§;'},
   {sep:true},
   {label:'print',ins:'print()',caret:1},
+  {label:'background',snippet:'background("§#101827§")'},
   {label:'clear',snippet:'clear("§#101827§")'},
   {label:'rect',snippet:'rect(§x§, y, w, h, "#70d6ff")'},
   {label:'circle',snippet:'circle(§x§, y, r, "#70d6ff")'},
@@ -3370,11 +3697,17 @@ codeInput.addEventListener('keydown',e=>{
   }
 });
 codeInput.addEventListener('input',()=>{
-  refreshEditor();saveCode();scheduleEditSnapshot();updateAC(false);updateHint();
+  // Refresh suggestions first, so a highlighting/status hiccup cannot prevent autocomplete.
+  updateAC(false);
+  refreshEditor();saveCode();scheduleEditSnapshot();updateHint();
 });
 codeInput.addEventListener('scroll',()=>{syncScroll();if(AC.open)positionAC();});
-codeInput.addEventListener('click',()=>{closeAC();updateCaretPos();updateHint();updateCodeColorUI();});
-codeInput.addEventListener('blur',()=>setTimeout(()=>{if(!acPopup.matches(':hover'))closeAC();},120));
+codeInput.addEventListener('focus',()=>{updateAC(true);});
+codeInput.addEventListener('click',()=>{updateCaretPos();updateHint();updateCodeColorUI();updateAC(false);});
+codeInput.addEventListener('keyup',e=>{
+  if(!['ArrowUp','ArrowDown','Enter','Escape','Tab','Shift','Control','Alt','Meta'].includes(e.key))updateAC(false);
+});
+codeInput.addEventListener('blur',()=>setTimeout(()=>{if(!acPopup.matches(':hover'))closeAC();},180));
 document.addEventListener('selectionchange',()=>{
   if(document.activeElement===codeInput){updateCaretPos();updateHint();updateCodeColorUI();}
 });
@@ -3408,6 +3741,7 @@ function sanitizeScene(arr){
 let sceneShowGrid=true,sceneSnap=false,sceneResize=true;
 function renderScenePreview(){
   const c=sctx;
+  c.imageSmoothingEnabled=false;
   c.setTransform(1,0,0,1,0,0);
   c.clearRect(0,0,800,450);
   c.fillStyle='#0d1424';c.fillRect(0,0,800,450);
@@ -3636,8 +3970,29 @@ function renderFiles(){
     const row=document.createElement('div');
     row.className='file-row'+(nm===state.activeFile?' active':'');
     const entryTag=nm===ENTRY_FILE?' точка входа':'';
-    row.innerHTML='📄'+escapeHtml(nm)+entryTag+''+
-      ''+((state.files[nm].length||1)/1024).toFixed(1)+' КБ';
+    row.innerHTML='📄'+escapeHtml(nm)+entryTag+'&nbsp;&nbsp;'+((state.files[nm].length||1)/1024).toFixed(1)+' КБ';
+    const rename=document.createElement('button');
+    rename.className='btn mini';rename.textContent='Переименовать';
+    rename.addEventListener('click',()=>{
+      const proposed=prompt('Новое имя файла:',nm);
+      if(proposed===null)return;
+      let next=proposed.trim();
+      if(!next)return;
+      if(!/\.mrr$/i.test(next))next+='.mrr';
+      if(next===nm)return;
+      if(state.files[next]!==undefined){setNote('Файл «'+next+'» уже существует.');return;}
+      if(nm===ENTRY_FILE && !confirm('Переименовать точку входа? Кнопка «Запуск» будет использовать новое имя.'))return;
+      const source=state.files[nm];
+      const keys=Object.keys(state.files);
+      const rebuilt={};
+      keys.forEach(key=>{rebuilt[key===nm?next:key]=key===nm?source:state.files[key];});
+      state.files=rebuilt;
+      if(nm===ENTRY_FILE)ENTRY_FILE=next;
+      if(state.activeFile===nm)state.activeFile=next;
+      if(document.getElementById('codeFileName').textContent===nm)document.getElementById('codeFileName').textContent=next;
+      saveProjectLocal();renderFiles();setNote('Файл переименован: «'+nm+'» → «'+next+'».');
+    });
+    row.appendChild(rename);
     const open=document.createElement('button');
     open.className='btn mini';open.textContent='Открыть';
     open.addEventListener('click',()=>openCodeFile(nm));
@@ -3663,9 +4018,24 @@ function renderFiles(){
   state.sprites.forEach(s=>{
     const row=document.createElement('div');
     row.className='file-row';
-    row.innerHTML=''+
-      ''+escapeHtml(s.name)+''+
-      ''+(s.img.naturalWidth||'?')+'×'+(s.img.naturalHeight||'?')+' · '+(s.sizeKb||'?')+' КБ';
+    row.innerHTML=escapeHtml(s.name)+'&nbsp;&nbsp;'+(s.img.naturalWidth||'?')+'×'+(s.img.naturalHeight||'?')+' · '+(s.sizeKb||'?')+' КБ';
+    const rename=document.createElement('button');
+    rename.className='btn mini';rename.textContent='Переименовать';
+    rename.addEventListener('click',()=>{
+      const proposed=prompt('Новое имя спрайта:',s.name);
+      if(proposed===null)return;
+      const next=proposed.trim();
+      if(!next||next===s.name)return;
+      if(state.sprites.some(other=>other!==s&&other.name===next)){setNote('Спрайт «'+next+'» уже существует.');return;}
+      const previous=s.name;
+      s.name=next;
+      const escaped=previous.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      const refPattern=new RegExp('([\\"\\\'])'+escaped+'([\\"\\\'])','g');
+      Object.keys(state.files).forEach(name=>{state.files[name]=state.files[name].replace(refPattern,'$1'+next+'$2');});
+      if(state.activeFile && state.files[state.activeFile]!==undefined)codeInput.value=state.files[state.activeFile];
+      saveProjectLocal();renderFiles();refreshEditor();setNote('Спрайт переименован: «'+previous+'» → «'+next+'». Ссылки в коде обновлены.');
+    });
+    row.appendChild(rename);
     const del=document.createElement('button');
     del.className='btn mini danger';del.textContent='✕';
     del.addEventListener('click',()=>{
@@ -3789,7 +4159,7 @@ document.getElementById('btnExportPxl').addEventListener('click',exportPxl);
   const input=document.getElementById('mrrInput');
   if(!importButton||!input)return;
 
-  let importBusy=false;
+  let busy=false;
 
   function importMrrSource(name,source){
     source=String(source==null?'':source).replace(/^\uFEFF/,'');
@@ -3821,64 +4191,107 @@ document.getElementById('btnExportPxl').addEventListener('click',exportPxl);
     }
   }
 
-  function readAsText(file){
+  async function importWithFileSystemPicker(){
+    if(typeof window.showOpenFilePicker!=='function')return false;
+
+    let handles;
+    try{
+	  handles=await window.showOpenFilePicker({
+ 	    multiple:false,
+	    excludeAcceptAllOption:true,
+        types:[{
+          description:'MrrCode source',
+          accept:{
+            'application/octet-stream':['.mrr']
+          }
+        }]
+      });
+    }catch(err){
+      // В Android WebView API может существовать, но быть недоступен.
+      if(err&&err.name==='AbortError')return true;
+      return false; // fallback на обычный input[type=file]
+    }
+
+    if(!handles||!handles.length)return true;
+
+    const handle=handles[0];
+
+    // Получаем свежий File непосредственно из handle.
+    const file=await handle.getFile();
+    const name=String(file.name||'');
+
+    if(!/\.mrr$/i.test(name)){
+      throw new Error('Разрешены только файлы .mrr.');
+    }
+
+    const source=await file.text();
+    importMrrSource(name,source);
+    return true;
+  }
+
+  function importWithInput(){
     return new Promise((resolve,reject)=>{
-      try{
-        const reader=new FileReader();
-        reader.onload=()=>{
-          const result=reader.result;
-          if(typeof result!=='string'){
-            reject(new Error('Выбранный файл не удалось получить как текст.'));
+      const oldInput=input;
+
+      const onChange=async()=>{
+        try{
+          const file=oldInput.files&&oldInput.files[0];
+          if(!file){
+            resolve(false);
             return;
           }
-          resolve(result.replace(/^\uFEFF/,''));
-        };
-        reader.onerror=()=>{
-          reject(reader.error||new Error('Не удалось прочитать выбранный файл.'));
-        };
-        reader.onabort=()=>reject(new Error('Чтение файла отменено.'));
-        reader.readAsText(file,'UTF-8');
-      }catch(err){
-        reject(err);
+
+          const name=String(file.name||'');
+          if(!/\.mrr$/i.test(name)){
+            throw new Error('Разрешены только файлы .mrr.');
+          }
+
+          const source=await new Promise((res,rej)=>{
+            const reader=new FileReader();
+            reader.onload=()=>res(String(reader.result==null?'':reader.result));
+            reader.onerror=()=>rej(reader.error||new Error('Не удалось прочитать файл.'));
+            reader.onabort=()=>rej(new Error('Чтение файла отменено.'));
+            reader.readAsText(file,'UTF-8');
+          });
+
+          importMrrSource(name,source);
+          resolve(true);
+        }catch(err){
+          reject(err);
+        }finally{
+          oldInput.removeEventListener('change',onChange);
+          oldInput.value='';
+        }
+      };
+
+      oldInput.addEventListener('change',onChange,{once:false});
+      try { oldInput.click(); }
+      catch(err) {
+        oldInput.removeEventListener('change',onChange);
+        reject(new Error('Браузер не открыл окно выбора файла. Попробуй открыть HTML в Chrome.'));
       }
     });
   }
 
-  importButton.addEventListener('click',function(ev){
+  importButton.addEventListener('click',async ev=>{
     ev.preventDefault();
-    if(importBusy)return;
-    input.value='';
-    input.click();
-  });
+    if(busy)return;
 
-  input.addEventListener('change',async function(ev){
-    if(importBusy)return;
-
-    const file=ev.currentTarget.files&&ev.currentTarget.files[0];
-    if(!file){
-      setNote('Файл не выбран.');
-      return;
-    }
-
-    const name=String(file.name||'');
-    if(!/\.mrr$/i.test(name)){
-      setNote('Импорт отменён: разрешены только .mrr');
-      logConsole('[Файлы] Отклонён '+name+'. Требуется .mrr.','err');
-      input.value='';
-      return;
-    }
-
-    importBusy=true;
+    busy=true;
     try{
-      const source=await readAsText(file);
-      importMrrSource(name,source);
+      // На обычном сайте сначала используем File System Access API,
+      // если браузер его поддерживает.
+      const handled=await importWithFileSystemPicker();
+      if(handled)return;
+
+      // Старый браузерный fallback.
+      await importWithInput();
     }catch(err){
       const msg=String(err&&err.message||err);
-      setNote('Ошибка импорта '+name+': '+msg);
-      logConsole('[Файлы] Ошибка импорта '+name+': '+msg,'err');
+      setNote('Ошибка импорта .mrr: '+msg);
+      logConsole('[Файлы] Ошибка импорта .mrr: '+msg,'err');
     }finally{
-      importBusy=false;
-      input.value='';
+      busy=false;
     }
   });
 })();
@@ -3906,9 +4319,8 @@ function buildExamplesUI(){
     b.addEventListener('click',()=>loadExample(ex));
     grid.appendChild(b);
   });
-  const chips=document.getElementById('apiChips');
-  chips.innerHTML=Object.keys(API).filter(k=>API[k].kind==='fn')
-    .map(k=>''+escapeHtml(API[k].sig)+'').join('');
+  // Раздел 9 уже содержит сгруппированную и оформленную HTML-разметку.
+  // Не перезаписываем её плоским списком при запуске интерфейса.
 }
 function loadExample(ex){
   if(!confirm('Загрузить пример «'+ex.title+'»?\nКод main.mrr и сцена будут заменены.'+(ex.files?'\nТакже будут созданы файлы примера.':'')))return;
@@ -3989,13 +4401,14 @@ function exportGameHtml(){
 (()=>{'use strict';
 const project=${encoded};
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),errorBox=document.getElementById('error');
-let pointer={x:0,y:0,down:false},last=0,startTime=performance.now(),handlers={},images={};
+let pointer={x:0,y:0,down:false},last=0,startTime=performance.now(),handlers={},images={},gameBackground='#101827';
 for(const s of project.sprites||[]){const im=new Image();im.src=s.dataUrl||'';images[s.name]=im;}
 function coords(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*800/r.width,y:(e.clientY-r.top)*450/r.height};}
 canvas.addEventListener('pointerdown',e=>{pointer=Object.assign(coords(e),{down:true});canvas.setPointerCapture?.(e.pointerId);call('pointerDown',pointer.x,pointer.y);});
 canvas.addEventListener('pointermove',e=>{const q=coords(e);pointer.x=q.x;pointer.y=q.y;if(pointer.down)call('pointerMove',q.x,q.y);});
 function up(e){const q=coords(e);pointer.x=q.x;pointer.y=q.y;pointer.down=false;call('pointerUp',q.x,q.y);}
 canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+function background(color='#101827'){gameBackground=typeof color==='string'?color:'#101827';ctx.fillStyle=gameBackground;ctx.fillRect(0,0,800,450);}
 function clear(color='#101827'){ctx.fillStyle=typeof color==='string'?color:'#101827';ctx.fillRect(0,0,800,450);}
 function rect(x,y,w,h,color='#70d6ff'){ctx.fillStyle=String(color);ctx.fillRect(Number(x)||0,Number(y)||0,Number(w)||0,Number(h)||0);}
 function circle(x,y,r,color='#70d6ff'){ctx.fillStyle=String(color);ctx.beginPath();ctx.arc(Number(x)||0,Number(y)||0,Math.max(0,Number(r)||0),0,Math.PI*2);ctx.fill();}
@@ -4003,7 +4416,7 @@ function line(x1,y1,x2,y2,color='#fff',width=2){ctx.strokeStyle=String(color);ct
 function text(value,x,y,color='#fff',size=16){ctx.fillStyle=String(color);ctx.font='600 '+(Number(size)||16)+'px system-ui,sans-serif';ctx.textBaseline='top';ctx.fillText(String(value??''),Number(x)||0,Number(y)||0);}
 function sprite(name,x,y,w,h){const im=images[String(name)];if(im&&im.complete&&im.naturalWidth){ctx.drawImage(im,x,y,w||im.naturalWidth,h||im.naturalHeight);}}
 function print(...a){console.log(...a)}
-const api={clear,rect,circle,line,text,sprite,print,lerp:(a,b,t)=>a+(b-a)*t,map:(v,a,b,c,d)=>a===b?c:c+(v-a)*(d-c)/(b-a),sign:Math.sign,randomInt:(a,b)=>Math.floor(Math.random()*(b-a+1))+a,random:Math.random,rand:(a=0,b=1)=>a+Math.random()*(b-a),abs:Math.abs,sqrt:Math.sqrt,sin:Math.sin,cos:Math.cos,atan2:Math.atan2,floor:Math.floor,ceil:Math.ceil,round:Math.round,min:Math.min,max:Math.max,clamp:(v,a,b)=>Math.min(Math.max(v,a),b),toString:String,toNumber:Number,length:v=>v==null?0:(v.length??Object.keys(v).length),contains:(a,b)=>Array.isArray(a)?a.includes(b):String(a??'').includes(String(b??'')),join:(a,sep=',')=>Array.isArray(a)?a.join(sep):String(a??''),split:(a,sep=',')=>String(a??'').split(sep),push:(a,v)=>(a.push(v),a),pop:a=>a.pop(),time:()=>((performance.now()-startTime)/1000),dt:()=>last,pointerX:()=>pointer.x,pointerY:()=>pointer.y,pointerDownNow:()=>pointer.down,playTone:()=>{},stopSound:()=>{}};
+const api={background,clear,rect,circle,line,text,sprite,print,lerp:(a,b,t)=>a+(b-a)*t,map:(v,a,b,c,d)=>a===b?c:c+(v-a)*(d-c)/(b-a),sign:Math.sign,randomInt:(a,b)=>Math.floor(Math.random()*(b-a+1))+a,random:Math.random,rand:(a=0,b=1)=>a+Math.random()*(b-a),abs:Math.abs,sqrt:Math.sqrt,sin:Math.sin,cos:Math.cos,atan2:Math.atan2,floor:Math.floor,ceil:Math.ceil,round:Math.round,min:Math.min,max:Math.max,clamp:(v,a,b)=>Math.min(Math.max(v,a),b),toString:String,toNumber:Number,length:v=>v==null?0:(v.length??Object.keys(v).length),contains:(a,b)=>Array.isArray(a)?a.includes(b):String(a??'').includes(String(b??'')),join:(a,sep=',')=>Array.isArray(a)?a.join(sep):String(a??''),split:(a,sep=',')=>String(a??'').split(sep),push:(a,v)=>(a.push(v),a),pop:a=>a.pop(),time:()=>((performance.now()-startTime)/1000),dt:()=>last,pointerX:()=>pointer.x,pointerY:()=>pointer.y,pointerDownNow:()=>pointer.down,playTone:()=>{},stopSound:()=>{}};
 function call(name,...args){try{if(typeof handlers[name]==='function')handlers[name](...args);}catch(e){showError(name+': '+(e.stack||e.message||e));}}
 function showError(msg){errorBox.style.display='block';errorBox.textContent='Ошибка игры: '+msg;console.error(msg);}
 try{
@@ -4012,9 +4425,9 @@ handlers=factory(...Object.values(api));
 // Draw basic scene objects in the native page, so editor scene primitives survive export.
 const scene=project.scene||[];
 if(handlers.start) handlers.start();
-if(!handlers.update){clear();for(const o of scene){if(o.type==='rect')rect(o.x,o.y,o.w,o.h,o.color);else if(o.type==='circle')circle(o.x,o.y,o.r,o.color);else if(o.type==='text')text(o.text||o.name,o.x,o.y,o.color,o.size);}}
+if(!handlers.update){clear(gameBackground);for(const o of scene){if(o.type==='rect')rect(o.x,o.y,o.w,o.h,o.color);else if(o.type==='circle')circle(o.x,o.y,o.r,o.color);else if(o.type==='text')text(o.text||o.name,o.x,o.y,o.color,o.size);}}
 }catch(e){showError(e.stack||e.message||e);return;}
-function frame(ts){const dt=Math.min(.05,Math.max(0,(ts-lastFrame)/1000||0));lastFrame=ts;last=dt;if(handlers.update){try{handlers.update(dt);}catch(e){showError(e.stack||e.message||e);return;}}requestAnimationFrame(frame);}
+function frame(ts){const dt=Math.min(.05,Math.max(0,(ts-lastFrame)/1000||0));lastFrame=ts;last=dt;if(handlers.update){ctx.fillStyle=gameBackground;ctx.fillRect(0,0,800,450);try{handlers.update(dt);}catch(e){showError(e.stack||e.message||e);return;}}requestAnimationFrame(frame);}
 let lastFrame=performance.now();requestAnimationFrame(frame);
 })();
 </scr`+'ipt></body></html>';
@@ -4037,6 +4450,59 @@ document.getElementById('btnExportGameHtml').addEventListener('click',exportGame
   updateHint();
   logConsole('[MrrCode] Готов. Нажми «Запуск» — игра откроется на весь экран устройства.','sys');
   logConsole('v0.1.0 · только сенсор · 🤖 ИИ-агент (кнопка «ИИ»): подключи Base URL, API-ключ и модель — ИИ напишет код, создаст файлы и сцену.','sys');
+})();
+</script>
+<script id="mrrcode-quality-of-life">
+(function(){
+  'use strict';
+  // Global errors are surfaced in the in-app console instead of disappearing silently.
+  function report(message, kind) {
+    try {
+      if (typeof window.logConsole === 'function') window.logConsole('[Ошибка приложения] ' + message, kind || 'err');
+    } catch (_) {}
+  }
+  window.addEventListener('error', function(e) {
+    if (e && e.message) report(e.message + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : ''));
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    const reason = e && e.reason;
+    report(reason && reason.message ? reason.message : String(reason || 'Неизвестная ошибка Promise'));
+  });
+  document.addEventListener('keydown', function(e) {
+    const mod = e.ctrlKey || e.metaKey;
+    const target = e.target;
+    const inEditor = target && target.id === 'codeInput';
+    if (mod && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      const save = document.getElementById('btnSaveNow');
+      if (save) save.click();
+      else if (typeof window.saveProjectLocal === 'function') window.saveProjectLocal();
+    } else if (mod && e.key.toLowerCase() === 'z' && inEditor) {
+      e.preventDefault();
+      const undo = document.getElementById('btnUndo');
+      if (undo) undo.click();
+    } else if (mod && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z')) && inEditor) {
+      e.preventDefault();
+      const redo = document.getElementById('btnRedo');
+      if (redo) redo.click();
+    } else if (e.key === 'Escape') {
+      const overlay = document.getElementById('mrrGameOverlay');
+      if (overlay && overlay.classList.contains('active') && typeof window.mrrBackToEditor === 'function') {
+        window.mrrBackToEditor();
+      }
+    }
+  });
+  // Make the app's current tab available to assistive technology.
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.setAttribute('aria-controls', 'tab-' + btn.dataset.tab);
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-selected', btn.classList.contains('active') ? 'true' : 'false');
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tab-btn').forEach(function(other){
+        other.setAttribute('aria-selected', other === btn ? 'true' : 'false');
+      });
+    });
+  });
 })();
 </script>
 <!-- MrrCode game overlay -->
@@ -4099,185 +4565,15 @@ window.MrrCodeUI = window.MrrCodeUI || {};
 window.MrrCodeUI.showGame = function(html){ return window.mrrOpenGame(html); };
 window.MrrCodeUI.hideGame = function(){ return window.mrrBackToEditor(); };
 </script>
-
-<script>
-(function(){
-  const builtin = [
-    "print","rect","circle","line","text","clear","color","fill","stroke",
-    "width","height","if","else","for","while","let","const","true","false",
-    "return","function","random","sin","cos","abs","sqrt","touch",
-    "pointerDown","pointerUp"
-  ];
-
-  const boxId = "mrrFallbackCompletions";
-
-  function editorEl(){
-    return document.querySelector(
-      'textarea#codeEditor, textarea.code-editor, textarea.editor, textarea'
-    );
-  }
-
-  function currentPrefix(el){
-    const pos = el.selectionStart ?? el.value.length;
-    const before = el.value.slice(0, pos);
-    const m = before.match(/[A-Za-z_][A-Za-z0-9_]*$/);
-    return { prefix:m ? m[0] : "", pos };
-  }
-
-  function indexSymbols(code){
-    const symbols = new Map();
-
-    // User variables/constants:
-    // let coins = 10;
-    // const playerSpeed = 5;
-    const variableRe = /\b(?:let|const|var)\s+([A-Za-z_][A-Za-z0-9_]*)/g;
-    let m;
-    while ((m = variableRe.exec(code))) {
-      symbols.set(m[1], {name:m[1], kind:"variable"});
-    }
-
-    // User functions:
-    // function attack(...) { ... }
-    const functionRe = /\bfunction\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)/g;
-    while ((m = functionRe.exec(code))) {
-      symbols.set(m[1], {name:m[1], kind:"function", params:m[2]});
-    }
-
-    // Function parameters become local suggestions too.
-    const paramRe = /\bfunction\s+[A-Za-z_][A-Za-z0-9_]*\s*\(([^)]*)\)/g;
-    while ((m = paramRe.exec(code))) {
-      m[1].split(",").forEach(p => {
-        const name = p.trim().match(/^[A-Za-z_][A-Za-z0-9_]*/);
-        if (name) symbols.set(name[0], {name:name[0], kind:"parameter"});
-      });
-    }
-
-    return [...symbols.values()];
-  }
-
-  function ensureBox(){
-    let box = document.getElementById(boxId);
-    if (!box) {
-      box = document.createElement("div");
-      box.id = boxId;
-      box.style.cssText =
-        "position:fixed;z-index:100020;display:none;min-width:180px;max-width:300px;" +
-        "max-height:240px;overflow:auto;padding:5px;border:1px solid rgba(255,255,255,.14);" +
-        "border-radius:10px;background:rgba(25,29,38,.98);color:#fff;" +
-        "box-shadow:0 8px 28px rgba(0,0,0,.35);";
-      document.body.appendChild(box);
-    }
-    return box;
-  }
-
-  function hide(){
-    const box = document.getElementById(boxId);
-    if (box) box.style.display = "none";
-  }
-
-  function insertCompletion(el, item){
-    const {prefix, pos} = currentPrefix(el);
-    const from = pos - prefix.length;
-
-    // Functions get parentheses, variables/keywords keep their name.
-    const text = item.kind === "function" || item.kind === "builtin-function"
-      ? item.name + "()"
-      : item.name;
-
-    el.setRangeText(text, from, pos, "end");
-    el.dispatchEvent(new Event("input", {bubbles:true}));
-    hide();
-    el.focus();
-  }
-
-  function show(el){
-    const {prefix} = currentPrefix(el);
-    if (!prefix) { hide(); return; }
-
-    const code = el.value || "";
-    const userSymbols = indexSymbols(code);
-
-    const items = [
-      ...userSymbols,
-      ...builtin.map(name => ({
-        name,
-        kind: ["print","rect","circle","line","text","clear","random",
-               "sin","cos","abs","sqrt"].includes(name)
-          ? "builtin-function" : "keyword"
-      }))
-    ];
-
-    // De-duplicate, keeping user-defined symbols first.
-    const seen = new Set();
-    const matches = items.filter(item => {
-      const key = item.name.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return key.startsWith(prefix.toLowerCase());
-    }).slice(0, 10);
-
-    if (!matches.length) { hide(); return; }
-
-    const box = ensureBox();
-    box.innerHTML = "";
-
-    matches.forEach(item => {
-      const row = document.createElement("button");
-      row.type = "button";
-      row.textContent =
-        item.name +
-        (item.kind === "variable" ? "  · variable" :
-         item.kind === "parameter" ? "  · parameter" :
-         item.kind === "function" ? "  · function" :
-         item.kind === "builtin-function" ? "()" : "");
-
-      row.style.cssText =
-        "display:block;width:100%;padding:7px 9px;text-align:left;" +
-        "border:0;background:transparent;color:inherit;border-radius:7px;";
-
-      row.onmouseenter = () => row.style.background = "rgba(255,255,255,.08)";
-      row.onmouseleave = () => row.style.background = "transparent";
-      row.onclick = () => insertCompletion(el, item);
-
-      box.appendChild(row);
-    });
-
-    const r = el.getBoundingClientRect();
-    box.style.left = Math.max(8, r.left) + "px";
-    box.style.top = Math.min(window.innerHeight - 250, r.bottom + 6) + "px";
-    box.style.display = "block";
-  }
-
-  document.addEventListener("input", e => {
-    if (e.target && e.target.tagName === "TEXTAREA") show(e.target);
-  }, true);
-
-  document.addEventListener("keyup", e => {
-    if (e.target && e.target.tagName === "TEXTAREA" &&
-        !["ArrowUp","ArrowDown","Enter","Escape","Tab"].includes(e.key)) {
-      show(e.target);
-    }
-  }, true);
-
-  document.addEventListener("focusout", e => {
-    if (e.target && e.target.tagName === "TEXTAREA") {
-      setTimeout(hide, 180);
-    }
-  }, true);
-
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape") hide();
-  }, true);
-})();
-</script>
-<script>
-window.MrrCodeAutocomplete = window.MrrCodeAutocomplete || {
-  refresh: function(){
-    const el = document.querySelector(
-      'textarea#codeEditor, textarea.code-editor, textarea.editor, textarea'
-    );
-    if (el) el.dispatchEvent(new Event("input", {bubbles:true}));
-  }
+<script id="mrrcode-autocomplete-bridge">
+// Compatibility bridge: use the real MrrCode editor autocomplete, not a second
+// outdated popup with an incomplete hard-coded JavaScript-like function list.
+window.MrrCodeAutocomplete = window.MrrCodeAutocomplete || {};
+window.MrrCodeAutocomplete.refresh = function(){
+  const el = document.getElementById('codeInput');
+  if (!el) return;
+  if (typeof updateAC === 'function') updateAC(true);
+  if (typeof updateHint === 'function') updateHint();
 };
 </script>
 <script>
@@ -4293,11 +4589,86 @@ window.mrrBuildAIPrompt = function(userPrompt, currentCode){
   ].join("\n\n");
 };
 </script>
+<script>
+/* === MrrCode: ремонт импорта .mrr === */
+(function () {
+  if (window.__mrrReadFix) return;
+  window.__mrrReadFix = true;
 
+  const proto = window.FileReader && FileReader.prototype;
+  if (!proto) return;
+  const rawRead = proto.readAsText;
+  const rawText = Blob.prototype.text;
 
+  async function viaURL(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return await r.blob();
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+  async function memoryCopy(file) {
+    const b = await viaURL(file);
+    return new Blob([b], { type: 'text/plain;charset=utf-8' });
+  }
+  function withTimeout(p, ms) {
+    return Promise.race([
+      p,
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))
+    ]);
+  }
 
+  Blob.prototype.text = function () {
+    const self = this, args = arguments;
+    return withTimeout(Promise.resolve().then(() => rawText.apply(self, args)), 8000)
+      .catch(() => withTimeout(viaURL(self).then(b => rawText.call(b)), 8000));
+  };
 
-<div id="mrrFallbackCompletions" style="position: fixed; z-index: 100020; display: none; min-width: 180px; max-width: 300px; max-height: 240px; overflow: auto; padding: 5px; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 10px; background: rgba(25, 29, 38, 0.98); color: rgb(255, 255, 255); box-shadow: rgba(0, 0, 0, 0.35) 0px 8px 28px; left: 174.667px; top: 105px;"><button type="button" style="display: block; width: 100%; padding: 7px 9px; text-align: left; border: 0px; background: transparent; color: inherit; border-radius: 7px;">fill</button><button type="button" style="display: block; width: 100%; padding: 7px 9px; text-align: left; border: 0px; background: transparent; color: inherit; border-radius: 7px;">for</button><button type="button" style="display: block; width: 100%; padding: 7px 9px; text-align: left; border: 0px; background: transparent; color: inherit; border-radius: 7px;">false</button><button type="button" style="display: block; width: 100%; padding: 7px 9px; text-align: left; border: 0px; background: transparent; color: inherit; border-radius: 7px;">function</button></div><script>window.addEventListener("load",function(){setTimeout(function(){try{startGame();}catch(e){console.error("MrrCode build:",e);}},80);});</script>
-<script>window.addEventListener("load",function(){setTimeout(function(){try{startGame();}catch(e){console.error("MrrCode build:",e);}},80);});</script>
-<script>window.addEventListener("load",function(){setTimeout(function(){try{startGame();}catch(e){console.error("MrrCode build:",e);}},80);});</script>
+  proto.readAsText = function (file, enc) {
+    const fr = this;
+    if (fr.__mrrSafe) return rawRead.call(fr, file, enc);
+
+    let finished = false, timer = null;
+    const stop = () => {
+      finished = true;
+      if (timer) clearTimeout(timer);
+      if (fr.__mrrSafe) delete fr.__mrrSafe;
+    };
+    fr.addEventListener('loadend', stop);
+
+    const bail = (ev) => {
+      if (finished) return;
+      stop();
+      if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+      if (ev.preventDefault) ev.preventDefault();
+
+      memoryCopy(file).then(safe => {
+        fr.__mrrSafe = true;
+        rawRead.call(fr, safe, enc);
+      }).catch(err => {
+        try { Object.defineProperty(fr, 'error', { value: err, configurable: true }); } catch (_) {}
+        fr.dispatchEvent(new Event('error'));
+        fr.dispatchEvent(new Event('loadend'));
+      });
+    };
+
+    fr.addEventListener('error', bail, true);
+    fr.addEventListener('abort', bail, true);
+
+    timer = setTimeout(() => {
+      if (finished) return;
+      try { fr.abort(); } catch (_) { bail(new Event('error')); }
+    }, 6000);
+
+    try {
+      rawRead.call(fr, file, enc);
+    } catch (_) {
+      bail({ stopImmediatePropagation() {}, preventDefault() {} });
+    }
+  };
+})();
+</script>
 </body></html>
