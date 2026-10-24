@@ -3782,128 +3782,106 @@ function exportPxl(){
 }
 document.getElementById('btnExportPxl').addEventListener('click',exportPxl);
 
-const mrrInput=document.getElementById('mrrInput');
-const mrrImportButton=document.getElementById('btnImportPxl');
 
-function importMrrText(originalName,source){
-  source=String(source==null?'':source).replace(/^\uFEFF/,'');
-  if(!source.trim())throw new Error('Файл пустой.');
+/* ---------------- импорт .mrr ---------------- */
+(function(){
+  const importButton=document.getElementById('btnImportPxl');
+  const input=document.getElementById('mrrInput');
+  if(!importButton||!input)return;
 
-  state.files[originalName]=source;
-  state.activeFile=originalName;
-  codeInput.value=source;
+  let importBusy=false;
 
-  const nameEl=document.getElementById('codeFileName');
-  if(nameEl)nameEl.textContent=originalName;
+  function importMrrSource(name,source){
+    source=String(source==null?'':source).replace(/^\uFEFF/,'');
+    if(!source.trim())throw new Error('Файл пустой.');
 
-  refreshEditor();
-  renderFiles();
-  updateHint();
-  saveCode();
-  pushEditSnapshot();
+    state.files[name]=source;
+    state.activeFile=name;
+    codeInput.value=source;
 
-  setNote('Импортирован '+originalName+'.');
-  logConsole('[Файлы] Успешно импортирован .mrr: '+originalName,'sys');
+    const nameEl=document.getElementById('codeFileName');
+    if(nameEl)nameEl.textContent=name;
 
-  try{
-    const tokens=tokenize(source);
-    parse(tokens);
-    logConsole('[MrrCode] Синтаксис импортированного файла корректен.','sys');
-  }catch(err){
-    const msg=err&&err.message?err.message:String(err);
-    setNote('Файл импортирован, но есть ошибка MrrCode: '+msg);
-    logConsole('[MrrCode] Ошибка синтаксиса: '+msg,'err');
-  }
-}
+    refreshEditor();
+    renderFiles();
+    updateHint();
+    saveCode();
+    pushEditSnapshot();
 
-async function openMrrWithPicker(){
-  if(!window.showOpenFilePicker) return false;
+    setNote('Импортирован '+name+'.');
+    logConsole('[Файлы] Успешно импортирован .mrr: '+name,'sys');
 
-  let handles;
-  try{
-    handles=await window.showOpenFilePicker({
-      multiple:false,
-      types:[{
-        description:'MrrCode',
-        accept:{'application/mrr':['.mrr']}
-      }],
-      excludeAcceptAllOption:true
-    });
-  }catch(err){
-    // Отмена пользователем — не ошибка.
-    if(err&&err.name==='AbortError')return true;
-    throw err;
-  }
-
-  if(!handles||!handles.length)return true;
-
-  const handle=handles[0];
-  const file=await handle.getFile();
-  const name=String(file.name||'');
-
-  if(!/\.mrr$/i.test(name)){
-    throw new Error('Выбран не файл .mrr.');
-  }
-
-  // Получаем содержимое только после получения свежего File из handle.
-  const source=await file.text();
-  importMrrText(name,source);
-  return true;
-}
-
-if(mrrImportButton&&mrrInput){
-  mrrImportButton.addEventListener('click',async(ev)=>{
-    ev.preventDefault();
-
-    // В современных браузерах используем File System Access API.
-    // Он не хранит устаревшую ссылку на File после выбора.
-    if(window.showOpenFilePicker){
-      try{
-        await openMrrWithPicker();
-        return;
-      }catch(err){
-        const msg=err&&err.message?err.message:String(err);
-        setNote('Не удалось импортировать .mrr: '+msg);
-        logConsole('[Файлы] Ошибка выбора .mrr: '+msg,'err');
-        return;
-      }
+    try{
+      parse(tokenize(source));
+      logConsole('[MrrCode] Синтаксис импортированного файла корректен.','sys');
+    }catch(err){
+      const msg=err&&err.message?err.message:String(err);
+      setNote('Файл импортирован, но есть ошибка MrrCode: '+msg);
+      logConsole('[MrrCode] Ошибка синтаксиса: '+msg,'err');
     }
+  }
 
-    // Fallback для браузеров без showOpenFilePicker.
-    mrrInput.value='';
-    mrrInput.click();
+  function readAsText(file){
+    return new Promise((resolve,reject)=>{
+      try{
+        const reader=new FileReader();
+        reader.onload=()=>{
+          const result=reader.result;
+          if(typeof result!=='string'){
+            reject(new Error('Выбранный файл не удалось получить как текст.'));
+            return;
+          }
+          resolve(result.replace(/^\uFEFF/,''));
+        };
+        reader.onerror=()=>{
+          reject(reader.error||new Error('Не удалось прочитать выбранный файл.'));
+        };
+        reader.onabort=()=>reject(new Error('Чтение файла отменено.'));
+        reader.readAsText(file,'UTF-8');
+      }catch(err){
+        reject(err);
+      }
+    });
+  }
+
+  importButton.addEventListener('click',function(ev){
+    ev.preventDefault();
+    if(importBusy)return;
+    input.value='';
+    input.click();
   });
 
-  mrrInput.addEventListener('change',async(e)=>{
-    const input=e.currentTarget;
-    const file=input.files&&input.files[0];
+  input.addEventListener('change',async function(ev){
+    if(importBusy)return;
 
+    const file=ev.currentTarget.files&&ev.currentTarget.files[0];
     if(!file){
       setNote('Файл не выбран.');
       return;
     }
 
-    const originalName=String(file.name||'');
-    if(!/\.mrr$/i.test(originalName)){
-      setNote('Импорт отменён: нужен файл .mrr');
-      logConsole('[Файлы] Отклонён '+originalName+'. Разрешён только .mrr.','err');
+    const name=String(file.name||'');
+    if(!/\.mrr$/i.test(name)){
+      setNote('Импорт отменён: разрешены только .mrr');
+      logConsole('[Файлы] Отклонён '+name+'. Требуется .mrr.','err');
       input.value='';
       return;
     }
 
+    importBusy=true;
     try{
-      const source=await file.text();
-      importMrrText(originalName,source);
+      const source=await readAsText(file);
+      importMrrSource(name,source);
     }catch(err){
-      const msg=err&&err.message?err.message:String(err);
-      setNote('Ошибка чтения '+originalName+': '+msg);
-      logConsole('[Файлы] Ошибка чтения '+originalName+': '+msg,'err');
+      const msg=String(err&&err.message||err);
+      setNote('Ошибка импорта '+name+': '+msg);
+      logConsole('[Файлы] Ошибка импорта '+name+': '+msg,'err');
     }finally{
+      importBusy=false;
       input.value='';
     }
   });
-}
-
+})();
 /* ---------------- восстановление проекта ---------------- */
 setTimeout(()=>{if(!window.__MRRCODE_STANDALONE__&&restoreProjectLocal()){setNote('Восстановлен последний локальный проект.');logConsole('[MrrCode] Локальный проект восстановлен.','sys');}pushEditSnapshot();},0);
 
