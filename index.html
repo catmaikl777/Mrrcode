@@ -3,7 +3,10 @@
 <html lang="ru"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
-<title>MrrCode</title>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="mrrcode"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<title>MrrCode — Игра</title>
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-400-normal.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-600-normal.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-800-normal.css" rel="stylesheet"/>
@@ -4856,7 +4859,7 @@ function exportGameHtml(options={}){
     // Экспортируем только проектный код и небольшой нативный Canvas API — без редактора и интерпретатора MrrCode.
     const pageData={title:'Игра',source,files:p.files||{[ENTRY_FILE]:source},entry:ENTRY_FILE,scene:p.scene||[],sprites:(p.sprites||[]).map(s=>({name:s.name,dataUrl:s.dataUrl}))};
     const encoded=JSON.stringify(pageData).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
-    const html='<!doctype html>\n'+`<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Игра</title><style>
+    const html='<!doctype html>\n'+`<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="mrrcode"><meta name="apple-mobile-web-app-status-bar-style" content="default"><title>Игра</title><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101827}body{display:grid;place-items:center;touch-action:none}#game{display:block;width:min(100vw,177.7778vh);height:min(100vh,56.25vw);background:#101827;touch-action:none}#error{position:fixed;left:12px;right:12px;bottom:12px;padding:12px;background:#3b1720;color:#fff;border-radius:8px;font:14px/1.4 system-ui;white-space:pre-wrap;display:none}
 </style></head><body><canvas id="game" width="800" height="450" aria-label="Игра"></canvas><div id="error" role="alert"></div><script>
 (()=>{'use strict';
