@@ -468,6 +468,8 @@ window.MRRCODE_AI_SPEC = {
     ["sprite","sprite(name,x,y,width?,height?)"], ["spriteAnim","spriteAnim(name,x,y,w,h,frameW,frameH,fps)"], ["camera","camera(x,y)"], ["overlapRect","overlapRect(ax,ay,aw,ah,bx,by,bw,bh)"], ["moveBody","moveBody(body,dt,gravity)"], ["object","object(name)"],
     ["pointerX","pointerX()"], ["pointerY","pointerY()"], ["pointerDownNow","pointerDownNow()"],
     ["touchCount","touchCount()"], ["touchX","touchX(index)"], ["touchY","touchY(index)"],
+    ["screenWidth","screenWidth()"], ["screenHeight","screenHeight()"], ["gameWidth","gameWidth()"], ["gameHeight","gameHeight()"],
+    ["orientationAngle","orientationAngle()"], ["isPortrait","isPortrait()"], ["tiltX","tiltX()"], ["tiltY","tiltY()"], ["tiltZ","tiltZ()"], ["requestMotion","requestMotion()"],
     ["splice","splice(array,start,count,...items)"], ["shift","shift(array)"], ["unshift","unshift(array,value)"],
     ["indexOf","indexOf(array,value)"], ["slice","slice(array,start,end?)"], ["pow","pow(a,b)"],
     ["trim","trim(text)"], ["upper","upper(text)"], ["lower","lower(text)"],
@@ -581,8 +583,53 @@ window.MrrCodeValidate = function(){ throw new Error('Валидатор MrrCode
     endsWith(s,p){ return String(s).endsWith(String(p)); },
     replace(s,a,b){ return String(s).replaceAll(String(a), String(b)); },
 
-    typeof(v){ return Array.isArray(v) ? "array" : typeof v; }
+    typeof(v){ return Array.isArray(v) ? "array" : typeof v; },
+
+    // Размер видимой области браузера в CSS-пикселях; игровая сцена остаётся 800×450.
+    screenWidth(){ return Math.max(1, Number(window.innerWidth) || 800); },
+    screenHeight(){ return Math.max(1, Number(window.innerHeight) || 450); },
+    gameWidth(){ return 800; },
+    gameHeight(){ return 450; },
+    orientationAngle(){ return Number((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0) || 0; },
+    isPortrait(){ return (Number(window.innerHeight)||450) >= (Number(window.innerWidth)||800); },
+    tiltX(){ return Number((window.MrrDeviceOrientation || {}).gamma) || 0; },
+    tiltY(){ return Number((window.MrrDeviceOrientation || {}).beta) || 0; },
+    tiltZ(){ return Number((window.MrrDeviceOrientation || {}).alpha) || 0; },
+    requestMotion(){
+      const d = window.DeviceOrientationEvent;
+      if (!d) { window.MrrMotionStatus = 'unsupported'; return Promise.resolve(false); }
+      const listen = () => {
+        window.MrrDeviceOrientation = window.MrrDeviceOrientation || {alpha:0,beta:0,gamma:0,available:false};
+        if (!window.__mrrOrientationListener) {
+          const update = function(e){
+            const o = window.MrrDeviceOrientation;
+            if (e.alpha != null) o.alpha = Number(e.alpha);
+            if (e.beta != null) o.beta = Number(e.beta);
+            if (e.gamma != null) o.gamma = Number(e.gamma);
+            o.available = e.alpha != null || e.beta != null || e.gamma != null;
+            if (o.available) window.MrrMotionStatus = 'active';
+          };
+          window.addEventListener('deviceorientation', update, true);
+          window.addEventListener('deviceorientationabsolute', update, true);
+          window.__mrrOrientationListener = true;
+        }
+        window.MrrMotionStatus = 'waiting';
+        return true;
+      };
+      try {
+        if (typeof d.requestPermission === 'function') {
+          return d.requestPermission().then(result => {
+            if (result !== 'granted') { window.MrrMotionStatus = 'denied'; return false; }
+            return listen();
+          }).catch(() => { window.MrrMotionStatus = 'denied'; return false; });
+        }
+        return Promise.resolve(listen());
+      } catch (_) { window.MrrMotionStatus = 'denied'; return Promise.resolve(false); }
+    }
   };
+
+  window.MrrDeviceOrientation = window.MrrDeviceOrientation || {alpha:0,beta:0,gamma:0,available:false};
+  window.MrrMotionStatus = window.MrrMotionStatus || 'not-requested';
 
   window.MrrCodeStdlib020 = std;
 
@@ -928,6 +975,7 @@ main{max-width:1240px}
 <button class="btn" id="btnImportPng">＋ Импорт PNG-спрайта</button>
 <div class="row-btns" style="margin-top:6px">
 <button class="btn ghost" id="btnExportGameHtml">🎮 Сборка HTML</button>
+<button class="btn primary" id="btnPublishGithub">🌐 Опубликовать</button>
 <button class="btn ghost" id="btnExportProject">⬇ Проект</button>
 <button class="btn ghost" id="btnImportProject">⬆ Проект</button>
 <button class="btn ghost" id="btnSaveProjectLocal">💾 Автосейв</button><button class="btn ghost" id="btnProjectHistory">🕘 Версии</button><button class="btn ghost" id="btnCheckResources">🔎 Проверить ресурсы</button>
@@ -949,7 +997,7 @@ main{max-width:1240px}
 <div class="help-wrap">
 <div class="panel doc-section">
 <h2><span class="num">1</span>Как устроен проект <span class="mrr-cat-paw">🐾</span></h2>
-<p><b>Игра</b> — запущенный на весь экран устройства экран. <b>Код</b> — логика на MrrCode. <b>Сцена</b> — прямоугольники, круги и текстовые объекты. <b>Файлы</b> — код и PNG-спрайты. <b>🤖 ИИ</b> — агент, который пишет код за тебя. Точка входа — <code>main.mrr</code>. Координаты игрового поля всегда <b>800×450</b> — движок сам масштабирует картинку под любой экран.</p>
+<p><b>Игра</b> — запущенный на весь экран устройства экран. <b>Код</b> — логика на MrrCode. <b>Сцена</b> — прямоугольники, круги и текстовые объекты. <b>Файлы</b> — код и PNG-спрайты. <b>🤖 ИИ</b> — агент, который пишет код за тебя. Точка входа — <code>main.mrr</code>. Координаты игровой сцены всегда <b>800×450</b> — движок масштабирует её под экран. Для размера окна используй <code>screenWidth()</code>/<code>screenHeight()</code>, для логических координат — <code>gameWidth()</code>/<code>gameHeight()</code>.</p>
 </div>
 <div class="panel doc-section">
 <h2><span class="num">2</span>Переменные и типы <span class="mrr-cat-paw">🐾</span></h2>
@@ -1062,7 +1110,7 @@ main{max-width:1240px}
 <div class="panel doc-section">
 <h2><span class="num">9</span>Полезные встроенные функции</h2>
 <div class="api-groups" id="apiChips">
-<div class="api-group"><h3>🎮 Управление и события</h3><div class="api-chips"><code>start()</code><code>update(dt)</code><code>pointerDown(x,y)</code><code>pointerMove(x,y)</code><code>pointerUp(x,y)</code><code>pointerX()</code><code>pointerY()</code><code>pointerDownNow()</code><code>touchCount()</code><code>touchX(i)</code><code>touchY(i)</code></div></div>
+<div class="api-group"><h3>🎮 Управление, экран и датчики</h3><div class="api-chips"><code>start()</code><code>update(dt)</code><code>pointerDown(x,y)</code><code>pointerMove(x,y)</code><code>pointerUp(x,y)</code><code>pointerX()</code><code>pointerY()</code><code>pointerDownNow()</code><code>touchCount()</code><code>touchX(i)</code><code>touchY(i)</code><code>screenWidth()</code><code>screenHeight()</code><code>gameWidth()</code><code>gameHeight()</code><code>orientationAngle()</code><code>isPortrait()</code><code>tiltX()</code><code>tiltY()</code><code>tiltZ()</code><code>requestMotion()</code></div></div>
 <div class="api-group"><h3>🎨 Рисование и фон</h3><div class="api-chips"><code>background(color)</code><code>clear(color?)</code><code>rect(x,y,w,h,color)</code><code>circle(x,y,r,color)</code><code>line(x1,y1,x2,y2,color,width?)</code><code>text(value,x,y,color,size?)</code><code>sprite(name,x,y,w?,h?)</code><code>spriteAnim(name,x,y,w,h,frameW,frameH,fps)</code><code>camera(x,y)</code><code>rgba(r,g,b,a)</code><code>object(name)</code></div></div>
 <div class="api-group"><h3>🧮 Математика и время</h3><div class="api-chips"><code>random()</code><code>rand(min,max)</code><code>randomInt(min,max)</code><code>abs(x)</code><code>sqrt(x)</code><code>sin(a)</code><code>cos(a)</code><code>atan2(y,x)</code><code>floor(x)</code><code>ceil(x)</code><code>round(x)</code><code>min(a,b)</code><code>max(a,b)</code><code>clamp(value,min,max)</code><code>pow(a,b)</code><code>lerp(a,b,t)</code><code>map(value,inMin,inMax,outMin,outMax)</code><code>sign(x)</code><code>time()</code><code>dt()</code></div></div>
 <div class="api-group"><h3>📦 Массивы и строки</h3><div class="api-chips"><code>length(value)</code><code>push(array,value)</code><code>pop(array)</code><code>splice(array,start,count,...items)</code><code>shift(array)</code><code>unshift(array,value)</code><code>indexOf(array,value)</code><code>slice(array,start,end?)</code><code>join(array,separator)</code><code>split(text,separator)</code><code>contains(collection,value)</code><code>trim(text)</code><code>upper(text)</code><code>lower(text)</code><code>startsWith(text,prefix)</code><code>endsWith(text,suffix)</code><code>replace(text,from,to)</code><code>typeof(value)</code><code>toString(value)</code><code>toNumber(value)</code></div></div>
@@ -1216,6 +1264,39 @@ function update(dt) {
 </ul>
 </div>
 <div class="panel doc-section">
+<h2><span class="num">24</span>Размер экрана и наклон телефона</h2>
+<p><code>screenWidth()</code> и <code>screenHeight()</code> возвращают размер видимой области браузера в CSS-пикселях — в том числе после перехода в полноэкранный режим. Это размеры окна устройства, а не координаты рисования. Игровые координаты по-прежнему фиксированы: <code>gameWidth()</code> возвращает <b>800</b>, <code>gameHeight()</code> — <b>450</b>. Используй последние для размещения объектов на сцене.</p>
+<p><code>orientationAngle()</code> сообщает угол поворота экрана, <code>isPortrait()</code> — вертикально ли расположено окно. <code>tiltX()</code> возвращает наклон влево/вправо (gamma), <code>tiltY()</code> — вперёд/назад (beta), <code>tiltZ()</code> — alpha. Это углы датчика, а не гарантированное направление на север.</p>
+<p>На некоторых телефонах браузер требует разрешение на датчики. Вызывай <code>requestMotion()</code> в ответ на касание/нажатие пользователя. На неподдерживаемом устройстве или без разрешения углы могут оставаться нулевыми; датчики обычно требуют HTTPS или localhost.</p>
+<pre class="doc-code">function pointerDown(x, y) {
+    requestMotion(); // запросить разрешение после касания
+}
+function update(dt) {
+    clear("#101827");
+    let x = gameWidth() / 2 + tiltX() * 3;
+    let y = gameHeight() / 2 + tiltY() * 2;
+    circle(clamp(x, 20, gameWidth() - 20),
+           clamp(y, 20, gameHeight() - 20), 20, "#70d6ff");
+    text("Окно: " + screenWidth() + "×" + screenHeight(), 16, 18, "#ffffff", 16);
+    text("Наклон: " + round(tiltX()) + ", " + round(tiltY()), 16, 42, "#c5d2e8", 14);
+}</pre>
+</div>
+<div class="panel doc-section">
+<h2><span class="num">25</span>Деплой игры в интернет (GitHub Pages)</h2>
+<p>Деплой публикует собранную игру как сайт. В MrrCode Studio открой вкладку <b>«Файлы»</b> и нажми <b>«Опубликовать на GitHub Pages»</b>. Инструмент собирает отдельный <code>index.html</code> из текущего проекта и отправляет его в репозиторий GitHub; исходный редактор в опубликованную игру не входит.</p>
+<h3>Шаг 1. Создай репозиторий</h3>
+<ol><li>Войди на <a href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a>.</li><li>Задай имя, например <code>my-mrr-game</code>, и создай репозиторий. Для простого деплоя можно выбрать Public.</li><li>Запомни имя владельца GitHub, имя репозитория и ветку (обычно <code>main</code>).</li></ol>
+<h3>Шаг 2. Создай токен с правом записи</h3>
+<ol><li>Открой <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained personal access tokens</a> и создай токен.</li><li>В <b>Repository access</b> выбери <b>Only select repositories</b> и отметь только свой репозиторий.</li><li>В <b>Repository permissions</b> найди <b>Contents</b> и выставь <b>Read and write</b>, затем создай токен и скопируй его.</li></ol>
+<p><b>Если пункта Contents нет:</b> проверь, что создаёшь именно Fine-grained token, а не другой тип. Для Classic token эквивалентный старый вариант — scope <code>repo</code> (он даёт более широкие права). В организации создание токена может ограничиваться её политикой; тогда используй личный репозиторий или попроси владельца организации разрешить такой доступ. Не отправляй токен в чат и не публикуй его.</p>
+<h3>Шаг 3. Заполни окно публикации</h3>
+<ol><li>В поле <b>Владелец</b> укажи имя пользователя/организации GitHub.</li><li>В <b>Репозиторий</b> — имя репозитория без URL.</li><li>В <b>Ветка</b> — <code>main</code> (или выбранную ветку).</li><li>Вставь токен в поле пароля и нажми <b>«Собрать и опубликовать»</b>. Токен нужен только для запроса к GitHub; закрой окно после публикации, чтобы очистить поле.</li></ol>
+<h3>Шаг 4. Включи GitHub Pages</h3>
+<ol><li>Открой репозиторий на GitHub → <b>Settings</b> → <b>Pages</b>.</li><li>В разделе сборки выбери <b>Deploy from a branch</b>, ветку, которую указал при публикации (обычно <code>main</code>) и папку <code>/(root)</code>, затем сохрани. Если этот источник уже настроен, повторно менять его не нужно.</li><li>Подожди несколько минут и обнови страницу Pages. GitHub покажет адрес сайта. Для обычного репозитория адрес обычно выглядит как <code>https://ВЛАДЕЛЕЦ.github.io/ИМЯ-РЕПОЗИТОРИЯ/</code>; для репозитория вида <code>владелец.github.io</code> адрес корневой.</li></ol>
+<p>После повторной публикации <code>index.html</code> обновится; Pages может потребовать несколько минут, чтобы показать новую версию. Если сайт выдаёт 404, проверь, что файл <code>index.html</code> находится в корне выбранной ветки и Pages настроен на эту ветку/папку. Ошибка 401 обычно означает неверный или истёкший токен; 403 — недостаточно прав; 404 в окне публикации может означать неправильное имя владельца/репозитория.</p>
+<p><b>Важно:</b> игра на GitHub Pages будет публичным сайтом, если репозиторий и настройки Pages допускают публичный доступ. Не добавляй секретные ключи API в код игры — всё, что включено в HTML, посетители могут прочитать. Если игра использует сохранение, оно хранится в браузере каждого игрока отдельно.</p>
+</div>
+<div class="panel doc-section">
 <h2>Примеры</h2>
 <div class="examples-grid" id="examplesGrid"></div>
 </div></div>
@@ -1329,6 +1410,16 @@ const API={
   touchCount:{kind:'fn',sig:'touchCount()',doc:'Сколько пальцев сейчас касается поля (мультитач).'},
   touchX:{kind:'fn',sig:'touchX(i)',doc:'X-координата i-го пальца (0 … touchCount()-1), диапазон 0..800.'},
   touchY:{kind:'fn',sig:'touchY(i)',doc:'Y-координата i-го пальца (0 … touchCount()-1), диапазон 0..450.'},
+  screenWidth:{kind:'fn',sig:'screenWidth()',doc:'Ширина видимой области браузера в CSS-пикселях, включая полноэкранный режим. Для координат сцены используй gameWidth().' },
+  screenHeight:{kind:'fn',sig:'screenHeight()',doc:'Высота видимой области браузера в CSS-пикселях, включая полноэкранный режим. Для координат сцены используй gameHeight().' },
+  gameWidth:{kind:'fn',sig:'gameWidth()',doc:'Логическая ширина игровой сцены: 800 единиц, независимо от размера устройства.'},
+  gameHeight:{kind:'fn',sig:'gameHeight()',doc:'Логическая высота игровой сцены: 450 единиц, независимо от размера устройства.'},
+  orientationAngle:{kind:'fn',sig:'orientationAngle()',doc:'Угол поворота экрана в градусах (обычно 0, 90, 180 или 270).'},
+  isPortrait:{kind:'fn',sig:'isPortrait()',doc:'true, если видимая область выше, чем шире.'},
+  tiltX:{kind:'fn',sig:'tiltX()',doc:'Наклон телефона влево/вправо (gamma, обычно −90…90°). Нужны поддержка устройства и разрешение.'},
+  tiltY:{kind:'fn',sig:'tiltY()',doc:'Наклон телефона вперёд/назад (beta, обычно −180…180°). Нужны поддержка устройства и разрешение.'},
+  tiltZ:{kind:'fn',sig:'tiltZ()',doc:'Ориентация вокруг вертикальной оси (alpha, 0…360°; не гарантирует компасный север).'},
+  requestMotion:{kind:'fn',sig:'requestMotion()',doc:'Запрашивает разрешение на датчик ориентации там, где браузер этого требует. Вызывай после касания/нажатия.'},
   background:{kind:'fn',sig:'background(color)',doc:'Задаёт постоянный цвет фона игры. Установи один раз в start(); фон будет заливаться этим цветом в начале каждого кадра.'},
   clear:{kind:'fn',sig:'clear(color?)',doc:'Очищает текущий кадр и заливает его цветом color (по умолчанию "#0f172a"). Для постоянного фона используй background(color).'},
   rect:{kind:'fn',sig:'rect(x, y, w, h, color)',doc:'Прямоугольник: левый верхний угол (x, y), размер w×h.'},
@@ -3297,6 +3388,10 @@ const PALETTE=[
   {label:'touchCount()',ins:'touchCount()'},
   {label:'touchX()',ins:'touchX()',caret:1},
   {label:'touchY()',ins:'touchY()',caret:1},
+  {label:'screenWidth()',ins:'screenWidth()'},{label:'screenHeight()',ins:'screenHeight()'},
+  {label:'gameWidth()',ins:'gameWidth()'},{label:'gameHeight()',ins:'gameHeight()'},
+  {label:'tiltX()',ins:'tiltX()'},{label:'tiltY()',ins:'tiltY()'},{label:'tiltZ()',ins:'tiltZ()'},
+  {label:'requestMotion()',ins:'requestMotion()'},
   {sep:true},
   {label:'time()',ins:'time()'},{label:'dt()',ins:'dt()'},
   {label:'random()',ins:'random()'},{label:'rand()',ins:'rand()',caret:1},
@@ -3445,7 +3540,7 @@ function buildSystemPrompt(){
   return [
     'Ты — помощник по языку MrrCode 0.2.0.',
     'ОБЯЗАТЕЛЬНЫЙ РЕЖИМ ЗАКРЫТОГО МИРА: актуальный MRRCODE_AI_SPEC ниже — единственный источник встроенных функций, сигнатур и возможностей языка. Парсер MrrCode приложения задаёт допустимую грамматику.',
-    'НОВЫЕ ВОЗМОЖНОСТИ: scene-editor drag/resize/grid, история проекта и проверка ресурсов — инструменты интерфейса, а не команды языка. В коде доступны только описанные в MRRCODE_AI_SPEC функции: overlapRect, moveBody, camera и spriteAnim. Не выдумывай API синхронизации сцены с исходником.',
+    'НОВЫЕ ВОЗМОЖНОСТИ: scene-editor drag/resize/grid, история проекта и проверка ресурсов — инструменты интерфейса, а не команды языка. Встроенные функции бери из MRRCODE_AI_SPEC.builtins; не ограничивайся только overlapRect, moveBody, camera и spriteAnim. Для размеров используй screenWidth(), screenHeight() (видимая область браузера в CSS-пикселях), gameWidth(), gameHeight() (логическая игровая сцена), для ориентации orientationAngle(), isPortrait(), для датчика устройства tiltX(), tiltY(), tiltZ(). requestMotion() запрашивай из пользовательского действия (например pointerDown), потому что браузер может требовать разрешение. Не выдумывай API синхронизации сцены с исходником.',
     'ФИЗИКА: moveBody(body,dt,gravity) требует объект с x,y,vx,vy; overlapRect принимает два набора x,y,w,h и считает только настоящее пересечение без касания краями. Камера сдвигает рисование, но не координаты ввода. spriteAnim требует импортированный PNG-спрайтшит и размеры кадра в исходных пикселях.',
     'ПЕРЕД ПРИМЕНЕНИЕМ: сохраняй исходную версию, валидируй каждый изменённый файл, не утверждай что код гарантированно работает до реального запуска. Если ответ обрезан или файл неполный, не применяй его как целый файл.', 
     'Запрещено выводить поддержку из JavaScript, Python, браузера или другого языка. Знакомый синтаксис не означает, что он поддерживается MrrCode.',
@@ -4410,13 +4505,13 @@ document.getElementById('btnAiClear').addEventListener('click',()=>{
 });
 
 /* ---------------- экспорт автономной HTML-сборки ---------------- */
-function exportGameHtml(){
+function exportGameHtml(options={}){
   try{
     const p=projectData();
     const source=String((p.files&&p.files[ENTRY_FILE])||'');
     if(!source.trim()) throw new Error('Файл main.mrr пуст.');
     // Экспортируем только проектный код и небольшой нативный Canvas API — без редактора и интерпретатора MrrCode.
-    const pageData={title:'Игра',source,scene:p.scene||[],sprites:(p.sprites||[]).map(s=>({name:s.name,dataUrl:s.dataUrl}))};
+    const pageData={title:'Игра',source,files:p.files||{[ENTRY_FILE]:source},entry:ENTRY_FILE,scene:p.scene||[],sprites:(p.sprites||[]).map(s=>({name:s.name,dataUrl:s.dataUrl}))};
     const encoded=JSON.stringify(pageData).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
     const html='<!doctype html>\n'+`<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Игра</title><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101827}body{display:grid;place-items:center;touch-action:none}#game{display:block;width:min(100vw,177.7778vh);height:min(100vh,56.25vw);background:#101827;touch-action:none}#error{position:fixed;left:12px;right:12px;bottom:12px;padding:12px;background:#3b1720;color:#fff;border-radius:8px;font:14px/1.4 system-ui;white-space:pre-wrap;display:none}
@@ -4424,42 +4519,128 @@ function exportGameHtml(){
 (()=>{'use strict';
 const project=${encoded};
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),errorBox=document.getElementById('error');
-let pointer={x:0,y:0,down:false},last=0,startTime=performance.now(),handlers={},images={},gameBackground='#101827';
+let pointer={x:0,y:0,down:false},touches=[],last=0,startTime=performance.now(),handlers={},images={},gameBackground='#101827',cameraOffset={x:0,y:0},audioContext=null;
+const savedTouches=new Map();
+const scene=Array.isArray(project.scene)?project.scene:[];
 for(const s of project.sprites||[]){const im=new Image();im.src=s.dataUrl||'';images[s.name]=im;}
 function coords(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*800/r.width,y:(e.clientY-r.top)*450/r.height};}
-canvas.addEventListener('pointerdown',e=>{pointer=Object.assign(coords(e),{down:true});canvas.setPointerCapture?.(e.pointerId);call('pointerDown',pointer.x,pointer.y);});
-canvas.addEventListener('pointermove',e=>{const q=coords(e);pointer.x=q.x;pointer.y=q.y;if(pointer.down)call('pointerMove',q.x,q.y);});
-function up(e){const q=coords(e);pointer.x=q.x;pointer.y=q.y;pointer.down=false;call('pointerUp',q.x,q.y);}
+canvas.addEventListener('pointerdown',e=>{const q=coords(e);pointer=Object.assign(q,{down:true});savedTouches.set(e.pointerId,q);touches=Array.from(savedTouches.values());canvas.setPointerCapture?.(e.pointerId);call('pointerDown',pointer.x,pointer.y);});
+canvas.addEventListener('pointermove',e=>{const q=coords(e);pointer.x=q.x;pointer.y=q.y;if(savedTouches.has(e.pointerId))savedTouches.set(e.pointerId,q);touches=Array.from(savedTouches.values());if(pointer.down)call('pointerMove',q.x,q.y);});
+function up(e){const q=coords(e);pointer.x=q.x;pointer.y=q.y;pointer.down=false;savedTouches.delete(e.pointerId);touches=Array.from(savedTouches.values());call('pointerUp',q.x,q.y);}
 canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
 function background(color='#101827'){gameBackground=typeof color==='string'?color:'#101827';ctx.fillStyle=gameBackground;ctx.fillRect(0,0,800,450);}
-function clear(color='#101827'){ctx.fillStyle=typeof color==='string'?color:'#101827';ctx.fillRect(0,0,800,450);}
-function rect(x,y,w,h,color='#70d6ff'){ctx.fillStyle=String(color);ctx.fillRect(Number(x)||0,Number(y)||0,Number(w)||0,Number(h)||0);}
-function circle(x,y,r,color='#70d6ff'){ctx.fillStyle=String(color);ctx.beginPath();ctx.arc(Number(x)||0,Number(y)||0,Math.max(0,Number(r)||0),0,Math.PI*2);ctx.fill();}
-function line(x1,y1,x2,y2,color='#fff',width=2){ctx.strokeStyle=String(color);ctx.lineWidth=Number(width)||2;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
-function text(value,x,y,color='#fff',size=16){ctx.fillStyle=String(color);ctx.font='600 '+(Number(size)||16)+'px system-ui,sans-serif';ctx.textBaseline='top';ctx.fillText(String(value??''),Number(x)||0,Number(y)||0);}
-function sprite(name,x,y,w,h){const im=images[String(name)];if(im&&im.complete&&im.naturalWidth){ctx.drawImage(im,x,y,w||im.naturalWidth,h||im.naturalHeight);}}
+function clear(color=gameBackground){ctx.fillStyle=typeof color==='string'?color:gameBackground;ctx.fillRect(0,0,800,450);}
+function rect(x,y,w,h,color='#70d6ff'){ctx.fillStyle=String(color);ctx.fillRect((Number(x)||0)-cameraOffset.x,(Number(y)||0)-cameraOffset.y,Number(w)||0,Number(h)||0);}
+function circle(x,y,r,color='#70d6ff'){ctx.fillStyle=String(color);ctx.beginPath();ctx.arc((Number(x)||0)-cameraOffset.x,(Number(y)||0)-cameraOffset.y,Math.max(0,Number(r)||0),0,Math.PI*2);ctx.fill();}
+function line(x1,y1,x2,y2,color='#fff',width=2){ctx.strokeStyle=String(color);ctx.lineWidth=Number(width)||2;ctx.beginPath();ctx.moveTo(Number(x1)-cameraOffset.x,Number(y1)-cameraOffset.y);ctx.lineTo(Number(x2)-cameraOffset.x,Number(y2)-cameraOffset.y);ctx.stroke();}
+function text(value,x,y,color='#fff',size=16){ctx.fillStyle=String(color);ctx.font='600 '+(Number(size)||16)+'px system-ui,sans-serif';ctx.textBaseline='top';ctx.fillText(String(value??''),(Number(x)||0)-cameraOffset.x,(Number(y)||0)-cameraOffset.y);}
+function sprite(name,x,y,w,h){const im=images[String(name)];if(im&&im.complete&&im.naturalWidth){ctx.imageSmoothingEnabled=false;ctx.drawImage(im,(Number(x)||0)-cameraOffset.x,(Number(y)||0)-cameraOffset.y,w==null?im.naturalWidth:Number(w),h==null?im.naturalHeight:Number(h));}}
+function spriteAnim(name,x,y,w,h,frameW,frameH,fps){const im=images[String(name)];if(!im||!im.complete||!im.naturalWidth)return sprite(name,x,y,w,h);const fw=Math.max(1,Number(frameW)||Number(w)||32),fh=Math.max(1,Number(frameH)||Number(h)||32),cols=Math.max(1,Math.floor(im.naturalWidth/fw)),rows=Math.max(1,Math.floor(im.naturalHeight/fh)),count=cols*rows,frame=Math.floor((performance.now()-startTime)/1000*Math.max(1,Number(fps)||8))%count;ctx.imageSmoothingEnabled=false;ctx.drawImage(im,(frame%cols)*fw,Math.floor(frame/cols)*fh,fw,fh,(Number(x)||0)-cameraOffset.x,(Number(y)||0)-cameraOffset.y,Number(w)||fw,Number(h)||fh);}
+function camera(x=0,y=0){cameraOffset.x=Number(x)||0;cameraOffset.y=Number(y)||0;}
+function rgba(r,g,b,a=1){return 'rgba('+(Number(r)||0)+','+(Number(g)||0)+','+(Number(b)||0)+','+(a==null?1:Number(a))+')';}
+function object(name){return scene.find(o=>String(o.name)===String(name))||null;}
+function renderScene(){for(const o of scene){if(!o)continue;const x=Number(o.x)||0,y=Number(o.y)||0;if(o.type==='rect'){ctx.fillStyle=o.color||'#ff8844';ctx.fillRect(x-cameraOffset.x,y-cameraOffset.y,Number(o.w)||0,Number(o.h)||0);}else if(o.type==='circle'){ctx.fillStyle=o.color||'#70d6ff';ctx.beginPath();ctx.arc(x-cameraOffset.x,y-cameraOffset.y,Math.max(0,Number(o.r)||0),0,Math.PI*2);ctx.fill();}else if(o.type==='text'){ctx.fillStyle=o.color||'#fff';ctx.font='600 '+(Number(o.size)||18)+'px system-ui,sans-serif';ctx.textBaseline='top';ctx.fillText(String(o.text||o.name||''),x-cameraOffset.x,y-cameraOffset.y);}}}
 function print(...a){console.log(...a)}
-const api={background,clear,rect,circle,line,text,sprite,print,lerp:(a,b,t)=>a+(b-a)*t,map:(v,a,b,c,d)=>a===b?c:c+(v-a)*(d-c)/(b-a),sign:Math.sign,randomInt:(a,b)=>Math.floor(Math.random()*(b-a+1))+a,random:Math.random,rand:(a=0,b=1)=>a+Math.random()*(b-a),abs:Math.abs,sqrt:Math.sqrt,sin:Math.sin,cos:Math.cos,atan2:Math.atan2,floor:Math.floor,ceil:Math.ceil,round:Math.round,min:Math.min,max:Math.max,clamp:(v,a,b)=>Math.min(Math.max(v,a),b),toString:String,toNumber:Number,length:v=>v==null?0:(v.length??Object.keys(v).length),contains:(a,b)=>Array.isArray(a)?a.includes(b):String(a??'').includes(String(b??'')),join:(a,sep=',')=>Array.isArray(a)?a.join(sep):String(a??''),split:(a,sep=',')=>String(a??'').split(sep),push:(a,v)=>(a.push(v),a),pop:a=>a.pop(),time:()=>((performance.now()-startTime)/1000),dt:()=>last,pointerX:()=>pointer.x,pointerY:()=>pointer.y,pointerDownNow:()=>pointer.down,playTone:()=>{},stopSound:()=>{}};
+function save(key,value){try{localStorage.setItem('mrr-save:'+String(key),JSON.stringify(value));return true;}catch(_){return false;}}
+function load(key,defaultValue=null){try{const raw=localStorage.getItem('mrr-save:'+String(key));return raw===null?defaultValue:JSON.parse(raw);}catch(_){return defaultValue;}}
+function playTone(frequency=440,duration=.12,volume=.08){try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!audioContext)audioContext=new AC();if(audioContext.state==='suspended')audioContext.resume();const osc=audioContext.createOscillator(),gain=audioContext.createGain(),dur=Math.max(.01,Number(duration)||.12),vol=Math.max(0,Math.min(.25,Number(volume)||0));osc.frequency.value=Math.max(20,Number(frequency)||440);gain.gain.setValueAtTime(vol,audioContext.currentTime);gain.gain.exponentialRampToValueAtTime(.0001,audioContext.currentTime+dur);osc.connect(gain);gain.connect(audioContext.destination);osc.start();osc.stop(audioContext.currentTime+dur);}catch(e){console.warn('Звук:',e);}return null;}
+function stopSound(){try{if(audioContext)audioContext.suspend();}catch(_){}}
+window.MrrDeviceOrientation=window.MrrDeviceOrientation||{alpha:0,beta:0,gamma:0,available:false};
+window.MrrMotionStatus=window.MrrMotionStatus||'not-requested';
+const screenWidth=()=>Math.max(1,Number(window.innerWidth)||800),screenHeight=()=>Math.max(1,Number(window.innerHeight)||450),gameWidth=()=>800,gameHeight=()=>450;
+const orientationAngle=()=>Number((screen.orientation&&screen.orientation.angle)??window.orientation??0)||0,isPortrait=()=>screenHeight()>=screenWidth();
+const tiltX=()=>Number(window.MrrDeviceOrientation.gamma)||0,tiltY=()=>Number(window.MrrDeviceOrientation.beta)||0,tiltZ=()=>Number(window.MrrDeviceOrientation.alpha)||0;
+function requestMotion(){
+ const d=window.DeviceOrientationEvent;
+ if(!d){window.MrrMotionStatus='unsupported';return Promise.resolve(false);}
+ const listen=()=>{
+  if(!window.__mrrOrientationListener){
+   const update=e=>{const o=window.MrrDeviceOrientation;if(e.alpha!=null)o.alpha=Number(e.alpha);if(e.beta!=null)o.beta=Number(e.beta);if(e.gamma!=null)o.gamma=Number(e.gamma);o.available=e.alpha!=null||e.beta!=null||e.gamma!=null;if(o.available)window.MrrMotionStatus='active';};
+   window.addEventListener('deviceorientation',update,true);window.addEventListener('deviceorientationabsolute',update,true);window.__mrrOrientationListener=true;
+  }
+  window.MrrMotionStatus='waiting';return true;
+ };
+ try{if(typeof d.requestPermission==='function')return d.requestPermission().then(r=>{if(r!=='granted'){window.MrrMotionStatus='denied';return false;}return listen();}).catch(()=>{window.MrrMotionStatus='denied';return false;});return Promise.resolve(listen());}catch(_){window.MrrMotionStatus='denied';return Promise.resolve(false);}
+}
+const api={background,clear,rect,circle,line,text,sprite,spriteAnim,camera,rgba,object,print,screenWidth,screenHeight,gameWidth,gameHeight,orientationAngle,isPortrait,tiltX,tiltY,tiltZ,requestMotion,lerp:(a,b,t)=>Number(a)+(Number(b)-Number(a))*Number(t),map:(v,a,b,c,d)=>Number(a)===Number(b)?Number(c):Number(c)+(Number(v)-Number(a))*(Number(d)-Number(c))/(Number(b)-Number(a)),sign:Math.sign,randomInt:(a,b)=>Math.floor(Math.random()*(Number(b)-Number(a)+1))+Number(a),random:Math.random,rand:(a=0,b=1)=>Number(a)+Math.random()*(Number(b)-Number(a)),abs:Math.abs,sqrt:Math.sqrt,sin:Math.sin,cos:Math.cos,atan2:Math.atan2,floor:Math.floor,ceil:Math.ceil,round:Math.round,min:Math.min,max:Math.max,clamp:(v,a,b)=>Math.min(Math.max(Number(v),Number(a)),Number(b)),pow:Math.pow,toString:v=>String(v),toNumber:v=>Number(v),length:v=>v==null?0:(typeof v==='string'||Array.isArray(v)?v.length:typeof v==='object'?Object.keys(v).length:0),contains:(a,b)=>Array.isArray(a)?a.includes(b):String(a??'').includes(String(b??'')),join:(a,sep=',')=>Array.isArray(a)?a.join(sep==null?',':sep):String(a??''),split:(a,sep=',')=>String(a??'').split(sep),push:(a,v)=>(a.push(v),a),pop:a=>a.pop(),splice:(a,start,count,...items)=>a.splice(start,count,...items),shift:a=>a.shift(),unshift:(a,v)=>(a.unshift(v),a.length),indexOf:(a,v)=>Array.isArray(a)?a.indexOf(v):String(a??'').indexOf(String(v)),slice:(a,start,end)=>a.slice(start,end),trim:v=>String(v??'').trim(),upper:v=>String(v??'').toUpperCase(),lower:v=>String(v??'').toLowerCase(),startsWith:(v,p)=>String(v??'').startsWith(String(p??'')),endsWith:(v,p)=>String(v??'').endsWith(String(p??'')),replace:(v,a,b)=>String(v??'').replaceAll(String(a??''),String(b??'')),mrr_typeof:v=>v===null?'null':Array.isArray(v)?'array':typeof v,save,load,playTone,stopSound,time:()=>((performance.now()-startTime)/1000),dt:()=>last,pointerX:()=>pointer.x,pointerY:()=>pointer.y,pointerDownNow:()=>pointer.down,touchCount:()=>touches.length,touchX:i=>touches[Math.floor(Number(i)||0)]?.x??0,touchY:i=>touches[Math.floor(Number(i)||0)]?.y??0,overlapRect:(ax,ay,aw,ah,bx,by,bw,bh)=>Number(ax)<Number(bx)+Number(bw)&&Number(ax)+Number(aw)>Number(bx)&&Number(ay)<Number(by)+Number(bh)&&Number(ay)+Number(ah)>Number(by),moveBody:(body,delta,gravity=0)=>{if(!body||typeof body!=='object')throw new Error('moveBody(body,dt,gravity) ожидает объект {x,y,vx,vy}');const d=Math.max(0,Math.min(.1,Number(delta)||0));body.vy=(Number(body.vy)||0)+(Number(gravity)||0)*d;body.x=(Number(body.x)||0)+(Number(body.vx)||0)*d;body.y=(Number(body.y)||0)+(Number(body.vy)||0)*d;return body}};
+// Синхронизируем экспорт с реальной стандартной библиотекой MrrCode 0.2.0.
+// typeof — ключевое слово JavaScript, поэтому оно доступно в коде игры как mrr_typeof после преобразования вызова.
+for(const [name,fn] of Object.entries(window.MrrCodeStdlib020||{})){const key=name==='typeof'?'mrr_typeof':name;if(!Object.prototype.hasOwnProperty.call(api,key))api[key]=fn;}
+const requiredBuiltins=${JSON.stringify((window.MRRCODE_AI_SPEC||{}).builtins||[])};
+const missingBuiltins=requiredBuiltins.map(x=>Array.isArray(x)?x[0]:String(x)).filter(name=>!Object.prototype.hasOwnProperty.call(api,name==='typeof'?'mrr_typeof':name));
+if(missingBuiltins.length)throw new Error('В экспорте не реализованы встроенные функции MrrCode: '+missingBuiltins.join(', '));
 function call(name,...args){try{if(typeof handlers[name]==='function')handlers[name](...args);}catch(e){showError(name+': '+(e.stack||e.message||e));}}
 function showError(msg){errorBox.style.display='block';errorBox.textContent='Ошибка игры: '+msg;console.error(msg);}
 try{
-const factory=new Function(...Object.keys(api),project.source+String.fromCharCode(10)+';return {start:typeof start==="function"?start:null,update:typeof update==="function"?update:null,pointerDown:typeof pointerDown==="function"?pointerDown:null,pointerMove:typeof pointerMove==="function"?pointerMove:null,pointerUp:typeof pointerUp==="function"?pointerUp:null};');
+function bundleModules(entry,files,seen=new Set()){if(seen.has(entry))return '';seen.add(entry);let src=String(files[entry]||'');const imports=[];src=src.replace(/^\\s*from\\s+(['"])([^'"]+)\\1\\s+import\\s+([^;]+);?\\s*$/gm,(_,q,mod,names)=>{const file=files[mod]!==undefined?mod:(files[mod+'.mrr']!==undefined?mod+'.mrr':null);if(!file)throw new Error('Не найден импортируемый файл: '+mod);const specs=names.trim()==='*'?null:names.split(',').map(v=>{const z=v.trim().split(/\\s+as\\s+/);return {name:z[0],alias:z[1]||z[0]};});let moduleSrc=String(files[file]||'');if(specs){const declarations=[];for(const spec of specs){const name=spec.name;const re=new RegExp('(?:^|\\\\n)\\\\s*(?:export\\\\s+)?function\\\\s+'+name+'\\\\s*\\\\([^)]*\\\\)\\\\s*\\\\{','m');const m=re.exec(moduleSrc);if(m){let start=m.index+(m[0].startsWith('\\n')?1:0),brace=moduleSrc.indexOf('{',m.index+m[0].length-1),depth=0,end=brace;for(;end<moduleSrc.length;end++){if(moduleSrc[end]==='{')depth++;else if(moduleSrc[end]==='}'&&--depth===0){end++;break;}}let decl=moduleSrc.slice(start,end);if(spec.alias!==name)decl=decl.replace(new RegExp('function\\\\s+'+name+'\\\\s*\\\\('),'function '+spec.alias+'(');declarations.push(decl);}}moduleSrc=declarations.join('\\n');}else{const namesFound=Array.from(moduleSrc.matchAll(/function\\s+([A-Za-z_$][\\w$]*)\\s*\\(/g),m=>m[1]);moduleSrc=namesFound.map(name=>{const re=new RegExp('(?:^|\\\\n)\\\\s*(?:export\\\\s+)?function\\\\s+'+name+'\\\\s*\\\\([^)]*\\\\)\\\\s*\\\\{','m');const m=re.exec(String(files[file]||''));if(!m)return '';const original=String(files[file]||''),st=m.index+(m[0].startsWith('\\n')?1:0),brace=original.indexOf('{',m.index+m[0].length-1);let depth=0,end=brace;for(;end<original.length;end++){if(original[end]==='{')depth++;else if(original[end]==='}'&&--depth===0){end++;break;}}return original.slice(st,end);}).join('\\n');}imports.push(bundleModules(file,files,seen));imports.push(moduleSrc);return '';});return imports.join('\\n')+'\\n'+src;}
+const bundledSource=bundleModules(project.entry||'main.mrr',project.files||{[project.entry||'main.mrr']:project.source}).replace(/\\btypeof\\s*\\(/g,'mrr_typeof(');
+const factory=new Function(...Object.keys(api),bundledSource+String.fromCharCode(10)+';return {start:typeof start==="function"?start:null,update:typeof update==="function"?update:null,pointerDown:typeof pointerDown==="function"?pointerDown:null,pointerMove:typeof pointerMove==="function"?pointerMove:null,pointerUp:typeof pointerUp==="function"?pointerUp:null};');
 handlers=factory(...Object.values(api));
-// Draw basic scene objects in the native page, so editor scene primitives survive export.
-const scene=project.scene||[];
+// The object(name) API and renderer share the same scene data, so code can find and move scene objects.
 if(handlers.start) handlers.start();
-if(!handlers.update){clear(gameBackground);for(const o of scene){if(o.type==='rect')rect(o.x,o.y,o.w,o.h,o.color);else if(o.type==='circle')circle(o.x,o.y,o.r,o.color);else if(o.type==='text')text(o.text||o.name,o.x,o.y,o.color,o.size);}}
+if(!handlers.update){clear(gameBackground);renderScene();}
 }catch(e){showError(e.stack||e.message||e);return;}
-function frame(ts){const dt=Math.min(.05,Math.max(0,(ts-lastFrame)/1000||0));lastFrame=ts;last=dt;if(handlers.update){ctx.fillStyle=gameBackground;ctx.fillRect(0,0,800,450);try{handlers.update(dt);}catch(e){showError(e.stack||e.message||e);return;}}requestAnimationFrame(frame);}
+function frame(ts){const dt=Math.min(.05,Math.max(0,(ts-lastFrame)/1000||0));lastFrame=ts;last=dt;if(handlers.update){ctx.fillStyle=gameBackground;ctx.fillRect(0,0,800,450);try{handlers.update(dt);renderScene();}catch(e){showError(e.stack||e.message||e);return;}}requestAnimationFrame(frame);}
 let lastFrame=performance.now();requestAnimationFrame(frame);
 })();
 </scr`+'ipt></body></html>';
-    download('MrrCode-game.html',html,'text/html;charset=utf-8');
-    setNote('Создан нативный HTML: только Canvas, CSS и JavaScript игры — без интерфейса и движка редактора.');
-    logConsole('[Сборка] Создан MrrCode-game.html (нативный HTML/CSS/JS).','sys');
-  }catch(err){setNote('Не удалось собрать HTML: '+err.message);logConsole('[Сборка] '+err.message,'error');}
+    if(options.download!==false) download('MrrCode-game.html',html,'text/html;charset=utf-8');
+    setNote('Создан автономный HTML с API MrrCode 0.2.0 и подключаемыми модулями проекта.');
+    logConsole('[Сборка] Создан MrrCode-game.html с полным набором встроенных функций MrrCode.','sys');
+    return html;
+  }catch(err){setNote('Не удалось собрать HTML: '+err.message);logConsole('[Сборка] '+err.message,'error');return null;}
 }
-document.getElementById('btnExportGameHtml').addEventListener('click',exportGameHtml);
+document.getElementById('btnExportGameHtml').addEventListener('click',()=>exportGameHtml());
+
+
+/* ---------------- публикация игры в GitHub Pages ---------------- */
+const publishModal=document.createElement('div');
+publishModal.id='githubPublishModal';
+publishModal.style.cssText='display:none;position:fixed;inset:0;z-index:99999;background:#000b;align-items:center;justify-content:center;padding:16px;font:14px/1.45 system-ui,sans-serif;color:var(--text,#eee)';
+publishModal.innerHTML=`<div style="width:min(100%,520px);max-height:92vh;overflow:auto;background:var(--panel,#182234);border:1px solid var(--border,#344158);border-radius:16px;padding:18px;box-shadow:0 20px 80px #0009">
+<h2 style="margin:0 0 8px;font-size:20px">🌐 Опубликовать игру</h2>
+<p style="margin:0 0 12px;color:var(--muted,#aab5c5)">Загрузит собранную игру как <code>index.html</code> в выбранный GitHub-репозиторий.</p>
+<label style="display:block;margin:10px 0 4px">Владелец репозитория</label><input id="ghOwner" autocomplete="off" placeholder="username" style="width:100%;padding:10px;border-radius:8px;border:1px solid #596579;background:#0e1726;color:#fff">
+<label style="display:block;margin:10px 0 4px">Имя репозитория</label><input id="ghRepo" autocomplete="off" placeholder="my-game" style="width:100%;padding:10px;border-radius:8px;border:1px solid #596579;background:#0e1726;color:#fff">
+<label style="display:block;margin:10px 0 4px">Ветка</label><input id="ghBranch" autocomplete="off" value="main" style="width:100%;padding:10px;border-radius:8px;border:1px solid #596579;background:#0e1726;color:#fff">
+<label style="display:block;margin:10px 0 4px">GitHub Personal Access Token</label><input id="ghToken" type="password" autocomplete="off" placeholder="github_pat_…" style="width:100%;padding:10px;border-radius:8px;border:1px solid #596579;background:#0e1726;color:#fff">
+<p style="font-size:12px;color:var(--muted,#aab5c5);margin:8px 0">Токен нужен с разрешением <b>Contents: Read and write</b>. Он используется только при публикации и не сохраняется в движке. Не отправляй его в чат и не публикуй.</p>
+<p style="font-size:12px;color:#f3c979;margin:8px 0">Сначала включи GitHub Pages для этого репозитория и выбери указанную ветку и корневую папку (/). Опубликованный сайт будет общедоступным.</p>
+<div id="ghPublishStatus" role="status" style="white-space:pre-wrap;margin:10px 0;color:var(--muted,#aab5c5)"></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:12px"><button type="button" id="ghPublishCancel" class="btn ghost">Отмена</button><button type="button" id="ghPublishGo" class="btn primary">Собрать и опубликовать</button></div>
+<div id="ghPublishResult" style="display:none;margin-top:14px;overflow-wrap:anywhere"></div></div>`;
+document.body.appendChild(publishModal);
+const ghEl=id=>document.getElementById(id);
+function openGithubPublish(){publishModal.style.display='flex';ghEl('ghPublishStatus').textContent='';ghEl('ghPublishResult').style.display='none';ghEl('ghOwner').focus();}
+function closeGithubPublish(){publishModal.style.display='none';ghEl('ghToken').value='';}
+ghEl('btnPublishGithub').addEventListener('click',openGithubPublish);
+ghEl('ghPublishCancel').addEventListener('click',closeGithubPublish);
+publishModal.addEventListener('click',e=>{if(e.target===publishModal)closeGithubPublish();});
+function toBase64Utf8(str){const bytes=new TextEncoder().encode(str);let binary='';for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(binary);}
+async function publishGithubGame(){
+ const owner=ghEl('ghOwner').value.trim(),repo=ghEl('ghRepo').value.trim(),branch=ghEl('ghBranch').value.trim()||'main',token=ghEl('ghToken').value.trim(),status=ghEl('ghPublishStatus'),result=ghEl('ghPublishResult'),go=ghEl('ghPublishGo');
+ if(!/^[A-Za-z0-9-]+$/.test(owner)||!/^[A-Za-z0-9._-]+$/.test(repo)||repo==='.'||repo==='..'||!token){status.textContent='Проверь владельца, имя репозитория и токен.';return;}
+ if(!/^[A-Za-z0-9._/-]+$/.test(branch)||branch.startsWith('/')||branch.includes('..')){status.textContent='Проверь название ветки.';return;}
+ const html=exportGameHtml({download:false});if(!html){status.textContent='Не удалось собрать HTML. Проверь ошибки сборки в консоли.';return;}
+ go.disabled=true;go.textContent='Публикация…';status.textContent='Проверяю GitHub Pages и загружаю игру…';result.style.display='none';
+ const api='https://api.github.com/repos/'+encodeURIComponent(owner)+'/'+encodeURIComponent(repo);
+ const headers={'Accept':'application/vnd.github+json','Authorization':'Bearer '+token,'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'};
+ const req=async(url,opts={})=>{const r=await fetch(url,{...opts,headers:{...headers,...(opts.headers||{})}});let data={};try{data=await r.json();}catch(_){}if(!r.ok){let msg=data.message||('HTTP '+r.status);if(r.status===401)msg='Токен неверный или истёк.';if(r.status===403)msg='Нет прав доступа. Нужны Contents: Read and write; проверь ограничения репозитория.';if(r.status===404)msg='Репозиторий не найден или GitHub Pages ещё не включён.';throw new Error(msg);}return data;};
+ try{
+   const pageUrl=repo.toLowerCase()===owner.toLowerCase()+'.github.io'?'https://'+owner.toLowerCase()+'.github.io/':'https://'+owner.toLowerCase()+'.github.io/'+repo.toLowerCase()+'/';
+   let sha;
+   try{const existing=await req(api+'/contents/index.html?ref='+encodeURIComponent(branch));if(existing&&existing.type==='file')sha=existing.sha;}catch(e){if(!String(e.message).includes('не найден')&&!String(e.message).includes('404'))throw e;}
+   const body={message:'Publish MrrCode game to GitHub Pages',content:toBase64Utf8(html),branch};if(sha)body.sha=sha;
+   await req(api+'/contents/index.html',{method:'PUT',body:JSON.stringify(body)});
+   status.textContent='HTML загружен. GitHub Pages может обновляться несколько минут.';
+   result.style.display='block';result.innerHTML='<b>Игра отправлена на публикацию</b><p><a href="'+pageUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" target="_blank" rel="noopener noreferrer" style="color:#70d6ff">'+pageUrl+'</a></p><button type="button" id="ghCopyUrl" class="btn">Копировать URL</button> <button type="button" id="ghOpenUrl" class="btn primary">Играть</button><p style="font-size:12px;color:var(--muted,#aab5c5)">Если страница пока не открывается, подожди несколько минут и попробуй снова.</p>';
+   ghEl('ghCopyUrl').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(pageUrl);ghEl('ghCopyUrl').textContent='Скопировано ✓';}catch(_){status.textContent='Скопируй URL вручную: '+pageUrl;}});
+   ghEl('ghOpenUrl').addEventListener('click',()=>window.open(pageUrl,'_blank','noopener'));
+   logConsole('[GitHub Pages] Игра загружена в '+owner+'/'+repo+'. URL: '+pageUrl,'sys');
+ }catch(e){status.textContent='Не удалось опубликовать: '+e.message+'\n\nУбедись, что GitHub Pages включён для указанной ветки и корневой папки.';logConsole('[GitHub Pages] '+e.message,'error');}
+ finally{go.disabled=false;go.textContent='Собрать и опубликовать';ghEl('ghToken').value='';}
+}
+ghEl('ghPublishGo').addEventListener('click',publishGithubGame);
 
 /* ---------------- инициализация ---------------- */
 (function init(){
@@ -4531,7 +4712,7 @@ document.getElementById('btnExportGameHtml').addEventListener('click',exportGame
 <!-- MrrCode game overlay -->
 <div aria-hidden="true" id="mrrGameOverlay">
 <button aria-label="Назад в MrrCode" id="mrrGameBack" type="button">← Назад</button>
-<iframe id="mrrGameFrame" sandbox="allow-scripts allow-pointer-lock" title="Игра MrrCode"></iframe>
+<iframe id="mrrGameFrame" sandbox="allow-scripts allow-same-origin allow-pointer-lock" allow="accelerometer *; gyroscope *; magnetometer *; fullscreen *" title="Игра MrrCode"></iframe>
 </div>
 <script>
 (function(){
@@ -4606,7 +4787,7 @@ window.mrrBuildAIPrompt = function(userPrompt, currentCode){
     JSON.stringify(window.MRRCODE_AI_SPEC),
     "CURRENT main.mrr:\n" + (currentCode || ""),
     "CLOSED WORLD: Only names and signatures in MRRCODE_AI_SPEC are built-in. The parser grammar is authoritative for syntax. Never infer MrrCode support from JavaScript or Python. Do not use undocumented member-method calls or invented APIs.",
-    "New feature guidance: overlapRect checks axis-aligned rectangle overlap (edge-touch alone is false); moveBody mutates {x,y,vx,vy} and clamps dt to 0..0.1; camera(x,y) offsets drawing but not pointer input; spriteAnim requires an imported PNG spritesheet and source frame dimensions. Scene editor, project history and resource checking are UI features, not MrrCode functions.",
+    "New feature guidance: use all built-ins listed in MRRCODE_AI_SPEC.builtins, not only physics/camera helpers. screenWidth()/screenHeight() return the visible browser viewport in CSS pixels; gameWidth()/gameHeight() return logical scene dimensions. orientationAngle()/isPortrait() report device orientation; tiltX()/tiltY()/tiltZ() read device-orientation sensor values, which may be unavailable or initially zero. Call requestMotion() from a user gesture when the browser requires sensor permission. overlapRect checks axis-aligned rectangle overlap (edge-touch alone is false); moveBody mutates {x,y,vx,vy} and clamps dt to 0..0.1; camera(x,y) offsets drawing but not pointer input; spriteAnim requires an imported PNG spritesheet and source frame dimensions. Scene editor, project history and resource checking are UI features, not MrrCode functions.",
     "Before applying AI edits, preserve a project version and validate changed MrrCode files. Validation is static and does not guarantee successful runtime behavior.",
     "USER REQUEST:\n" + (userPrompt || "")
   ].join("\n\n");
