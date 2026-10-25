@@ -478,7 +478,7 @@ window.MRRCODE_AI_SPEC = {
     ["trim","trim(text)"],["upper","upper(text)"],["lower","lower(text)"],["startsWith","startsWith(text,prefix)"],["endsWith","endsWith(text,suffix)"],["replace","replace(text,from,to) — заменяет все совпадения"],["contains","contains(value,part) — проверяет элемент массива или подстроку"],
     ["length","length(value) — длина строки/массива или количество собственных ключей объекта; null/числа дают 0"],["push","push(array,value) — добавляет элемент и возвращает массив"],["pop","pop(array) — удаляет и возвращает последний элемент"],["splice","splice(array,start,count,...items) — удаляет/вставляет элементы; возвращает удалённые элементы"],["shift","shift(array) — удаляет первый элемент"],["unshift","unshift(array,value) — добавляет элемент в начало и возвращает новую длину"],["join","join(array,separator)"],["split","split(text,separator)"],["indexOf","indexOf(array,value) — индекс элемента или -1"],["slice","slice(array,start,end?) — копия части массива"],
     ["save","save(key,value) — сохраняет JSON-совместимое значение в localStorage; true при успехе, false при ошибке"],["load","load(key,defaultValue?) — читает сохранённое значение, иначе возвращает defaultValue или null"],["playTone","playTone(frequency,duration,volume?) — синтезированный тон; duration в секундах, громкость ограничена движком"],["stopSound","stopSound() — приостанавливает аудиоконтекст"],
-    ["time","time() — секунды с начала игры"],["dt","dt() — dt текущего кадра"],
+    ["time","time() — секунды с начала игры"],["dt","dt() — dt текущего кадра. Внутри function update(dt) используй параметр dt без скобок: вызов dt() там затеняется параметром и вызывает ошибку «не функция». Вне update(dt) можно вызывать dt()."],
     ["background","background(color) — задаёт постоянный цвет фона"],["clear","clear(color?) — закрашивает текущий кадр; по умолчанию #0f172a"],["rect","rect(x,y,width,height,color?) — рисует залитый прямоугольник"],["circle","circle(x,y,radius,color?) — рисует залитый круг"],["line","line(x1,y1,x2,y2,color?,lineWidth?) — рисует линию; ширина по умолчанию 2"],["text","text(value,x,y,color?,size?) — рисует текст с верхней базовой линией; размер по умолчанию 16"],["sprite","sprite(name,x,y,width?,height?) — рисует импортированный PNG; размеры по умолчанию равны исходному изображению"],["spriteAnim","spriteAnim(name,x,y,w,h,frameW,frameH,fps) — циклическая анимация кадров сетки PNG"],["camera","camera(x,y) — задаёт смещение камеры для рисования"],["object","object(name) — возвращает объект с указанным именем из вкладки Сцена или null"],
     ["overlapRect","overlapRect(ax,ay,aw,ah,bx,by,bw,bh) — строгое AABB-пересечение"],["moveBody","moveBody(body,dt,gravity) — изменяет и возвращает body {x,y,vx,vy}"],
     ["pointerX","pointerX() — x последнего указателя в координатах сцены"],["pointerY","pointerY() — y последнего указателя в координатах сцены"],["pointerDownNow","pointerDownNow() — true, пока указатель удерживается"],["touchCount","touchCount() — число активных касаний/указателей"],["touchX","touchX(index) — x касания по индексу, 0 если нет такого касания"],["touchY","touchY(index) — y касания по индексу, 0 если нет такого касания"],
@@ -1123,6 +1123,7 @@ main{max-width:1240px}
 <div class="api-group"><h3>🛠️ Физика, данные и звук</h3><div class="api-chips"><code>overlapRect(ax,ay,aw,ah,bx,by,bw,bh)</code><code>moveBody(body,dt,gravity)</code><code>save(key,value)</code><code>load(key,defaultValue)</code><code>playTone(frequency,duration,volume?)</code><code>stopSound()</code><code>print(...values)</code></div></div>
 </div>
 <p>Функции сгруппированы по назначению. Нажми на «📖 Шпаргалка» во вкладке «Код», чтобы найти сигнатуру, прочитать описание и вставить вызов в редактор. Для фона игры используй <code>background("#182235")</code>; в отличие от <code>clear(color)</code>, этот цвет сохраняется между кадрами.</p>
+<div class="row-btns" style="margin-top:12px"><button class="btn ai" id="btnRunApiAudit" type="button">🧪 Проверить API движка</button><span id="mrrApiAuditSummary" style="color:var(--muted);font-size:12px"></span></div><pre id="mrrApiAuditOutput" class="doc-code" style="display:none;max-height:380px;white-space:pre-wrap;overflow:auto"></pre>
 </div>
 <div class="panel doc-section">
 <h2><span class="num">10</span>Редактор на сенсоре, сохранение и ограничения</h2>
@@ -1398,8 +1399,8 @@ function fmtValue(v,depth){
   return '{'+Object.keys(v).map(k=>k+': '+fmtValue(v[k],depth+1)).join(', ')+'}';
 }
 function numArg(v,def){
-  if(typeof v==='number'&&isFinite(v))return v;
-  if(typeof v==='string'){const n=parseFloat(v);if(!isNaN(n))return n;}
+  if(typeof v==='number'&&Number.isFinite(v))return v;
+  if(typeof v==='string'&&v.trim()!==''){const n=Number(v);if(Number.isFinite(n))return n;}
   return def===undefined?0:def;
 }
 
@@ -1485,6 +1486,163 @@ const API={
   replace:{kind:'fn',sig:'replace(text, from, to)',doc:'Заменяет все вхождения подстроки from на to и возвращает новую строку.'},
   typeof:{kind:'fn',sig:'typeof(value)',doc:'Возвращает название типа строкой; массивы распознаются отдельно как "array". Для null результат соответствует правилам JavaScript и равен "object".'}
 };
+/* === Generated MrrCode API registry: catalog cross-checked against source registrations === */
+window.MRRCODE_API_REGISTRY = {"name":"MRRCODE_API_REGISTRY","version":"1.0.0","languageVersion":"MrrCode 0.2.0","sourceFile":"MrrCode-Studio-ai-engine-dt-fixed.html","auditMethod":"Static source scan of API catalog, direct N(...) registrations, stdlib object, parser keyword table; in-app validator tests are provided separately.","counts":{"apiEntries":79,"builtins":74,"lifecycleEvents":5,"directRuntimeRegistrations":51,"stdlibFunctions":35,"directAndStdlibOverlap":12},"sourceCoverage":{"apiBuiltinsMatchRuntimeUnion":true,"apiBuiltinsMissingRuntime":[],"apiEntriesWithoutImplementation":[],"directRuntimeRegistrations":["abs","atan2","background","camera","ceil","circle","clamp","clear","contains","cos","dt","floor","join","length","lerp","line","load","map","max","min","moveBody","object","overlapRect","playTone","pointerDownNow","pointerX","pointerY","pop","print","push","rand","random","randomInt","rect","rgba","round","save","sign","sin","split","sprite","spriteAnim","sqrt","stopSound","text","time","toNumber","toString","touchCount","touchX","touchY"],"stdlibFunctions":["ceil","clamp","contains","endsWith","floor","gameHeight","gameWidth","indexOf","isPortrait","join","length","lower","max","min","orientationAngle","pop","pow","push","replace","requestMotion","round","screenHeight","screenWidth","shift","slice","splice","split","startsWith","tiltX","tiltY","tiltZ","trim","typeof","unshift","upper"]},"entries":[{"name":"start","kind":"ev","signature":"function start()","description":"Вызывается один раз при нажатии «Запуск».","category":"lifecycle-events","implementationEvidence":{"apiCatalog":"API.start","runtime":"registered as an event handler in Engine.handlers","apiCatalogLine":1409,"runtimeLine":1490},"status":"event-handler-supported-in-runtime-source","testStatus":"requires runtime/manual event test","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1409,"apiCatalogExpression":"API.start","runtimeLine":1490,"runtimeExpression":"for(const ev of ['start','update','pointerDown','pointerMove','pointerUp']) Engine.handlers[ev]=..."},"testPlan":{"mode":"manual","test":"Define the event handler and trigger the corresponding action in a running game.","expected":"Handler fires at the documented lifecycle/input event with documented arguments.","status":"NOT_RUN"}},{"name":"update","kind":"ev","signature":"function update(dt)","description":"Вызывается каждый кадр. dt — секунды с прошлого кадра.","category":"lifecycle-events","implementationEvidence":{"apiCatalog":"API.update","runtime":"registered as an event handler in Engine.handlers","apiCatalogLine":1410,"runtimeLine":1490},"status":"event-handler-supported-in-runtime-source","testStatus":"requires runtime/manual event test","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1410,"apiCatalogExpression":"API.update","runtimeLine":1490,"runtimeExpression":"for(const ev of ['start','update','pointerDown','pointerMove','pointerUp']) Engine.handlers[ev]=..."},"testPlan":{"mode":"manual","test":"Define the event handler and trigger the corresponding action in a running game.","expected":"Handler fires at the documented lifecycle/input event with documented arguments.","status":"NOT_RUN"}},{"name":"pointerDown","kind":"ev","signature":"function pointerDown(x, y)","description":"Событие: палец коснулся игрового поля. x, y — координаты 0..800 / 0..450. Срабатывает для каждого пальца (мультитач).","category":"lifecycle-events","implementationEvidence":{"apiCatalog":"API.pointerDown","runtime":"registered as an event handler in Engine.handlers","apiCatalogLine":1411,"runtimeLine":1490},"status":"event-handler-supported-in-runtime-source","testStatus":"requires runtime/manual event test","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1411,"apiCatalogExpression":"API.pointerDown","runtimeLine":1490,"runtimeExpression":"for(const ev of ['start','update','pointerDown','pointerMove','pointerUp']) Engine.handlers[ev]=..."},"testPlan":{"mode":"manual","test":"Define the event handler and trigger the corresponding action in a running game.","expected":"Handler fires at the documented lifecycle/input event with documented arguments.","status":"NOT_RUN"}},{"name":"pointerMove","kind":"ev","signature":"function pointerMove(x, y)","description":"Событие: палец движется по игровому полю.","category":"lifecycle-events","implementationEvidence":{"apiCatalog":"API.pointerMove","runtime":"registered as an event handler in Engine.handlers","apiCatalogLine":1412,"runtimeLine":1490},"status":"event-handler-supported-in-runtime-source","testStatus":"requires runtime/manual event test","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1412,"apiCatalogExpression":"API.pointerMove","runtimeLine":1490,"runtimeExpression":"for(const ev of ['start','update','pointerDown','pointerMove','pointerUp']) Engine.handlers[ev]=..."},"testPlan":{"mode":"manual","test":"Define the event handler and trigger the corresponding action in a running game.","expected":"Handler fires at the documented lifecycle/input event with documented arguments.","status":"NOT_RUN"}},{"name":"pointerUp","kind":"ev","signature":"function pointerUp(x, y)","description":"Событие: палец отпущен.","category":"lifecycle-events","implementationEvidence":{"apiCatalog":"API.pointerUp","runtime":"registered as an event handler in Engine.handlers","apiCatalogLine":1413,"runtimeLine":1490},"status":"event-handler-supported-in-runtime-source","testStatus":"requires runtime/manual event test","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1413,"apiCatalogExpression":"API.pointerUp","runtimeLine":1490,"runtimeExpression":"for(const ev of ['start','update','pointerDown','pointerMove','pointerUp']) Engine.handlers[ev]=..."},"testPlan":{"mode":"manual","test":"Define the event handler and trigger the corresponding action in a running game.","expected":"Handler fires at the documented lifecycle/input event with documented arguments.","status":"NOT_RUN"}},{"name":"pointerX","kind":"fn","signature":"pointerX()","description":"X-координата последнего касания (0..800).","category":"input","implementationEvidence":{"apiCatalog":"API.pointerX","runtime":"runtime registration N('pointerX', ...)","apiCatalogLine":1414,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1414,"apiCatalogExpression":"API.pointerX","runtimeLine":1490,"runtimeExpression":"N('pointerX', ...)"},"testPlan":{"mode":"runtime-smoke","test":"pointerX()","expected":"reads current pointer x","status":"NOT_RUN"}},{"name":"pointerY","kind":"fn","signature":"pointerY()","description":"Y-координата последнего касания (0..450).","category":"input","implementationEvidence":{"apiCatalog":"API.pointerY","runtime":"runtime registration N('pointerY', ...)","apiCatalogLine":1415,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1415,"apiCatalogExpression":"API.pointerY","runtimeLine":1490,"runtimeExpression":"N('pointerY', ...)"},"testPlan":{"mode":"runtime-smoke","test":"pointerY()","expected":"reads current pointer y","status":"NOT_RUN"}},{"name":"pointerDownNow","kind":"fn","signature":"pointerDownNow()","description":"true, пока хоть один палец удерживает игровое поле.","category":"input","implementationEvidence":{"apiCatalog":"API.pointerDownNow","runtime":"runtime registration N('pointerDownNow', ...)","apiCatalogLine":1416,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1416,"apiCatalogExpression":"API.pointerDownNow","runtimeLine":1490,"runtimeExpression":"N('pointerDownNow', ...)"},"testPlan":{"mode":"runtime-smoke","test":"pointerDownNow()","expected":"reads pointer-down state","status":"NOT_RUN"}},{"name":"touchCount","kind":"fn","signature":"touchCount()","description":"Сколько пальцев сейчас касается поля (мультитач).","category":"input","implementationEvidence":{"apiCatalog":"API.touchCount","runtime":"runtime registration N('touchCount', ...)","apiCatalogLine":1417,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1417,"apiCatalogExpression":"API.touchCount","runtimeLine":1490,"runtimeExpression":"N('touchCount', ...)"},"testPlan":{"mode":"runtime-smoke","test":"touchCount()","expected":"reads active touch count","status":"NOT_RUN"}},{"name":"touchX","kind":"fn","signature":"touchX(i)","description":"X-координата i-го пальца (0 … touchCount()-1), диапазон 0..800.","category":"input","implementationEvidence":{"apiCatalog":"API.touchX","runtime":"runtime registration N('touchX', ...)","apiCatalogLine":1418,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1418,"apiCatalogExpression":"API.touchX","runtimeLine":1490,"runtimeExpression":"N('touchX', ...)"},"testPlan":{"mode":"runtime-smoke","test":"touchX(0)","expected":"reads x of touch index 0","status":"NOT_RUN"}},{"name":"touchY","kind":"fn","signature":"touchY(i)","description":"Y-координата i-го пальца (0 … touchCount()-1), диапазон 0..450.","category":"input","implementationEvidence":{"apiCatalog":"API.touchY","runtime":"runtime registration N('touchY', ...)","apiCatalogLine":1419,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1419,"apiCatalogExpression":"API.touchY","runtimeLine":1490,"runtimeExpression":"N('touchY', ...)"},"testPlan":{"mode":"runtime-smoke","test":"touchY(0)","expected":"reads y of touch index 0","status":"NOT_RUN"}},{"name":"screenWidth","kind":"fn","signature":"screenWidth()","description":"Ширина видимой области браузера в CSS-пикселях, включая полноэкранный режим. Для координат сцены используй gameWidth().","category":"screen-and-sensors","implementationEvidence":{"apiCatalog":"API.screenWidth","runtime":"MrrCodeStdlib020.std.screenWidth (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1420,"runtimeLine":595},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1420,"apiCatalogExpression":"API.screenWidth","runtimeLine":595,"runtimeExpression":"MrrCodeStdlib020.std.screenWidth"},"testPlan":{"mode":"runtime-smoke","test":"screenWidth()","expected":"positive CSS viewport width","status":"NOT_RUN"}},{"name":"screenHeight","kind":"fn","signature":"screenHeight()","description":"Высота видимой области браузера в CSS-пикселях, включая полноэкранный режим. Для координат сцены используй gameHeight().","category":"screen-and-sensors","implementationEvidence":{"apiCatalog":"API.screenHeight","runtime":"MrrCodeStdlib020.std.screenHeight (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1421,"runtimeLine":596},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1421,"apiCatalogExpression":"API.screenHeight","runtimeLine":596,"runtimeExpression":"MrrCodeStdlib020.std.screenHeight"},"testPlan":{"mode":"runtime-smoke","test":"screenHeight()","expected":"positive CSS viewport height","status":"NOT_RUN"}},{"name":"gameWidth","kind":"fn","signature":"gameWidth()","description":"Логическая ширина игровой сцены: 800 единиц, независимо от размера устройства.","category":"screen-and-sensors","implementationEvidence":{"apiCatalog":"API.gameWidth","runtime":"MrrCodeStdlib020.std.gameWidth (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1422,"runtimeLine":597},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1422,"apiCatalogExpression":"API.gameWidth","runtimeLine":597,"runtimeExpression":"MrrCodeStdlib020.std.gameWidth"},"testPlan":{"mode":"runtime-smoke","test":"gameWidth()","expected":"800","status":"NOT_RUN"}},{"name":"gameHeight","kind":"fn","signature":"gameHeight()","description":"Логическая высота игровой сцены: 450 единиц, независимо от размера устройства.","category":"screen-and-sensors","implementationEvidence":{"apiCatalog":"API.gameHeight","runtime":"MrrCodeStdlib020.std.gameHeight (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1423,"runtimeLine":598},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1423,"apiCatalogExpression":"API.gameHeight","runtimeLine":598,"runtimeExpression":"MrrCodeStdlib020.std.gameHeight"},"testPlan":{"mode":"runtime-smoke","test":"gameHeight()","expected":"450","status":"NOT_RUN"}},{"name":"orientationAngle","kind":"fn","signature":"orientationAngle()","description":"Угол поворота экрана в градусах (обычно 0, 90, 180 или 270).","category":"screen-and-sensors","implementationEvidence":{"apiCatalog":"API.orientationAngle","runtime":"MrrCodeStdlib020.std.orientationAngle (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1424,"runtimeLine":599},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1424,"apiCatalogExpression":"API.orientationAngle","runtimeLine":599,"runtimeExpression":"MrrCodeStdlib020.std.orientationAngle"},"testPlan":{"mode":"runtime-smoke","test":"orientationAngle()","expected":"numeric screen orientation angle","status":"NOT_RUN"}},{"name":"isPortrait","kind":"fn","signature":"isPortrait()","description":"true, если видимая область выше, чем шире.","category":"screen-and-sensors","implementationEvidence":{"apiCatalog":"API.isPortrait","runtime":"MrrCodeStdlib020.std.isPortrait (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1425,"runtimeLine":600},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1425,"apiCatalogExpression":"API.isPortrait","runtimeLine":600,"runtimeExpression":"MrrCodeStdlib020.std.isPortrait"},"testPlan":{"mode":"runtime-smoke","test":"isPortrait()","expected":"boolean","status":"NOT_RUN"}},{"name":"tiltX","kind":"fn","signature":"tiltX()","description":"Наклон телефона влево/вправо (gamma, обычно −90…90°). Нужны поддержка устройства и разрешение.","category":"screen-and-sensors","implementationEvidence":{"apiCatalog":"API.tiltX","runtime":"MrrCodeStdlib020.std.tiltX (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1426,"runtimeLine":601},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1426,"apiCatalogExpression":"API.tiltX","runtimeLine":601,"runtimeExpression":"MrrCodeStdlib020.std.tiltX"},"testPlan":{"mode":"runtime-smoke","test":"tiltX()","expected":"numeric gamma sensor value; often 0 without permission/data","status":"NOT_RUN"}},{"name":"tiltY","kind":"fn","signature":"tiltY()","description":"Наклон телефона вперёд/назад (beta, обычно −180…180°). Нужны поддержка устройства и разрешение.","category":"screen-and-sensors","implementationEvidence":{"apiCatalog":"API.tiltY","runtime":"MrrCodeStdlib020.std.tiltY (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1427,"runtimeLine":602},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1427,"apiCatalogExpression":"API.tiltY","runtimeLine":602,"runtimeExpression":"MrrCodeStdlib020.std.tiltY"},"testPlan":{"mode":"runtime-smoke","test":"tiltY()","expected":"numeric beta sensor value; often 0 without permission/data","status":"NOT_RUN"}},{"name":"tiltZ","kind":"fn","signature":"tiltZ()","description":"Ориентация вокруг вертикальной оси (alpha, 0…360°; не гарантирует компасный север).","category":"screen-and-sensors","implementationEvidence":{"apiCatalog":"API.tiltZ","runtime":"MrrCodeStdlib020.std.tiltZ (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1428,"runtimeLine":603},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1428,"apiCatalogExpression":"API.tiltZ","runtimeLine":603,"runtimeExpression":"MrrCodeStdlib020.std.tiltZ"},"testPlan":{"mode":"runtime-smoke","test":"tiltZ()","expected":"numeric alpha sensor value; often 0 without permission/data","status":"NOT_RUN"}},{"name":"requestMotion","kind":"fn","signature":"requestMotion()","description":"Запрашивает разрешение на датчик ориентации там, где браузер этого требует. Вызывай после касания/нажатия.","category":"screen-and-sensors","implementationEvidence":{"apiCatalog":"API.requestMotion","runtime":"MrrCodeStdlib020.std.requestMotion (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1429,"runtimeLine":604},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1429,"apiCatalogExpression":"API.requestMotion","runtimeLine":604,"runtimeExpression":"MrrCodeStdlib020.std.requestMotion"},"testPlan":{"mode":"manual","test":"Call from a user gesture on a supported device and inspect MrrMotionStatus/tilt values.","expected":"Permission/connect result is boolean; sensor values may remain zero if unavailable.","status":"NOT_RUN"}},{"name":"background","kind":"fn","signature":"background(color)","description":"Задаёт постоянный цвет фона игры. Установи один раз в start(); фон будет заливаться этим цветом в начале каждого кадра.","category":"drawing","implementationEvidence":{"apiCatalog":"API.background","runtime":"runtime registration N('background', ...)","apiCatalogLine":1430,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1430,"apiCatalogExpression":"API.background","runtimeLine":1490,"runtimeExpression":"N('background', ...)"},"testPlan":{"mode":"manual","test":"Call background(\"#112233\") while running.","expected":"Canvas background is #112233 on subsequent frames.","status":"NOT_RUN"}},{"name":"clear","kind":"fn","signature":"clear(color?)","description":"Очищает текущий кадр и заливает его цветом color (по умолчанию \"#0f172a\"). Для постоянного фона используй background(color).","category":"drawing","implementationEvidence":{"apiCatalog":"API.clear","runtime":"runtime registration N('clear', ...)","apiCatalogLine":1431,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1431,"apiCatalogExpression":"API.clear","runtimeLine":1490,"runtimeExpression":"N('clear', ...)"},"testPlan":{"mode":"manual","test":"Call clear(\"#112233\") inside update(dt).","expected":"Current frame is filled with #112233; next frame is redrawn by runtime.","status":"NOT_RUN"}},{"name":"rect","kind":"fn","signature":"rect(x, y, w, h, color)","description":"Прямоугольник: левый верхний угол (x, y), размер w×h.","category":"drawing","implementationEvidence":{"apiCatalog":"API.rect","runtime":"runtime registration N('rect', ...)","apiCatalogLine":1432,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1432,"apiCatalogExpression":"API.rect","runtimeLine":1490,"runtimeExpression":"N('rect', ...)"},"testPlan":{"mode":"manual","test":"Draw a rectangle at a known position with a known color.","expected":"A filled rectangle appears at x/y with requested width/height and camera offset.","status":"NOT_RUN"}},{"name":"circle","kind":"fn","signature":"circle(x, y, r, color)","description":"Круг с центром (x, y) и радиусом r.","category":"drawing","implementationEvidence":{"apiCatalog":"API.circle","runtime":"runtime registration N('circle', ...)","apiCatalogLine":1433,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1433,"apiCatalogExpression":"API.circle","runtimeLine":1490,"runtimeExpression":"N('circle', ...)"},"testPlan":{"mode":"manual","test":"Draw a circle with known center/radius/color.","expected":"A filled circle appears at the expected coordinates.","status":"NOT_RUN"}},{"name":"line","kind":"fn","signature":"line(x1, y1, x2, y2, color, width?)","description":"Линия из (x1, y1) в (x2, y2). width — толщина, по умолчанию 2.","category":"drawing","implementationEvidence":{"apiCatalog":"API.line","runtime":"runtime registration N('line', ...)","apiCatalogLine":1434,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1434,"apiCatalogExpression":"API.line","runtimeLine":1490,"runtimeExpression":"N('line', ...)"},"testPlan":{"mode":"manual","test":"Draw a line with explicit color and lineWidth.","expected":"Line appears with requested endpoints and width.","status":"NOT_RUN"}},{"name":"text","kind":"fn","signature":"text(str, x, y, color, size?)","description":"Текст в точке (x, y). size — размер шрифта, по умолчанию 16.","category":"drawing","implementationEvidence":{"apiCatalog":"API.text","runtime":"runtime registration N('text', ...)","apiCatalogLine":1435,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1435,"apiCatalogExpression":"API.text","runtimeLine":1490,"runtimeExpression":"N('text', ...)"},"testPlan":{"mode":"manual","test":"Draw known text with explicit size and color.","expected":"Text appears at expected position; baseline is top.","status":"NOT_RUN"}},{"name":"sprite","kind":"fn","signature":"sprite(name, x, y, w?, h?)","description":"Рисует PNG-спрайт по имени из вкладки «Файлы». w и h необязательны — иначе берётся исходный размер.","category":"drawing","implementationEvidence":{"apiCatalog":"API.sprite","runtime":"runtime registration N('sprite', ...)","apiCatalogLine":1436,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1436,"apiCatalogExpression":"API.sprite","runtimeLine":1490,"runtimeExpression":"N('sprite', ...)"},"testPlan":{"mode":"manual","test":"Import a PNG and call sprite with/without width and height.","expected":"PNG is drawn; missing resources produce a placeholder and warning.","status":"NOT_RUN"}},{"name":"spriteAnim","kind":"fn","signature":"spriteAnim(name,x,y,w,h,frameW,frameH,fps)","description":"Анимирует импортированный PNG-спрайтшит по сетке слева направо, затем сверху вниз. frameW/frameH — размер кадра в исходной PNG; fps — кадров в секунду. Имя должно совпадать с ресурсом во вкладке «Файлы».","category":"drawing","implementationEvidence":{"apiCatalog":"API.spriteAnim","runtime":"runtime registration N('spriteAnim', ...)","apiCatalogLine":1437,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1437,"apiCatalogExpression":"API.spriteAnim","runtimeLine":1490,"runtimeExpression":"N('spriteAnim', ...)"},"testPlan":{"mode":"manual","test":"Import a spritesheet and animate with known frame dimensions/fps.","expected":"Frames cycle from the spritesheet; missing resources produce a placeholder.","status":"NOT_RUN"}},{"name":"camera","kind":"fn","signature":"camera(x,y)","description":"Задаёт смещение камеры для следующих rect/circle/line/text/sprite/spriteAnim. Для сброса вызови camera(0,0); координаты касаний не меняются.","category":"drawing","implementationEvidence":{"apiCatalog":"API.camera","runtime":"runtime registration N('camera', ...)","apiCatalogLine":1438,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1438,"apiCatalogExpression":"API.camera","runtimeLine":1490,"runtimeExpression":"N('camera', ...)"},"testPlan":{"mode":"manual","test":"Set camera(x,y), draw an object, then reset with camera(0,0).","expected":"Subsequent drawing is offset; input coordinates remain scene coordinates.","status":"NOT_RUN"}},{"name":"overlapRect","kind":"fn","signature":"overlapRect(ax,ay,aw,ah,bx,by,bw,bh)","description":"Проверяет пересечение двух осевых прямоугольников (x,y,w,h). Касание только краями не считается пересечением; возвращает true/false.","category":"physics-and-collision","implementationEvidence":{"apiCatalog":"API.overlapRect","runtime":"runtime registration N('overlapRect', ...)","apiCatalogLine":1439,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1439,"apiCatalogExpression":"API.overlapRect","runtimeLine":1490,"runtimeExpression":"N('overlapRect', ...)"},"testPlan":{"mode":"runtime-smoke","test":"overlapRect(0,0,10,10,5,5,10,10)","expected":"true; also checks edge-touch returns false","status":"NOT_RUN"}},{"name":"moveBody","kind":"fn","signature":"moveBody(body,dt,gravity)","description":"Обновляет объект {x,y,vx,vy}: сначала vy += gravity*dt, затем x/y обновляются по vx/vy. dt ограничивается 0..0.1 сек. Меняет объект и возвращает его.","category":"physics-and-collision","implementationEvidence":{"apiCatalog":"API.moveBody","runtime":"runtime registration N('moveBody', ...)","apiCatalogLine":1440,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1440,"apiCatalogExpression":"API.moveBody","runtimeLine":1490,"runtimeExpression":"N('moveBody', ...)"},"testPlan":{"mode":"runtime-smoke","test":"moveBody({x:0,y:0,vx:10,vy:0},0.5,10)","expected":"mutates body to x=1,y=0.1,vy=1 because dt is clamped to 0.1","status":"NOT_RUN"}},{"name":"object","kind":"fn","signature":"object(name)","description":"Возвращает объект сцены по имени (вкладка «Сцена»). Свойства можно менять из кода: x, y, w, h, r, color, text, size.","category":"scene","implementationEvidence":{"apiCatalog":"API.object","runtime":"runtime registration N('object', ...)","apiCatalogLine":1441,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1441,"apiCatalogExpression":"API.object","runtimeLine":1490,"runtimeExpression":"N('object', ...)"},"testPlan":{"mode":"runtime-smoke","test":"object(\"__mrr_api_audit_object__\")","expected":"returns matching scene object; test restores previous scene","status":"NOT_RUN"}},{"name":"random","kind":"fn","signature":"random()","description":"Случайное число от 0 до 1.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.random","runtime":"runtime registration N('random', ...)","apiCatalogLine":1442,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1442,"apiCatalogExpression":"API.random","runtimeLine":1490,"runtimeExpression":"N('random', ...)"},"testPlan":{"mode":"runtime-smoke","test":"random()","expected":"number in [0,1)","status":"NOT_RUN"}},{"name":"rand","kind":"fn","signature":"rand(min, max)","description":"Случайное число от min до max.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.rand","runtime":"runtime registration N('rand', ...)","apiCatalogLine":1443,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1443,"apiCatalogExpression":"API.rand","runtimeLine":1490,"runtimeExpression":"N('rand', ...)"},"testPlan":{"mode":"runtime-smoke","test":"rand(-2,2)","expected":"number in [-2,2)","status":"NOT_RUN"}},{"name":"abs","kind":"fn","signature":"abs(x)","description":"Модуль числа.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.abs","runtime":"runtime registration N('abs', ...)","apiCatalogLine":1444,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1444,"apiCatalogExpression":"API.abs","runtimeLine":1490,"runtimeExpression":"N('abs', ...)"},"testPlan":{"mode":"runtime-smoke","test":"abs(-7)","expected":"7","status":"NOT_RUN"}},{"name":"sqrt","kind":"fn","signature":"sqrt(x)","description":"Квадратный корень.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.sqrt","runtime":"runtime registration N('sqrt', ...)","apiCatalogLine":1445,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1445,"apiCatalogExpression":"API.sqrt","runtimeLine":1490,"runtimeExpression":"N('sqrt', ...)"},"testPlan":{"mode":"runtime-smoke","test":"sqrt(16)","expected":"4","status":"NOT_RUN"}},{"name":"sin","kind":"fn","signature":"sin(a)","description":"Синус угла в радианах.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.sin","runtime":"runtime registration N('sin', ...)","apiCatalogLine":1446,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1446,"apiCatalogExpression":"API.sin","runtimeLine":1490,"runtimeExpression":"N('sin', ...)"},"testPlan":{"mode":"runtime-smoke","test":"sin(0)","expected":"0","status":"NOT_RUN"}},{"name":"cos","kind":"fn","signature":"cos(a)","description":"Косинус угла в радианах.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.cos","runtime":"runtime registration N('cos', ...)","apiCatalogLine":1447,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1447,"apiCatalogExpression":"API.cos","runtimeLine":1490,"runtimeExpression":"N('cos', ...)"},"testPlan":{"mode":"runtime-smoke","test":"cos(0)","expected":"1","status":"NOT_RUN"}},{"name":"atan2","kind":"fn","signature":"atan2(y, x)","description":"Угол в радианах по координатам y и x; результат от -π до π.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.atan2","runtime":"runtime registration N('atan2', ...)","apiCatalogLine":1448,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1448,"apiCatalogExpression":"API.atan2","runtimeLine":1490,"runtimeExpression":"N('atan2', ...)"},"testPlan":{"mode":"runtime-smoke","test":"atan2(1,1)","expected":"π/4","status":"NOT_RUN"}},{"name":"floor","kind":"fn","signature":"floor(x)","description":"Округление вниз.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.floor","runtime":"runtime registration N('floor', ...)","apiCatalogLine":1449,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1449,"apiCatalogExpression":"API.floor","runtimeLine":1490,"runtimeExpression":"N('floor', ...)"},"testPlan":{"mode":"runtime-smoke","test":"floor(3.7)","expected":"3","status":"NOT_RUN"}},{"name":"ceil","kind":"fn","signature":"ceil(x)","description":"Округление вверх.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.ceil","runtime":"runtime registration N('ceil', ...)","apiCatalogLine":1450,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1450,"apiCatalogExpression":"API.ceil","runtimeLine":1490,"runtimeExpression":"N('ceil', ...)"},"testPlan":{"mode":"runtime-smoke","test":"ceil(3.2)","expected":"4","status":"NOT_RUN"}},{"name":"round","kind":"fn","signature":"round(x)","description":"Округление до ближайшего целого.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.round","runtime":"runtime registration N('round', ...)","apiCatalogLine":1451,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1451,"apiCatalogExpression":"API.round","runtimeLine":1490,"runtimeExpression":"N('round', ...)"},"testPlan":{"mode":"runtime-smoke","test":"round(3.5)","expected":"4","status":"NOT_RUN"}},{"name":"min","kind":"fn","signature":"min(a, b)","description":"Меньшее из двух чисел.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.min","runtime":"runtime registration N('min', ...)","apiCatalogLine":1452,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1452,"apiCatalogExpression":"API.min","runtimeLine":1490,"runtimeExpression":"N('min', ...)"},"testPlan":{"mode":"runtime-smoke","test":"min(3,7)","expected":"3","status":"NOT_RUN"}},{"name":"max","kind":"fn","signature":"max(a, b)","description":"Большее из двух чисел.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.max","runtime":"runtime registration N('max', ...)","apiCatalogLine":1453,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1453,"apiCatalogExpression":"API.max","runtimeLine":1490,"runtimeExpression":"N('max', ...)"},"testPlan":{"mode":"runtime-smoke","test":"max(3,7)","expected":"7","status":"NOT_RUN"}},{"name":"clamp","kind":"fn","signature":"clamp(value, min, max)","description":"Ограничивает значение рамками min..max.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.clamp","runtime":"runtime registration N('clamp', ...)","apiCatalogLine":1454,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1454,"apiCatalogExpression":"API.clamp","runtimeLine":1490,"runtimeExpression":"N('clamp', ...)"},"testPlan":{"mode":"runtime-smoke","test":"clamp(10,0,5)","expected":"5","status":"NOT_RUN"}},{"name":"length","kind":"fn","signature":"length(value)","description":"Длина строки или массива, число ключей объекта.","category":"arrays","implementationEvidence":{"apiCatalog":"API.length","runtime":"runtime registration N('length', ...)","apiCatalogLine":1455,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1455,"apiCatalogExpression":"API.length","runtimeLine":1490,"runtimeExpression":"N('length', ...)"},"testPlan":{"mode":"runtime-smoke","test":"length([1,2,3])","expected":"3; also tests object own-key count","status":"NOT_RUN"}},{"name":"push","kind":"fn","signature":"push(array, value)","description":"Добавляет элемент в конец массива.","category":"arrays","implementationEvidence":{"apiCatalog":"API.push","runtime":"runtime registration N('push', ...)","apiCatalogLine":1456,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1456,"apiCatalogExpression":"API.push","runtimeLine":1490,"runtimeExpression":"N('push', ...)"},"testPlan":{"mode":"runtime-smoke","test":"push([1,2],3)","expected":"returns [1,2,3] and mutates array","status":"NOT_RUN"}},{"name":"pop","kind":"fn","signature":"pop(array)","description":"Убирает и возвращает последний элемент массива.","category":"arrays","implementationEvidence":{"apiCatalog":"API.pop","runtime":"runtime registration N('pop', ...)","apiCatalogLine":1457,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1457,"apiCatalogExpression":"API.pop","runtimeLine":1490,"runtimeExpression":"N('pop', ...)"},"testPlan":{"mode":"runtime-smoke","test":"pop([1,2])","expected":"returns 2 and mutates array","status":"NOT_RUN"}},{"name":"time","kind":"fn","signature":"time()","description":"Число секунд с момента запуска игры.","category":"time","implementationEvidence":{"apiCatalog":"API.time","runtime":"runtime registration N('time', ...)","apiCatalogLine":1458,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1458,"apiCatalogExpression":"API.time","runtimeLine":1490,"runtimeExpression":"N('time', ...)"},"testPlan":{"mode":"runtime-smoke","test":"time()","expected":"non-negative seconds since game start","status":"NOT_RUN"}},{"name":"dt","kind":"fn","signature":"dt()","description":"Секунды с прошлого кадра (то же, что аргумент update).","category":"time","implementationEvidence":{"apiCatalog":"API.dt","runtime":"runtime registration N('dt', ...)","apiCatalogLine":1459,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1459,"apiCatalogExpression":"API.dt","runtimeLine":1490,"runtimeExpression":"N('dt', ...)"},"testPlan":{"mode":"runtime-smoke","test":"dt()","expected":"numeric frame delta outside a local dt parameter scope","status":"NOT_RUN"}},{"name":"rgba","kind":"fn","signature":"rgba(r, g, b, a)","description":"Возвращает CSS-цвет rgba() из красного, зелёного, синего и альфа-канала.","category":"drawing","implementationEvidence":{"apiCatalog":"API.rgba","runtime":"runtime registration N('rgba', ...)","apiCatalogLine":1460,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1460,"apiCatalogExpression":"API.rgba","runtimeLine":1490,"runtimeExpression":"N('rgba', ...)"},"testPlan":{"mode":"runtime-smoke","test":"rgba(1,2,3,0.5)","expected":"\"rgba(1,2,3,0.5)\"","status":"NOT_RUN"}},{"name":"print","kind":"fn","signature":"print(...values)","description":"Выводит значения в консоль.","category":"console","implementationEvidence":{"apiCatalog":"API.print","runtime":"runtime registration N('print', ...)","apiCatalogLine":1461,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1461,"apiCatalogExpression":"API.print","runtimeLine":1490,"runtimeExpression":"N('print', ...)"},"testPlan":{"mode":"manual","test":"Verify output appears in the MrrCode console without changing game state.","expected":"Console output is visible; return value is null.","status":"NOT_RUN"}},{"name":"lerp","kind":"fn","signature":"lerp(a, b, t)","description":"Линейно смешивает a и b по t от 0 до 1.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.lerp","runtime":"runtime registration N('lerp', ...)","apiCatalogLine":1462,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1462,"apiCatalogExpression":"API.lerp","runtimeLine":1490,"runtimeExpression":"N('lerp', ...)"},"testPlan":{"mode":"runtime-smoke","test":"lerp(0,10,0.5)","expected":"5","status":"NOT_RUN"}},{"name":"map","kind":"fn","signature":"map(value, inMin, inMax, outMin, outMax)","description":"Переносит число из одного диапазона в другой.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.map","runtime":"runtime registration N('map', ...)","apiCatalogLine":1463,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1463,"apiCatalogExpression":"API.map","runtimeLine":1490,"runtimeExpression":"N('map', ...)"},"testPlan":{"mode":"runtime-smoke","test":"map(5,0,10,0,100)","expected":"50","status":"NOT_RUN"}},{"name":"sign","kind":"fn","signature":"sign(x)","description":"Возвращает -1, 0 или 1.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.sign","runtime":"runtime registration N('sign', ...)","apiCatalogLine":1464,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1464,"apiCatalogExpression":"API.sign","runtimeLine":1490,"runtimeExpression":"N('sign', ...)"},"testPlan":{"mode":"runtime-smoke","test":"sign(-3)","expected":"-1","status":"NOT_RUN"}},{"name":"randomInt","kind":"fn","signature":"randomInt(min, max)","description":"Случайное целое в диапазоне включительно.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.randomInt","runtime":"runtime registration N('randomInt', ...)","apiCatalogLine":1465,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1465,"apiCatalogExpression":"API.randomInt","runtimeLine":1490,"runtimeExpression":"N('randomInt', ...)"},"testPlan":{"mode":"runtime-smoke","test":"randomInt(1,5)","expected":"integer in inclusive range 1..5","status":"NOT_RUN"}},{"name":"toString","kind":"fn","signature":"toString(value)","description":"Преобразует значение в строку.","category":"strings-and-conversion","implementationEvidence":{"apiCatalog":"API.toString","runtime":"runtime registration N('toString', ...)","apiCatalogLine":1466,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1466,"apiCatalogExpression":"API.toString","runtimeLine":1490,"runtimeExpression":"N('toString', ...)"},"testPlan":{"mode":"runtime-smoke","test":"toString(123)","expected":"\"123\"","status":"NOT_RUN"}},{"name":"toNumber","kind":"fn","signature":"toNumber(value)","description":"Преобразует значение в число.","category":"strings-and-conversion","implementationEvidence":{"apiCatalog":"API.toNumber","runtime":"runtime registration N('toNumber', ...)","apiCatalogLine":1467,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1467,"apiCatalogExpression":"API.toNumber","runtimeLine":1490,"runtimeExpression":"N('toNumber', ...)"},"testPlan":{"mode":"runtime-smoke","test":"toNumber(\"45\")","expected":"45","status":"NOT_RUN"}},{"name":"contains","kind":"fn","signature":"contains(text, part)","description":"Проверяет наличие подстроки.","category":"arrays","implementationEvidence":{"apiCatalog":"API.contains","runtime":"runtime registration N('contains', ...)","apiCatalogLine":1468,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1468,"apiCatalogExpression":"API.contains","runtimeLine":1490,"runtimeExpression":"N('contains', ...)"},"testPlan":{"mode":"runtime-smoke","test":"contains(\"hello\",\"ell\")","expected":"true; also tests array membership","status":"NOT_RUN"}},{"name":"join","kind":"fn","signature":"join(array, separator)","description":"Объединяет элементы массива в строку.","category":"arrays","implementationEvidence":{"apiCatalog":"API.join","runtime":"runtime registration N('join', ...)","apiCatalogLine":1469,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1469,"apiCatalogExpression":"API.join","runtimeLine":1490,"runtimeExpression":"N('join', ...)"},"testPlan":{"mode":"runtime-smoke","test":"join([1,2,3],\",\")","expected":"\"1,2,3\"","status":"NOT_RUN"}},{"name":"split","kind":"fn","signature":"split(text, separator)","description":"Разделяет строку на массив.","category":"arrays","implementationEvidence":{"apiCatalog":"API.split","runtime":"runtime registration N('split', ...)","apiCatalogLine":1470,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1470,"apiCatalogExpression":"API.split","runtimeLine":1490,"runtimeExpression":"N('split', ...)"},"testPlan":{"mode":"runtime-smoke","test":"split(\"a,b,c\",\",\")","expected":"[\"a\",\"b\",\"c\"]","status":"NOT_RUN"}},{"name":"save","kind":"fn","signature":"save(key, value)","description":"Сохраняет значение игры в локальное хранилище.","category":"persistence","implementationEvidence":{"apiCatalog":"API.save","runtime":"runtime registration N('save', ...)","apiCatalogLine":1471,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1471,"apiCatalogExpression":"API.save","runtimeLine":1490,"runtimeExpression":"N('save', ...)"},"testPlan":{"mode":"runtime-smoke","test":"save(tempKey,{ok:7}); load(tempKey,null)","expected":"Round-trips a JSON-compatible object; temporary storage key is removed after test.","status":"NOT_RUN"}},{"name":"load","kind":"fn","signature":"load(key, defaultValue)","description":"Загружает значение игры из локального хранилища.","category":"persistence","implementationEvidence":{"apiCatalog":"API.load","runtime":"runtime registration N('load', ...)","apiCatalogLine":1472,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1472,"apiCatalogExpression":"API.load","runtimeLine":1490,"runtimeExpression":"N('load', ...)"},"testPlan":{"mode":"runtime-smoke","test":"save(tempKey,{ok:7}); load(tempKey,null)","expected":"Round-trips a JSON-compatible object; temporary storage key is removed after test.","status":"NOT_RUN"}},{"name":"playTone","kind":"fn","signature":"playTone(frequency, duration, volume?)","description":"Проигрывает короткий синтезированный тон.","category":"audio","implementationEvidence":{"apiCatalog":"API.playTone","runtime":"runtime registration N('playTone', ...)","apiCatalogLine":1473,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1473,"apiCatalogExpression":"API.playTone","runtimeLine":1490,"runtimeExpression":"N('playTone', ...)"},"testPlan":{"mode":"manual","test":"From a user gesture call playTone(440,0.1,0.05).","expected":"A short tone is audible where browser audio is supported and permitted.","status":"NOT_RUN"}},{"name":"stopSound","kind":"fn","signature":"stopSound()","description":"Останавливает активные синтезированные звуки.","category":"audio","implementationEvidence":{"apiCatalog":"API.stopSound","runtime":"runtime registration N('stopSound', ...)","apiCatalogLine":1474,"runtimeLine":1490},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1474,"apiCatalogExpression":"API.stopSound","runtimeLine":1490,"runtimeExpression":"N('stopSound', ...)"},"testPlan":{"mode":"manual","test":"Start a tone then call stopSound().","expected":"Audio context is suspended; behavior depends on browser audio support.","status":"NOT_RUN"}},{"name":"splice","kind":"fn","signature":"splice(array, start, count, ...items)","description":"Удаляет count элементов массива начиная с start и вставляет вместо них items. Изменяет исходный массив и возвращает удалённые элементы.","category":"arrays","implementationEvidence":{"apiCatalog":"API.splice","runtime":"MrrCodeStdlib020.std.splice (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1475,"runtimeLine":567},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1475,"apiCatalogExpression":"API.splice","runtimeLine":567,"runtimeExpression":"MrrCodeStdlib020.std.splice"},"testPlan":{"mode":"runtime-smoke","test":"splice([1,2,3],1,1,9)","expected":"returns [2], array becomes [1,9,3]","status":"NOT_RUN"}},{"name":"shift","kind":"fn","signature":"shift(array)","description":"Удаляет и возвращает первый элемент массива; массив изменяется.","category":"arrays","implementationEvidence":{"apiCatalog":"API.shift","runtime":"MrrCodeStdlib020.std.shift (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1476,"runtimeLine":568},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1476,"apiCatalogExpression":"API.shift","runtimeLine":568,"runtimeExpression":"MrrCodeStdlib020.std.shift"},"testPlan":{"mode":"runtime-smoke","test":"shift([1,2])","expected":"returns 1 and mutates array","status":"NOT_RUN"}},{"name":"unshift","kind":"fn","signature":"unshift(array, value)","description":"Добавляет value в начало массива и возвращает новую длину массива.","category":"arrays","implementationEvidence":{"apiCatalog":"API.unshift","runtime":"MrrCodeStdlib020.std.unshift (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1477,"runtimeLine":569},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1477,"apiCatalogExpression":"API.unshift","runtimeLine":569,"runtimeExpression":"MrrCodeStdlib020.std.unshift"},"testPlan":{"mode":"runtime-smoke","test":"unshift([2,3],1)","expected":"returns 3 and array becomes [1,2,3]","status":"NOT_RUN"}},{"name":"indexOf","kind":"fn","signature":"indexOf(array, value)","description":"Индекс первого точного совпадения в массиве или -1, если элемент не найден.","category":"arrays","implementationEvidence":{"apiCatalog":"API.indexOf","runtime":"MrrCodeStdlib020.std.indexOf (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1478,"runtimeLine":574},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1478,"apiCatalogExpression":"API.indexOf","runtimeLine":574,"runtimeExpression":"MrrCodeStdlib020.std.indexOf"},"testPlan":{"mode":"runtime-smoke","test":"indexOf([1,2,3],2)","expected":"1","status":"NOT_RUN"}},{"name":"slice","kind":"fn","signature":"slice(array, start, end?)","description":"Возвращает копию части массива от start до end (end не включается); исходный массив не меняется.","category":"arrays","implementationEvidence":{"apiCatalog":"API.slice","runtime":"MrrCodeStdlib020.std.slice (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1479,"runtimeLine":575},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1479,"apiCatalogExpression":"API.slice","runtimeLine":575,"runtimeExpression":"MrrCodeStdlib020.std.slice"},"testPlan":{"mode":"runtime-smoke","test":"slice([1,2,3],1,3)","expected":"[2,3]","status":"NOT_RUN"}},{"name":"pow","kind":"fn","signature":"pow(a, b)","description":"Возводит a в степень b. Также доступен оператор **.","category":"math-and-random","implementationEvidence":{"apiCatalog":"API.pow","runtime":"MrrCodeStdlib020.std.pow (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1480,"runtimeLine":583},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1480,"apiCatalogExpression":"API.pow","runtimeLine":583,"runtimeExpression":"MrrCodeStdlib020.std.pow"},"testPlan":{"mode":"runtime-smoke","test":"pow(2,3)","expected":"8","status":"NOT_RUN"}},{"name":"trim","kind":"fn","signature":"trim(text)","description":"Убирает пробельные символы в начале и конце строки.","category":"strings-and-conversion","implementationEvidence":{"apiCatalog":"API.trim","runtime":"MrrCodeStdlib020.std.trim (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1481,"runtimeLine":585},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1481,"apiCatalogExpression":"API.trim","runtimeLine":585,"runtimeExpression":"MrrCodeStdlib020.std.trim"},"testPlan":{"mode":"runtime-smoke","test":"trim(\"  hello \")","expected":"\"hello\"","status":"NOT_RUN"}},{"name":"upper","kind":"fn","signature":"upper(text)","description":"Возвращает строку в верхнем регистре.","category":"strings-and-conversion","implementationEvidence":{"apiCatalog":"API.upper","runtime":"MrrCodeStdlib020.std.upper (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1482,"runtimeLine":586},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1482,"apiCatalogExpression":"API.upper","runtimeLine":586,"runtimeExpression":"MrrCodeStdlib020.std.upper"},"testPlan":{"mode":"runtime-smoke","test":"upper(\"hi\")","expected":"\"HI\"","status":"NOT_RUN"}},{"name":"lower","kind":"fn","signature":"lower(text)","description":"Возвращает строку в нижнем регистре.","category":"strings-and-conversion","implementationEvidence":{"apiCatalog":"API.lower","runtime":"MrrCodeStdlib020.std.lower (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1483,"runtimeLine":587},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1483,"apiCatalogExpression":"API.lower","runtimeLine":587,"runtimeExpression":"MrrCodeStdlib020.std.lower"},"testPlan":{"mode":"runtime-smoke","test":"lower(\"HI\")","expected":"\"hi\"","status":"NOT_RUN"}},{"name":"startsWith","kind":"fn","signature":"startsWith(text, prefix)","description":"Проверяет, начинается ли строка с prefix; возвращает true/false.","category":"strings-and-conversion","implementationEvidence":{"apiCatalog":"API.startsWith","runtime":"MrrCodeStdlib020.std.startsWith (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1484,"runtimeLine":588},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1484,"apiCatalogExpression":"API.startsWith","runtimeLine":588,"runtimeExpression":"MrrCodeStdlib020.std.startsWith"},"testPlan":{"mode":"runtime-smoke","test":"startsWith(\"hello\",\"he\")","expected":"true","status":"NOT_RUN"}},{"name":"endsWith","kind":"fn","signature":"endsWith(text, suffix)","description":"Проверяет, заканчивается ли строка на suffix; возвращает true/false.","category":"strings-and-conversion","implementationEvidence":{"apiCatalog":"API.endsWith","runtime":"MrrCodeStdlib020.std.endsWith (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1485,"runtimeLine":589},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1485,"apiCatalogExpression":"API.endsWith","runtimeLine":589,"runtimeExpression":"MrrCodeStdlib020.std.endsWith"},"testPlan":{"mode":"runtime-smoke","test":"endsWith(\"hello\",\"lo\")","expected":"true","status":"NOT_RUN"}},{"name":"replace","kind":"fn","signature":"replace(text, from, to)","description":"Заменяет все вхождения подстроки from на to и возвращает новую строку.","category":"strings-and-conversion","implementationEvidence":{"apiCatalog":"API.replace","runtime":"MrrCodeStdlib020.std.replace (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1486,"runtimeLine":590},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1486,"apiCatalogExpression":"API.replace","runtimeLine":590,"runtimeExpression":"MrrCodeStdlib020.std.replace"},"testPlan":{"mode":"runtime-smoke","test":"replace(\"abab\",\"ab\",\"cd\")","expected":"\"cdcd\"","status":"NOT_RUN"}},{"name":"typeof","kind":"fn","signature":"typeof(value)","description":"Возвращает название типа строкой; массивы распознаются отдельно как \"array\". Для null результат соответствует правилам JavaScript и равен \"object\".","category":"strings-and-conversion","implementationEvidence":{"apiCatalog":"API.typeof","runtime":"MrrCodeStdlib020.std.typeof (exposed by createGlobalEnv stdlib loop)","apiCatalogLine":1487,"runtimeLine":592},"status":"implementation-found-in-source","testStatus":"not executed in real browser runtime by source audit","aliases":[],"limitations":[],"sourceLocation":{"apiCatalogLine":1487,"apiCatalogExpression":"API.typeof","runtimeLine":592,"runtimeExpression":"MrrCodeStdlib020.std.typeof"},"testPlan":{"mode":"runtime-smoke","test":"typeof([1,2])","expected":"\"array\"","status":"NOT_RUN"}}],"language":{"keywords":["let","const","if","else","while","for","of","function","return","break","continue","true","false","null","from","import","as"],"literals":["number","single-quoted string","double-quoted string","template literal with ${expression}","true","false","null","array literal","object literal"],"operators":{"arithmetic":["+","-","*","/","%","**"],"comparison":["==","!=","<",">","<=",">="],"logical":["&&","||","!"],"assignment":["=","+=","-=","*=","/=","%=","**="],"update":["++","--"],"other":[".","[]","?:"]},"statements":["variable declaration let/const","function declaration","if/else","while","for counter loop","for...of","return","break","continue","from/import/as modules","line comments //","block comments /* */"],"knownUnsupported":["var declarations","strict equality === and !==","arbitrary browser DOM/fetch/JavaScript APIs","documented keyboard-specific input functions","arbitrary member-method calls such as array.map(...)"],"evidence":"Parser implementation and KEYWORDS table in the main MrrCode runtime script; static documentation was cross-checked against source."},"editorAndProjectFeatures":[{"name":"code editor","status":"found in source","details":"Editor textarea, syntax highlighting, API completion, hints, snippets and validation."},{"name":"game runtime","status":"found in source","details":"800×450 logical canvas, start/update loop, max frame delta 0.05 seconds, console and stop/run controls."},{"name":"scene editor","status":"found in source","details":"Rectangle, circle and text scene objects; select, drag, resize, delete, properties and preview. Runtime scene objects are separate from source drawing commands."},{"name":"project files","status":"found in source","details":"Multiple .mrr project files, main.mrr entry file, module imports, PNG resources and project state."},{"name":"modules","status":"parser/runtime support documented and source present","details":"from \"file\" import name; import *; aliases with as; module cache; cyclic imports rejected."},{"name":"version history","status":"UI feature listed in source","details":"Project version history; not a MrrCode built-in function."},{"name":"resource checking","status":"UI feature listed in source","details":"Resource reference checking; not a MrrCode built-in function."},{"name":"AI integration","status":"found in source","details":"OpenAI-compatible chat request with Base URL, key, model, project context, JSON response parsing and static validation before applying edits."},{"name":"export and publish","status":"requires feature-specific verification","details":"Generic download helper exists; this audit does not claim that GitHub Pages publication or every project export flow is fully verified."}]};
+(function(){
+  const spec = window.MRRCODE_AI_SPEC || (window.MRRCODE_AI_SPEC = {});
+  const registry = window.MRRCODE_API_REGISTRY;
+  // Single source of truth for validator allowlist and AI-visible builtin signatures.
+  spec.builtins = registry.entries.filter(x => x.kind === 'fn').map(x => [x.name, x.signature + ' — ' + x.description]);
+  spec.apiRegistryVersion = registry.version;
+  spec.apiRegistryCounts = registry.counts;
+  spec.languageInventory = registry.language;
+  window.MrrCodeGetAPIRegistry = function(query){
+    const q = String(query || '').trim().toLowerCase();
+    if (!q) return registry;
+    return {
+      version: registry.version,
+      entries: registry.entries.filter(x => [x.name,x.signature,x.description,x.category].join(' ').toLowerCase().includes(q)),
+      language: registry.language,
+      counts: registry.counts
+    };
+  };
+  window.MrrCodeRunAPIAudit = function(){
+    const results = [];
+    const add = (name, pass, detail) => results.push({test:name,status:pass?'PASS':'FAIL',detail:String(detail||'')});
+    const manual = (name, detail) => results.push({test:name,status:'MANUAL',detail:String(detail||'')});
+    const eq = (a,b) => JSON.stringify(a) === JSON.stringify(b);
+    const near = (a,b,eps=1e-8) => typeof a==='number' && Math.abs(a-b)<=eps;
+    const apiNames = registry.entries.filter(x=>x.kind==='fn').map(x=>x.name).sort();
+    const runtimeNames = [...new Set([...(registry.sourceCoverage.directRuntimeRegistrations||[]),...(registry.sourceCoverage.stdlibFunctions||[])])].sort();
+    add('Registry covers all source runtime builtins', eq(apiNames,runtimeNames), 'API builtins: '+apiNames.length+'; source runtime union: '+runtimeNames.length);
+    const specNames = (spec.builtins||[]).map(x=>Array.isArray(x)?x[0]:String(x)).sort();
+    add('AI spec builtins match registry', eq(apiNames,specNames), 'Spec builtins: '+specNames.length);
+    add('Lifecycle handlers documented', ['start','update','pointerDown','pointerMove','pointerUp'].every(n=>registry.entries.some(x=>x.name===n&&x.kind==='ev')), 'Expected lifecycle events: start, update, pointerDown, pointerMove, pointerUp');
+    if (typeof window.MrrCodeValidate === 'function') {
+      for (const entry of registry.entries.filter(x=>x.kind==='fn')) {
+        try { window.MrrCodeValidate('function __mrrAudit(){ '+entry.name+'(); }'); add('Validator recognizes '+entry.name, true, entry.signature); }
+        catch(e) { add('Validator recognizes '+entry.name, false, e && e.message || e); }
+      }
+      try { window.MrrCodeValidate('function __mrrAudit(){ inventedMrrCodeFunction(); }'); add('Validator rejects unknown API', false, 'Unknown function was accepted'); }
+      catch(e) { add('Validator rejects unknown API', true, e && e.message || 'Rejected as expected'); }
+      const positive = [
+        'let score = 0; const title = `Score: ${score}`; score += 1;',
+        'function update(dt) { let a = [1, 2]; for (let item of a) { print(item); } }',
+        'let body = {x: 1, y: 2, vx: 0, vy: 0}; body.x += 1;',
+        'if (true) { print("ok"); } else { print("no"); }'
+      ];
+      positive.forEach((code,i)=>{try{window.MrrCodeValidate(code);add('Parser accepts supported syntax sample '+(i+1),true,'');}catch(e){add('Parser accepts supported syntax sample '+(i+1),false,e&&e.message||e);}});
+      for (const [label,code] of [['var declaration','var x = 1;'],['strict equality','let x = 1 === 1;']]) {
+        try { window.MrrCodeValidate(code); add('Parser rejects unsupported '+label,false,'Unsupported syntax was accepted'); }
+        catch(e) { add('Parser rejects unsupported '+label,true,e&&e.message||'Rejected as expected'); }
+      }
+    } else add('Validator available', false, 'MrrCodeValidate is not initialized');
+
+    // Execute deterministic/safe built-ins against a fresh environment. Drawing, audio,
+    // permission prompts and actual browser device events are intentionally not triggered.
+    let env=null;
+    try { env=buildGlobalEnv(); } catch(e) { add('Create isolated runtime environment',false,e&&e.message||e); }
+    const call=(name,args=[])=>{
+      const fn=env&&env.vars.get(name);
+      if(!fn||fn.__pf!=='native') throw new Error('Runtime function not found: '+name);
+      return fn.f(args,0,{});
+    };
+    const run=(name,args,check,description)=>{
+      try { const actual=call(name,args); const ok=check(actual); add('Runtime '+name,!!ok,description+'; actual='+safeDescribe(actual)); }
+      catch(e){add('Runtime '+name,false,(description||'')+'; '+(e&&e.message||e));}
+    };
+    const safeDescribe=v=>{try{return JSON.stringify(v);}catch(_){return String(v);}};
+    if(env){
+      run('lerp',[0,10,.5],v=>near(v,5),'Expected 5');
+      run('map',[5,0,10,0,100],v=>near(v,50),'Expected 50');
+      run('sign',[-3],v=>v===-1,'Expected -1');
+      run('randomInt',[1,5],v=>Number.isInteger(v)&&v>=1&&v<=5,'Integer in inclusive range 1..5');
+      run('random',[],v=>typeof v==='number'&&v>=0&&v<1,'Number in [0,1)');
+      run('rand',[-2,2],v=>typeof v==='number'&&v>=-2&&v<2,'Number in [-2,2)');
+      run('abs',[-7],v=>v===7,'Expected 7'); run('sqrt',[16],v=>v===4,'Expected 4');
+      run('sin',[0],v=>v===0,'Expected 0'); run('cos',[0],v=>v===1,'Expected 1');
+      run('atan2',[1,1],v=>near(v,Math.PI/4),'Expected π/4'); run('pow',[2,3],v=>v===8,'Expected 8');
+      run('min',[3,7],v=>v===3,'Expected 3'); run('max',[3,7],v=>v===7,'Expected 7');
+      run('clamp',[10,0,5],v=>v===5,'Expected 5'); run('floor',[3.7],v=>v===3,'Expected 3');
+      run('ceil',[3.2],v=>v===4,'Expected 4'); run('round',[3.5],v=>v===4,'Expected 4');
+      run('toString',[123],v=>v==='123','Expected "123"'); run('toNumber',['45'],v=>v===45,'Expected 45');
+      run('typeof',[[1,2]],v=>v==='array','Expected "array"'); run('rgba',[1,2,3,.5],v=>v==='rgba(1,2,3,0.5)','Expected CSS rgba string');
+      run('trim',['  hello '],v=>v==='hello','Expected "hello"'); run('upper',['hi'],v=>v==='HI','Expected "HI"');
+      run('lower',['HI'],v=>v==='hi','Expected "hi"'); run('startsWith',['hello','he'],v=>v===true,'Expected true');
+      run('endsWith',['hello','lo'],v=>v===true,'Expected true'); run('replace',['abab','ab','cd'],v=>v==='cdcd','Replace all matches');
+      run('contains',['hello','ell'],v=>v===true,'String contains substring'); run('contains',[[1,2,3],2],v=>v===true,'Array contains element');
+      run('length',[[1,2,3]],v=>v===3,'Array length is 3');
+      const arrPush=[1,2]; run('push',[arrPush,3],v=>eq(v,[1,2,3])&&eq(arrPush,[1,2,3]),'Appends and returns array');
+      const arrPop=[1,2]; run('pop',[arrPop],v=>v===2&&eq(arrPop,[1]),'Returns and removes last element');
+      const arrSplice=[1,2,3]; run('splice',[arrSplice,1,1,9],v=>eq(v,[2])&&eq(arrSplice,[1,9,3]),'Returns removed elements and mutates array');
+      const arrShift=[1,2]; run('shift',[arrShift],v=>v===1&&eq(arrShift,[2]),'Returns and removes first element');
+      const arrUnshift=[2,3]; run('unshift',[arrUnshift,1],v=>v===3&&eq(arrUnshift,[1,2,3]),'Prepends and returns new length');
+      run('join',[[1,2,3],','],v=>v==='1,2,3','Joins array values'); run('split',['a,b,c',','],v=>eq(v,['a','b','c']),'Splits string');
+      run('indexOf',[[1,2,3],2],v=>v===1,'Returns index 1'); run('slice',[[1,2,3],1,3],v=>eq(v,[2,3]),'Returns a copy of selected range');
+      run('length',[{x:1,y:2}],v=>v===2,'Counts own object keys');
+      run('overlapRect',[0,0,10,10,5,5,10,10],v=>v===true,'Overlapping AABBs return true');
+      run('overlapRect',[0,0,10,10,10,0,10,10],v=>v===false,'Touching edges alone return false');
+      const body={x:0,y:0,vx:10,vy:0}; run('moveBody',[body,.5,10],v=>v===body&&near(body.x,1)&&near(body.y,.1)&&near(body.vy,1),'Mutates body and clamps dt to 0.1 seconds');
+      const oldPointer={x:Engine.pointer.x,y:Engine.pointer.y,down:Engine.pointer.down};
+      const oldTouches=Engine.touches;
+      try { Engine.pointer={x:123,y:234,down:true}; Engine.touches=[{x:12,y:34}];
+        run('pointerX',[],v=>v===123,'Reads pointer x'); run('pointerY',[],v=>v===234,'Reads pointer y');
+        run('pointerDownNow',[],v=>v===true,'Reads pointer held state'); run('touchCount',[],v=>v===1,'Reads active touch count');
+        run('touchX',[0],v=>v===12,'Reads touch x by index'); run('touchY',[0],v=>v===34,'Reads touch y by index');
+      } finally { Engine.pointer=oldPointer; Engine.touches=oldTouches; }
+      const oldScene=Engine.runtimeScene;
+      try { const testObj={name:'__mrr_api_audit_object__',x:1,y:2}; Engine.runtimeScene=[testObj]; run('object',['__mrr_api_audit_object__'],v=>v===testObj,'Finds scene object by name'); }
+      finally { Engine.runtimeScene=oldScene; }
+      run('screenWidth',[],v=>typeof v==='number'&&v>0,'Positive viewport width'); run('screenHeight',[],v=>typeof v==='number'&&v>0,'Positive viewport height');
+      run('gameWidth',[],v=>v===800,'Logical width is 800'); run('gameHeight',[],v=>v===450,'Logical height is 450');
+      run('orientationAngle',[],v=>typeof v==='number','Returns numeric screen angle'); run('isPortrait',[],v=>typeof v==='boolean','Returns boolean orientation');
+      run('tiltX',[],v=>typeof v==='number','Returns numeric gamma value'); run('tiltY',[],v=>typeof v==='number','Returns numeric beta value'); run('tiltZ',[],v=>typeof v==='number','Returns numeric alpha value');
+      run('time',[],v=>typeof v==='number'&&v>=0,'Non-negative seconds since game start'); run('dt',[],v=>typeof v==='number','Returns numeric frame delta');
+      // Test persistence with a temporary, namespaced key and always clean it up.
+      try { const key='__mrr_api_audit_'+Date.now(); const saved=call('save',[key,{ok:7}]);
+        if(saved!==true){
+          manual('Runtime save/load','Browser storage is unavailable or writes are blocked in this origin; persistence could not be verified.');
+        }else{
+          const loaded=call('load',[key,null]);
+          add('Runtime save/load',eq(loaded,{ok:7}),'Expected saved object to round-trip; loaded='+safeDescribe(loaded));
+        }
+        try { localStorage.removeItem('mrr-save:'+key); } catch(_) {}
+      } catch(e) { manual('Runtime save/load','Storage unavailable or blocked in this browser: '+(e&&e.message||e)); }
+      // Deliberately no audible sound, permission prompts, or drawing side effects during audit.
+      for(const n of ['print','background','clear','rect','circle','line','text','sprite','spriteAnim','camera','playTone','stopSound','requestMotion']){
+        const reason = ['playTone','stopSound'].includes(n) ? 'Not executed to avoid audio playback/state changes.' :
+          n==='requestMotion' ? 'Not executed because it can trigger a device permission prompt.' :
+          ['background','clear','rect','circle','line','text','sprite','spriteAnim','camera'].includes(n) ? 'Requires visual canvas/resource inspection; not executed to avoid changing the user canvas.' :
+          'Not executed to avoid writing to the visible console.';
+        manual('Runtime '+n,reason);
+      }
+    }
+    const summary = {registryVersion:registry.version,counts:{total:results.length,passed:results.filter(x=>x.status==='PASS').length,failed:results.filter(x=>x.status==='FAIL').length,manual:results.filter(x=>x.status==='MANUAL').length},results,warning:'Runtime smoke checks execute safe built-ins in a fresh interpreter environment. MANUAL tests were intentionally not triggered because they draw on the canvas, play audio, write to the console, or request device permission. This does not replace device/browser end-to-end testing.'};
+    window.MrrCodeLastAPIAudit = summary;
+    return summary;
+  };
+  const auditButton = document.getElementById('btnRunApiAudit');
+  if (auditButton) auditButton.addEventListener('click', function(){
+    const output = document.getElementById('mrrApiAuditOutput');
+    const summary = document.getElementById('mrrApiAuditSummary');
+    auditButton.disabled = true;
+    auditButton.textContent = '⏳ Проверка…';
+    try {
+      const report = window.MrrCodeRunAPIAudit();
+      summary.textContent = 'PASS: '+report.counts.passed+' · FAIL: '+report.counts.failed+' · MANUAL: '+report.counts.manual;
+      output.style.display = 'block';
+      output.textContent = report.results.map(x => '['+x.status+'] '+x.test+(x.detail?' — '+x.detail:'')).join('\n')+'\n\n'+report.warning;
+    } catch (e) {
+      summary.textContent = 'Ошибка проверки';
+      output.style.display = 'block';
+      output.textContent = String(e && e.stack || e);
+    } finally {
+      auditButton.disabled = false;
+      auditButton.textContent = '🧪 Проверить API движка';
+    }
+  });
+})();
+
 const KEYWORDS=['let','const','if','else','while','for','of','function','return','break','continue','true','false','null','from','import','as'];
 const KEYWORD_DOCS={
   let:'Объявить изменяемую переменную: let health = 100;',
@@ -1571,7 +1729,9 @@ function tokenize(src){
         let j=i+1;if(src[j]==='+'||src[j]==='-')j++;
         if(/[0-9]/.test(src[j]||'')){s+=src.slice(i,j);i=j;while(i<src.length&&/[0-9]/.test(src[i]))s+=src[i++];}
       }
-      T.push({t:'num',v:Number(s),line});continue;
+      const numericValue=Number(s);
+      if(!Number.isFinite(numericValue))throw new PFError('Числовой литерал выходит за допустимый диапазон: '+s,line);
+      T.push({t:'num',v:numericValue,line});continue;
     }
     if(idStart.test(c)){
       let s='';while(i<src.length&&idPart.test(src[i]))s+=src[i++];
@@ -1680,6 +1840,7 @@ function parse(tokens){
       const nameTk=eat('id');
       let init=null;
       if(is('op','=')){next();init=parseExpr();}
+      else if(kind==='const'&&!is('kw','of'))throw new PFError('Для const обязательно начальное значение.',nameTk.line);
       decls.push({name:nameTk.v,init});
       if(is('punc',',')){next();continue;}
       break;
@@ -1701,8 +1862,9 @@ function parse(tokens){
       eat('punc',';');
     }
     if(varInit&&is('kw','of')){
+      if(init.decls.length!==1||init.decls[0].init)throw new PFError('В for...of укажи одну переменную без начального значения.',tk.line);
       next();const iter=parseExpr();eat('punc',')');const body=parseStmt();
-      return {n:'ForOf',name:init.decls[0].name,iter,body,line:tk.line};
+      return {n:'ForOf',name:init.decls[0].name,kind:init.kind,iter,body,line:tk.line};
     }
     let test=null;if(!is('punc',';'))test=parseExpr();eat('punc',';');
     let upd=null;if(!is('punc',')'))upd=parseExpr();eat('punc',')');
@@ -1874,7 +2036,10 @@ window.MrrCodeValidate = function(code, options){
     const mod=moduleAsts.get(file);
     if(!mod)throw new Error('Строка '+im.line+': файл модуля «'+file+'» не проходит синтаксическую проверку.');
     const exports=new Map();
-    visit(mod,n=>{if(n.n==='FuncDecl')exports.set(n.name,'function');if(n.n==='VarDecl')for(const d of n.decls)exports.set(d.name,'variable');});
+    for(const top of (mod.body||[])){
+      if(top.n==='FuncDecl')exports.set(top.name,'function');
+      else if(top.n==='VarDecl')for(const d of top.decls)exports.set(d.name,'variable');
+    }
     if(im.star){for(const [n,kind] of exports){declared.add(n);if(kind==='function')functions.add(n);importedNames.add(n);}}
     else for(const item of im.names){
       if(!exports.has(item.name))throw new Error('Строка '+im.line+': модуль «'+source+'» не экспортирует «'+item.name+'».');
@@ -1883,31 +2048,184 @@ window.MrrCodeValidate = function(code, options){
     }
   }
   // A declared function is valid; a variable cannot be presumed callable just because JS permits it.
-  visit(parsed,n=>{
+  function checkNode(n){
+    if(n.n==='Assign'&&(!n.target||!['Ident','Member'].includes(n.target.n)))
+      throw new Error('Строка '+n.line+': слева от оператора присваивания должна быть переменная или свойство объекта.');
+    if(n.n==='Update'&&(!n.arg||!['Ident','Member'].includes(n.arg.n)))
+      throw new Error('Строка '+n.line+': ++ и -- можно применять только к переменной или свойству объекта.');
     if(n.n==='Call'){
       if(n.callee&&n.callee.n==='Member'){
         const prop=n.callee.computed?'[вычисляемое свойство]':'.'+n.callee.prop;
         throw new Error('Строка '+n.line+': вызов через свойство '+prop+'() не описан как встроенный API MrrCode. Используй документированную функцию или объяви и импортируй функцию явно.');
       }
       if(!n.callee||n.callee.n!=='Ident')throw new Error('Строка '+n.line+': разрешены только вызовы по имени функции, описанной в спецификации или объявленной в проекте.');
-      if(!functions.has(n.callee.name))throw new Error('Строка '+n.line+': функция «'+n.callee.name+'()» не найдена в MRRCODE_AI_SPEC и не объявлена как функция проекта.');
+      if(!functions.has(n.callee.name))throw new Error('Строка '+n.line+': функция «'+n.callee.name+'()» не найдена в MRRCODE_API_REGISTRY и не объявлена как функция проекта.');
     }
     if(n.n==='Ident'&&!declared.has(n.name)){
       throw new Error('Строка '+n.line+': имя «'+n.name+'» отсутствует в спецификации и не объявлено в проекте.');
     }
+  }
+  // Validate every ${...} expression with the same closed-world rules as ordinary code.
+  const templateAsts=[];
+  const templateAstMap=new WeakMap();
+  visit(parsed,n=>{
+    if(n.n!=='Template')return;
+    const raw=String(n.v||'');
+    for(let i=0;i<raw.length;){
+      if(raw[i]!=='$'||raw[i+1]!=='{'){i++;continue;}
+      let j=i+2,depth=1,quote=null,esc=false;
+      for(;j<raw.length;j++){
+        const ch=raw[j];
+        if(quote){
+          if(esc){esc=false;continue;}
+          if(ch==='\\\\'){esc=true;continue;}
+          if(ch===quote){quote=null;continue;}
+          continue;
+        }
+        if(ch==='"'||ch==="'"||ch==='`'){quote=ch;continue;}
+        if(ch==='{')depth++;
+        else if(ch==='}'&&--depth===0)break;
+      }
+      if(depth!==0)throw new Error('Строка '+n.line+': незакрытое выражение ${...} в шаблонной строке.');
+      const expr=raw.slice(i+2,j).trim();
+      if(!expr)throw new Error('Строка '+n.line+': пустое выражение ${...}.');
+      let ep;
+      try{ep=parse(tokenize(expr));}catch(e){throw new Error('Строка '+n.line+': ошибка в ${...}: '+(e.message||e));}
+      templateAsts.push(ep);
+      const current=templateAstMap.get(n)||[];
+      current.push(ep);
+      templateAstMap.set(n,current);
+      i=j+1;
+    }
   });
+  visit(parsed,checkNode);
+  for(const ast of templateAsts)visit(ast,checkNode);
+  // Reject control-flow statements that cannot execute in their required context.
+  function checkControl(node,fnDepth,loopDepth){
+    if(!node||typeof node!=='object')return;
+    if(Array.isArray(node)){for(const x of node)checkControl(x,fnDepth,loopDepth);return;}
+    if(node.n==='Return'&&fnDepth===0)throw new Error('Строка '+node.line+': return разрешён только внутри функции.');
+    if((node.n==='Break'||node.n==='Continue')&&loopDepth===0)throw new Error('Строка '+node.line+': '+(node.n==='Break'?'break':'continue')+' разрешён только внутри цикла.');
+    const isFn=node.n==='FuncDecl'||node.n==='FuncExpr';
+    const isLoop=node.n==='While'||node.n==='For'||node.n==='ForOf';
+    for(const [k,v] of Object.entries(node)){
+      if(k==='line'||k==='name'||k==='kind'||k==='op'||k==='source'||k==='prop'||k==='key')continue;
+      if(v&&typeof v==='object')checkControl(v,fnDepth+(isFn?1:0),isFn?0:loopDepth+(isLoop?1:0));
+    }
+  }
+  checkControl(parsed,0,0);
+  // Lexical scope pass: avoid treating declarations inside functions/blocks as globals.
+  function newScope(parent){return {parent,bindings:new Map()};}
+  function bind(scope,name,kind,line){
+    if(!name)return;
+    if(scope.bindings.has(name)){
+      const previous=scope.bindings.get(name);
+      if(previous.kind==='builtin')throw new Error('Строка '+(line||1)+': нельзя переобъявлять встроенное имя «'+name+'». Выбери другое имя переменной.');
+      throw new Error('Строка '+(line||1)+': имя «'+name+'» уже объявлено в этой области.');
+    }
+    scope.bindings.set(name,{kind,line:line||1});
+  }
+  const rootScope=newScope(null);
+  for(const name of builtins)rootScope.bindings.set(name,{kind:'builtin',line:1});
+  function predeclareBody(body,scope){
+    for(const st of body||[]){
+      if(st.n==='VarDecl')for(const d of st.decls)bind(scope,d.name,st.kind,st.line);
+      else if(st.n==='FuncDecl')bind(scope,st.name,'function',st.line);
+      else if(st.n==='Import'){
+        if(st.star){
+          const source=String(st.source||'');
+          const file=[source,source+'.mrr'].find(n=>Object.prototype.hasOwnProperty.call(projectFiles,n));
+          const mod=file&&moduleAsts.get(file);
+          if(mod)for(const top of mod.body||[]){if(top.n==='FuncDecl')bind(scope,top.name,'import',st.line);if(top.n==='VarDecl')for(const d of top.decls)bind(scope,d.name,'import',st.line);}
+        }else for(const item of st.names)bind(scope,item.alias||item.name,'import',st.line);
+      }
+    }
+  }
+  function resolveBinding(scope,name){
+    for(let q=scope;q;q=q.parent)if(q.bindings.has(name))return q.bindings.get(name);
+    return null;
+  }
+  function scopeWalk(node,scope,fnDepth,loopDepth){
+    if(!node||typeof node!=='object')return;
+    if(Array.isArray(node)){for(const x of node)scopeWalk(x,scope,fnDepth,loopDepth);return;}
+    if(node.n==='Program'){
+      predeclareBody(node.body,scope);
+      for(const st of node.body)scopeWalk(st,scope,fnDepth,loopDepth);
+      return;
+    }
+    if(node.n==='Block'){
+      const blockScope=newScope(scope);predeclareBody(node.body,blockScope);
+      for(const st of node.body)scopeWalk(st,blockScope,fnDepth,loopDepth);
+      return;
+    }
+    if(node.n==='FuncDecl'||node.n==='FuncExpr'){
+      const fs=newScope(scope);
+      if(node.n==='FuncExpr'&&node.name)bind(fs,node.name,'function',node.line);
+      for(const p of node.params||[])bind(fs,p,'param',node.line);
+      scopeWalk(node.body,fs,fnDepth+1,0);
+      return;
+    }
+    if(node.n==='While'){
+      scopeWalk(node.test,scope,fnDepth,loopDepth);
+      scopeWalk(node.body,scope,fnDepth,loopDepth+1);
+      return;
+    }
+    if(node.n==='For'){
+      const ls=newScope(scope);
+      if(node.init&&node.init.n==='VarDecl')for(const d of node.init.decls)bind(ls,d.name,node.init.kind,node.init.line);
+      if(node.init)scopeWalk(node.init,ls,fnDepth,loopDepth);
+      if(node.test)scopeWalk(node.test,ls,fnDepth,loopDepth);
+      if(node.upd)scopeWalk(node.upd,ls,fnDepth,loopDepth);
+      scopeWalk(node.body,ls,fnDepth,loopDepth+1);
+      return;
+    }
+    if(node.n==='ForOf'){
+      const ls=newScope(scope);
+      if(node.name)bind(ls,node.name,node.kind||'let',node.line);
+      else if(node.assignTarget)scopeWalk(node.assignTarget,scope,fnDepth,loopDepth);
+      scopeWalk(node.iter,scope,fnDepth,loopDepth);
+      scopeWalk(node.body,ls,fnDepth,loopDepth+1);
+      return;
+    }
+    if(node.n==='Return'&&fnDepth===0)throw new Error('Строка '+node.line+': return разрешён только внутри функции.');
+    if((node.n==='Break'||node.n==='Continue')&&loopDepth===0)throw new Error('Строка '+node.line+': '+(node.n==='Break'?'break':'continue')+' разрешён только внутри цикла.');
+    if(node.n==='Ident'){
+      const binding=resolveBinding(scope,node.name);
+      if(!binding)throw new Error('Строка '+node.line+': имя «'+node.name+'» не объявлено в доступной области видимости.');
+      return;
+    }
+    if(node.n==='Assign'&&node.target&&node.target.n==='Ident'){
+      const binding=resolveBinding(scope,node.target.name);
+      if(binding&&binding.kind==='const')throw new Error('Строка '+node.line+': нельзя изменять const «'+node.target.name+'». Используй let, если значение должно меняться.');
+    }
+    if(node.n==='Update'&&node.arg&&node.arg.n==='Ident'){
+      const binding=resolveBinding(scope,node.arg.name);
+      if(binding&&binding.kind==='const')throw new Error('Строка '+node.line+': нельзя изменять const «'+node.arg.name+'». Используй let, если значение должно меняться.');
+    }
+    if(node.n==='VarDecl'){for(const d of node.decls)if(d.init)scopeWalk(d.init,scope,fnDepth,loopDepth);return;}
+    if(node.n==='Import')return;
+    if(node.n==='Template'){
+      for(const exprAst of (templateAstMap.get(node)||[]))scopeWalk(exprAst,scope,fnDepth,loopDepth);
+      return;
+    }
+    for(const [k,v] of Object.entries(node)){
+      if(['line','name','kind','op','source','prop','key'].includes(k))continue;
+      if(v&&typeof v==='object')scopeWalk(v,scope,fnDepth,loopDepth);
+    }
+  }
+  scopeWalk(parsed,rootScope,0,0);
   return true;
 };
 
 /* ---------------- MrrCode: интерпретатор ---------------- */
 const LIMIT_TOTAL=5000000, LIMIT_FRAME=2000000, MAX_DEPTH=250;
-function createEnv(parent){return {vars:new Map(),parent:parent||null};}
+function createEnv(parent){return {vars:new Map(),consts:new Set(),parent:parent||null};}
 function envGet(env,name,line){
   let e=env;while(e){if(e.vars.has(name))return e.vars.get(name);e=e.parent;}
   throw new PFError('Неизвестная переменная: «'+name+'»',line);
 }
 function envSet(env,name,val,line){
-  let e=env;while(e){if(e.vars.has(name)){e.vars.set(name,val);return;}e=e.parent;}
+  let e=env;while(e){if(e.vars.has(name)){if(e.consts&&e.consts.has(name))throw new PFError('Нельзя изменить const «'+name+'»',line);e.vars.set(name,val);return;}e=e.parent;}
   throw new PFError('Переменная не объявлена: «'+name+'» (используй let)',line);
 }
 function truthy(v){return !!v;}
@@ -2000,7 +2318,7 @@ function evalNode(nd,env,ctx){
     case 'Empty':return null;
     case 'ExprStmt':return evalNode(nd.e,env,ctx);
     case 'VarDecl':{
-      for(const d of nd.decls)env.vars.set(d.name,d.init?evalNode(d.init,env,ctx):null);
+      for(const d of nd.decls){if(env.vars.has(d.name))throw new PFError('Имя «'+d.name+'» уже объявлено в этой области',nd.line);env.vars.set(d.name,d.init?evalNode(d.init,env,ctx):null);if(nd.kind==='const')env.consts.add(d.name);}
       return null;
     }
     case 'Literal':return nd.v;
@@ -2062,7 +2380,7 @@ function evalNode(nd,env,ctx){
       const srcVal=evalNode(nd.iter,env,ctx);
       const items=Array.isArray(srcVal)?srcVal:(typeof srcVal==='string'?srcVal.split(''):(srcVal&&typeof srcVal==='object'?Object.values(srcVal):[]));
       const fe=createEnv(env);
-      if(nd.name)fe.vars.set(nd.name,null);
+      if(nd.name){fe.vars.set(nd.name,null);if(nd.kind==='const')fe.consts.add(nd.name);}
       for(const it of items){
         if(nd.name)fe.vars.set(nd.name,it);else setTarget(nd.assignTarget,it,env,ctx,nd.line);
         let doBreak=false;
@@ -2874,11 +3192,18 @@ gameCanvas.addEventListener('pointerup',e=>{
   firePointer('pointerUp',p);
 });
 gameCanvas.addEventListener('pointercancel',e=>{
+  const p=canvasPos(e);
   touchRemove(e.pointerId);
   Engine.pointer.down=Engine.touches.length>0;
+  firePointer('pointerUp',p);
+  if(Engine.touches.length){Engine.pointer.x=Engine.touches[0].x;Engine.pointer.y=Engine.touches[0].y;}
 });
 gameCanvas.addEventListener('contextmenu',e=>e.preventDefault());
-window.addEventListener('blur',()=>{Engine.touches=[];Engine.pointer.down=false;});
+window.addEventListener('blur',()=>{
+  const active=Engine.touches.slice();
+  for(const t of active)firePointer('pointerUp',{x:t.x,y:t.y});
+  Engine.touches=[];Engine.pointer.down=false;
+});
 
 /* ---------------- редактор: подсветка ---------------- */
 const codeInput=document.getElementById('codeInput');
@@ -3547,11 +3872,13 @@ function buildSystemPrompt(){
     'Ты — помощник по языку MrrCode 0.2.0.',
     'ОБЯЗАТЕЛЬНЫЙ РЕЖИМ ЗАКРЫТОГО МИРА: актуальный MRRCODE_AI_SPEC ниже — единственный источник встроенных функций, сигнатур и возможностей языка. Парсер MrrCode приложения задаёт допустимую грамматику.',
     'НОВЫЕ ВОЗМОЖНОСТИ: scene-editor drag/resize/grid, история проекта и проверка ресурсов — инструменты интерфейса, а не команды языка. Встроенные функции бери из MRRCODE_AI_SPEC.builtins; не ограничивайся только overlapRect, moveBody, camera и spriteAnim. Для размеров используй screenWidth(), screenHeight() (видимая область браузера в CSS-пикселях), gameWidth(), gameHeight() (логическая игровая сцена), для ориентации orientationAngle(), isPortrait(), для датчика устройства tiltX(), tiltY(), tiltZ(). requestMotion() запрашивай из пользовательского действия (например pointerDown), потому что браузер может требовать разрешение. Не выдумывай API синхронизации сцены с исходником.',
+    'ВРЕМЯ КАДРА — ВАЖНО: внутри function update(dt) параметр dt является числом. Используй dt без скобок (например x += speed * dt); НЕ вызывай dt() внутри update(dt), потому что параметр затеняет одноимённую встроенную функцию и возникнет ошибка «dt — не функция». dt() разрешена вне update(dt), когда локальная переменная dt не затеняет функцию. Не генерируй dt() внутри update(dt).',
     'ФИЗИКА: moveBody(body,dt,gravity) требует объект с x,y,vx,vy; overlapRect принимает два набора x,y,w,h и считает только настоящее пересечение без касания краями. Камера сдвигает рисование, но не координаты ввода. spriteAnim требует импортированный PNG-спрайтшит и размеры кадра в исходных пикселях.',
     'ПЕРЕД ПРИМЕНЕНИЕМ: сохраняй исходную версию, валидируй каждый изменённый файл, не утверждай что код гарантированно работает до реального запуска. Если ответ обрезан или файл неполный, не применяй его как целый файл.', 
     'Запрещено выводить поддержку из JavaScript, Python, браузера или другого языка. Знакомый синтаксис не означает, что он поддерживается MrrCode.',
     'Используй только синтаксис, который описан спецификацией и принимается грамматикой MrrCode, встроенные вызовы только из MRRCODE_AI_SPEC.builtins и явно объявленные в проекте функции. Не придумывай API, параметры, события, свойства, операторы и методы.',
-    'Вызовы через свойства объекта вида value.map(...) не являются встроенным API MrrCode, если отдельная сигнатура не указана в спецификации. Не используй методы JavaScript-массивов/строк/объектов.',
+    'ЖЁСТКОЕ ОГРАНИЧЕНИЕ API: не генерируй вызовы методов через точку: запрещены value.toFixed(...), text.toUpperCase(), array.map(...), array.push(...), Math.floor(...), console.log(...) и любые obj.method(...). В MrrCode разрешены только вызовы функций по имени из MRRCODE_API_REGISTRY/MRRCODE_AI_SPEC либо явно объявленных функций проекта. Наличие метода в JavaScript не означает, что он существует в MrrCode. Не используй .toFixed() даже для форматирования чисел. Вместо text("dt: " + dt.toFixed(3), ...) используй text("dt: " + dt, ...); вместо методов массива используй документированные push(array,value), pop(array), length(value), slice(array,start,end?) и другие соответствующие функции из реестра. Не вызывай методы через точку ни при каких обстоятельствах.',
+    'СВОЙСТВА И ВЫЗОВЫ: чтение свойства объекта (например body.x, если объект и поле подтверждены проектом) не равно вызову метода. Любой вызов Member(...) недопустим; валидатор должен отклонить такой файл. Не обходи это правило через шаблонные строки, комментарии или альтернативную запись.',
     'Если возможности нет в спецификации или проекте, прямо скажи, что она не документирована, и не генерируй код с ней. Не делай предположений о семантике и сигнатурах.',
     'Перед ответом проверь код по спецификации и парсеру. Если сомневаешься — исключи конструкцию и объясни ограничение.',
     'Не подменяй MrrCode JavaScript. Не меняй файлы, не относящиеся к запросу. Для каждого изменяемого или нового .mrr-файла возвращай полный текст. Новые ключи в files создают новые файлы проекта; включай только файлы, которые нужно создать или изменить.',
@@ -3665,18 +3992,13 @@ async function aiSend(){
   messages.push({role:'user',content:prompt});
   try{
     const url=cfg.baseUrl.replace(/\/+$/,'')+'/chat/completions';
-    const resp=await fetch(url,{
+    const rawResponse=await window.MrrCodeAINetwork.request(url,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.apiKey},
       body:JSON.stringify({model:cfg.model,messages:messages,temperature:0.4,max_tokens:8192})
     });
-    if(!resp.ok){
-      const t=await resp.text();
-      typing.remove();
-      aiAdd('err','Ошибка API '+resp.status+': '+t.slice(0,300));
-      return;
-    }
-    const data=await resp.json();
+    let data;
+    try{data=JSON.parse(rawResponse);}catch(_){throw new Error('Провайдер вернул не JSON. Проверь endpoint и формат OpenAI-compatible API.');}
     const choice=data.choices&&data.choices[0];
     let reply=(choice&&choice.message&&choice.message.content)||'';
     const finishReason=choice&&choice.finish_reason;
@@ -3689,7 +4011,7 @@ async function aiSend(){
     if(typeof reply!=='string') reply=String(reply||'');
     AI.history.push({role:'user',content:prompt},{role:'assistant',content:reply});
     typing.remove();
-    applyAIReply(reply);
+    applyAIReply(reply,prompt);
   }catch(err){
     typing.remove();
     aiAdd('err','Сеть/CORS: '+err.message+'\nПроверь Base URL и что провайдер разрешает запросы из браузера.');
@@ -3697,7 +4019,7 @@ async function aiSend(){
     AI.busy=false;setAiSendState(false);
   }
 }
-function applyAIReply(reply){
+function applyAIReply(reply,userPrompt){
   const data=extractJSON(reply);
   if(!data){
     const cleaned=stripFences(reply).replace(/^\s*\(|\)\s*$/g,'').trim();
@@ -3750,7 +4072,7 @@ function applyAIReply(reply){
       try {
         if(typeof window.MrrCodeValidate === 'function') window.MrrCodeValidate(nextCode,{projectFiles:Object.assign({},state.files,data.files),currentFile:nm});
       } catch(validationError) {
-        validationFailed=true;aiAdd('err','Файл «'+nm+'» не применён: проверка MrrCode обнаружила неподдерживаемую конструкцию. '+validationError.message);
+        validationFailed=true;aiAdd('err','Файл «'+nm+'» не применён: движок заблокировал код, потому что он использует синтаксис/API вне спецификации MrrCode. '+validationError.message+' Исправь код, используя только функции из реестра API; например, вместо dt.toFixed(3) используй конкатенацию: "dt: " + dt.');
         continue;
       }
       state.files[nm]=nextCode;
@@ -3774,10 +4096,17 @@ function applyAIReply(reply){
     }
   }
   if(Array.isArray(data.scene)){
-    state.scene=sanitizeScene(data.scene);
-    state.selectedId=null;
-    renderObjList();renderProps();renderScenePreview();
-    applied.push('▦ сцена: '+state.scene.length+' объектов');
+    const ask=String(userPrompt||'').toLowerCase();
+    const explicitClear=/(очисти|очистить|сбрось|сбросить|удали|удалить|убери|убрать)\s+(всю\s+)?(сцену|объекты)|\b(clear|empty)\s+(the\s+)?scene\b|\b(delete|remove)\s+all\s+objects\b/i.test(ask)
+      && !/(не\s+(очищай|очистить|сбрасывай|удаляй|удалить|убирай|убрать)|don't\s+(clear|empty|delete|remove)|do not\s+(clear|empty|delete|remove))/i.test(ask);
+    if(data.scene.length===0&&state.scene.length>0&&!explicitClear){
+      aiAdd('sys','Пустой массив scene проигнорирован: существующая сцена сохранена. Если нужно действительно очистить сцену, попроси ИИ явно удалить все объекты.');
+    }else{
+      state.scene=sanitizeScene(data.scene);
+      state.selectedId=null;
+      renderObjList();renderProps();renderScenePreview();
+      applied.push('▦ сцена: '+state.scene.length+' объектов');
+    }
   }
   if(validationFailed)aiAdd('sys','Часть предложенных файлов отклонена проверкой. Остальные прошедшие проверку изменения применены; исходная версия сохранена в «🕘 Версии».');
   const el=aiAdd('bot',String(data.message||'Готово.'));
@@ -4516,6 +4845,14 @@ function exportGameHtml(options={}){
     const p=projectData();
     const source=String((p.files&&p.files[ENTRY_FILE])||'');
     if(!source.trim()) throw new Error('Файл main.mrr пуст.');
+    if(typeof window.MrrCodeValidate==='function'){
+      const projectFiles=p.files||{[ENTRY_FILE]:source};
+      for(const [fileName,fileCode] of Object.entries(projectFiles)){
+        if(!String(fileName).endsWith('.mrr')||typeof fileCode!=='string')continue;
+        window.MrrCodeValidate(fileCode,{projectFiles,currentFile:fileName});
+      }
+    }
+    // Экспорт использует отдельный автономный runtime; валидация выше блокирует неподдерживаемый синтаксис перед сборкой.
     // Экспортируем только проектный код и небольшой нативный Canvas API — без редактора и интерпретатора MrrCode.
     const pageData={title:'Игра',source,files:p.files||{[ENTRY_FILE]:source},entry:ENTRY_FILE,scene:p.scene||[],sprites:(p.sprites||[]).map(s=>({name:s.name,dataUrl:s.dataUrl}))};
     const encoded=JSON.stringify(pageData).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
@@ -4790,10 +5127,11 @@ window.MrrCodeAutocomplete.refresh = function(){
 window.mrrBuildAIPrompt = function(userPrompt, currentCode){
   return [
     "You are the MrrCode 0.2.0 coding agent.",
-    JSON.stringify(window.MRRCODE_AI_SPEC),
+    "CANONICAL MACHINE-READABLE API REGISTRY (all confirmed built-ins and events; audit metadata omitted to save context):\n" + JSON.stringify((function(){const r=window.MRRCODE_API_REGISTRY||{entries:[]};return {version:r.version,counts:r.counts,builtins:r.entries.filter(x=>x.kind==='fn').map(x=>({name:x.name,signature:x.signature,category:x.category,description:x.description})),events:r.entries.filter(x=>x.kind==='ev').map(x=>({name:x.name,signature:x.signature,category:x.category,description:x.description})),language:r.language};})()),
+    "LANGUAGE SPECIFICATION AND VALIDATOR RULES (built-in inventory is defined by the registry above):\n" + JSON.stringify((function(){const x=Object.assign({},window.MRRCODE_AI_SPEC||{});delete x.builtins;return x;})()),
     "CURRENT main.mrr:\n" + (currentCode || ""),
-    "CLOSED WORLD: Only names and signatures in MRRCODE_AI_SPEC are built-in. The parser grammar is authoritative for syntax. Never infer MrrCode support from JavaScript or Python. Do not use undocumented member-method calls or invented APIs.",
-    "New feature guidance: use all built-ins listed in MRRCODE_AI_SPEC.builtins, not only physics/camera helpers. screenWidth()/screenHeight() return the visible browser viewport in CSS pixels; gameWidth()/gameHeight() return logical scene dimensions. orientationAngle()/isPortrait() report device orientation; tiltX()/tiltY()/tiltZ() read device-orientation sensor values, which may be unavailable or initially zero. Call requestMotion() from a user gesture when the browser requires sensor permission. overlapRect checks axis-aligned rectangle overlap (edge-touch alone is false); moveBody mutates {x,y,vx,vy} and clamps dt to 0..0.1; camera(x,y) offsets drawing but not pointer input; spriteAnim requires an imported PNG spritesheet and source frame dimensions. Scene editor, project history and resource checking are UI features, not MrrCode functions.",
+    "STRICT CLOSED WORLD: MRRCODE_API_REGISTRY is the only canonical built-in inventory. Use only listed functions/events and syntax accepted by the MrrCode parser. Never generate member-method calls such as dt.toFixed(3), text.toUpperCase(), array.map(...), array.push(...), Math.floor(...), console.log(...), or any obj.method(...), even if standard JavaScript supports them. Do not use .toFixed() for number formatting; use text(\"dt: \" + dt, x, y, color, size) instead. Use documented top-level functions such as push(array,value), pop(array), length(value), floor(x), round(x), and toString(value) where appropriate. Do not infer APIs from JavaScript/Python/browser behavior. Registry source evidence is not proof of device-level testing.",
+    "New feature guidance: use all built-ins listed in MRRCODE_API_REGISTRY, not only physics/camera helpers. screenWidth()/screenHeight() return the visible browser viewport in CSS pixels; gameWidth()/gameHeight() return logical scene dimensions. orientationAngle()/isPortrait() report device orientation; tiltX()/tiltY()/tiltZ() read device-orientation sensor values, which may be unavailable or initially zero. Call requestMotion() from a user gesture when the browser requires sensor permission. overlapRect checks axis-aligned rectangle overlap (edge-touch alone is false); moveBody mutates {x,y,vx,vy} and clamps dt to 0..0.1; camera(x,y) offsets drawing but not pointer input; spriteAnim requires an imported PNG spritesheet and source frame dimensions. IMPORTANT: inside function update(dt), use the numeric variable dt without parentheses; do not call dt() there because the parameter shadows the built-in function and causes “dt is not a function”. dt() is only for use outside a scope that declares a variable named dt. Example: text(\"dt: \" + dt, 10, 20, \"#ffffff\", 14). Never write dt.toFixed(3). Scene editor, project history and resource checking are UI features, not MrrCode functions.",
     "Before applying AI edits, preserve a project version and validate changed MrrCode files. Validation is static and does not guarantee successful runtime behavior.",
     "USER REQUEST:\n" + (userPrompt || "")
   ].join("\n\n");
