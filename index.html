@@ -421,88 +421,94 @@ window.MRRCODE_AI_SPEC = {
   version: "0.2.0",
   language: "MrrCode",
   extension: ".mrr",
+  runtime: {
+    description: "Встроенный интерпретатор языка MrrCode; не JavaScript и не Python. Эта спецификация описывает фактическую грамматику и API движка.",
+    entryFile: "main.mrr",
+    canvas: {width:800,height:450,coordinates:"Логические координаты сцены 800×450; x растёт вправо, y вниз."},
+    lifecycle: [
+      "function start() — вызывается один раз после успешной загрузки main.mrr.",
+      "function update(dt) — вызывается каждый кадр; dt — секунды между кадрами, ограниченные движком максимумом 0.05 секунды.",
+      "function pointerDown(x,y) — касание/указатель нажали игровое поле.",
+      "function pointerMove(x,y) — указатель перемещается, пока удерживается.",
+      "function pointerUp(x,y) — касание/указатель отпущены.",
+      "Обработчики должны быть объявлены в main.mrr или импортированы. Рисование выполняется в update; объекты вкладки Сцена автоматически рисуются после update каждого кадра."
+    ],
+    limits: ["Интерпретатор ограничивает число операций и глубину рекурсии.","Модули выполняются при первом импорте, кэшируются; циклические импорты запрещены.","requestMotion() асинхронна и может вернуть Promise<boolean>; датчик может быть недоступен из-за разрешений, HTTPS или ограничений браузера."]
+  },
   rules: [
-    "Generate MrrCode only; never replace it with JavaScript or Python.",
-    "Only syntax accepted by the MrrCode parser and names in this specification are built-in MrrCode features.",
-    "Project-defined variables and functions are allowed only when declared in project source or imported from an existing module.",
-    "Member-function calls such as value.map(...) are not part of the documented built-in API. Use only listed function-call forms.",
-    "Keep Scene objects separate from drawing commands in .mrr source.",
-    "Preserve working user code when changing unrelated parts.",
-    "When asked to replace a file, return complete file contents.",
-    "Use MrrCode array functions only: push(array, value), pop(array), splice(array, start, count, ...items), shift(array), unshift(array, value), length(array), join(array, separator), split(text, separator), contains(array, value), indexOf(array, value), slice(array, start, end). Do not use JavaScript-style dot methods.",
-    "For arrays use MrrCode functions push(array, value), pop(array), length(value), join(array, separator), split(text, separator), and ordinary indexing such as array[i].",
-    "Before returning code, check every array operation and remove unsupported dot-method calls.",
-    "Physics helpers: overlapRect(ax,ay,aw,ah,bx,by,bw,bh) returns true only when two axis-aligned rectangles overlap; touching edges alone is not overlap.",
-    "moveBody(body,dt,gravity) mutates and returns body with x,y,vx,vy numeric properties. dt is clamped to 0..0.1 seconds; gravity is added to vy before position is advanced.",
-    "Background: background(color) sets the persistent game clear color; call it in start(). clear(color) paints only the current frame and does not change the persistent background.",
-    "Camera: camera(x,y) sets the camera offset for subsequent rect/circle/line/text/sprite/spriteAnim drawing; use camera(0,0) to reset. Input coordinates remain canvas coordinates.",
-    "spriteAnim(name,x,y,w,h,frameW,frameH,fps) animates a grid of frames from an imported PNG sprite sheet. frameW/frameH are source-image pixels; the image must be imported in Files under the same name.",
-    "Editor features are UI tools, not MrrCode language functions: drag/resize scene objects, optional grid snapping, project version history, and resource reference checking.",
-    "Do not claim the editor automatically edits source when a scene object is dragged; scene manipulation and code drawing are separate workflows."
+    "Генерируй только MrrCode, никогда не заменяй его JavaScript или Python.",
+    "Эта спецификация описывает API; парсер MrrCode в приложении — источник истины для синтаксиса.",
+    "Не придумывай встроенные функции, параметры, события, методы или свойства. Для неизвестной возможности сообщи об отсутствии API.",
+    "Используй только let и const для объявлений переменных; var в текущем парсере не поддерживается.",
+    "Функции проекта и параметры функций можно использовать, если они объявлены в текущем проекте или импортированы.",
+    "Встроенные вызовы делай как functionName(...). Вызовы методов через точку, например array.map(...), валидатором запрещены; используй функции из builtins.",
+    "Чтение и запись полей объекта поддерживаются: body.x, body[\"x\"], array[i]. Не вызывай методы объекта.",
+    "Массивы создаются через [a,b], объекты через {x:1,y:2}. Поля объекта задаются парами ключ: значение.",
+    "Комментарии поддерживаются: // однострочный и /* многострочный */.",
+    "Точка входа — main.mrr. Для другого файла используй from \"имя\" import функция, переменная; расширение .mrr можно опустить. Допускается import *.",
+    "Сохраняй существующий код и сцену, если пользователь явно не просит их заменить.",
+    "Scene-объекты интерфейса и функции рисования — разные вещи. Перетаскивание объектов в редакторе не переписывает исходный код автоматически.",
+    "Для массивов используй push, pop, splice, shift, unshift, length, join, split, contains, indexOf, slice — без точечных методов.",
+    "overlapRect проверяет строгое пересечение прямоугольников; одно касание границ не считается столкновением.",
+    "moveBody(body,dt,gravity) изменяет объект {x,y,vx,vy}: сначала меняет vy по гравитации, затем обновляет x/y; dt ограничивается 0..0.1 секунды.",
+    "background(color) меняет постоянный цвет очистки кадра; clear(color?) закрашивает только текущий кадр.",
+    "camera(x,y) смещает последующие rect/circle/line/text/sprite/spriteAnim; входные координаты остаются координатами canvas. Для сброса camera(0,0).",
+    "sprite(name,x,y,width?,height?) использует PNG из вкладки Файлы. spriteAnim(name,x,y,w,h,frameW,frameH,fps) использует сетку кадров импортированного PNG; frameW/frameH — размеры кадра в пикселях исходного изображения.",
+    "requestMotion() лучше вызывать из пользовательского события pointerDown; tiltX/Y/Z могут оставаться нулевыми, пока сенсор не разрешён или не присылает данные."
   ],
-  keywords: ["let","const","var","if","else","for","while","return","function","true","false"],
-  conditionalOperator: {
-    syntax: "condition ? valueIfTrue : valueIfFalse",
-    description: "Тернарный оператор MrrCode для выбора одного из двух значений."
+  syntax: {
+    declarations: ["let name = expression;", "const name = expression;"],
+    functions: ["function name(a, b) { ... }", "function start() { ... }", "function update(dt) { ... }"],
+    conditions: ["if (condition) { ... } else { ... }", "condition ? valueA : valueB"],
+    loops: ["while (condition) { ... }", "for (let i = 0; i < n; i++) { ... }", "for (let item of array) { ... }", "break;", "continue;"],
+    imports: ["from \"player\" import spawnPlayer, movePlayer;", "from \"player\" import *;", "from \"player\" import spawnPlayer as spawn;"],
+    literals: ["numbers (including decimals and exponent notation)", "single-quoted and double-quoted strings", "template strings `Score: ${score}`", "arrays [1, 2, 3]", "objects {x: 1, y: 2}", "true, false, null"],
+    operators: ["arithmetic: + - * / % **", "comparison: == != < > <= >=", "logical short-circuit: && || !", "assignment: = += -= *= /= %= **=", "increment/decrement: ++ -- (prefix and postfix)", "unary numeric: +x -x", "member access: object.name, object[expression], array[index]", "ternary: condition ? a : b"],
+    note: "Parser does not tokenize strict-equality operators === and !==. Use == and !=. Semicolons are optional at many statement ends, but use them for clarity."
   },
-  colorFunctions: {
-    rgba: "rgba(red, green, blue, alpha)"
-  },
-  templateLiterals: {
-    syntax: "`text ${expression}`",
-    description: "Шаблонные строки с выражениями ${...}. Внутри ${...} разрешены только выражения MrrCode.",
-    examples: ["let c = `rgba(255,255,255,${brightness})`;", "let title = `Score: ${score}`;"]
-  },
+  keywords: ["let","const","if","else","while","for","of","function","return","break","continue","true","false","null","from","import","as"],
+  conditionalOperator: {syntax:"condition ? valueIfTrue : valueIfFalse",description:"Тернарный оператор выбора значения."},
+  templateLiterals: {syntax:"`text ${expression}`",description:"Шаблонные строки; выражения внутри ${...} должны быть выражениями MrrCode.",examples:["let title = `Score: ${score}`;","let c = `rgba(255,255,255,${alpha})`;"]},
+  colorFunctions: {rgba:"rgba(red, green, blue, alpha?) — возвращает CSS-цвет rgba(...); alpha по умолчанию 1."},
   builtins: [
-    ["print","print(value)"], ["lerp","lerp(a,b,t)"], ["map","map(value,inMin,inMax,outMin,outMax)"],
-    ["sign","sign(x)"], ["randomInt","randomInt(min,max)"], ["toString","toString(value)"], ["toNumber","toNumber(value)"],
-    ["contains","contains(text,part)"], ["join","join(array,separator)"], ["split","split(text,separator)"],
-    ["save","save(key,value)"], ["load","load(key,defaultValue)"], ["playTone","playTone(frequency,duration,volume?)"],
-    ["stopSound","stopSound()"], ["random","random()"], ["rand","rand(min,max)"], ["abs","abs(value)"],
-    ["sqrt","sqrt(value)"], ["sin","sin(value)"], ["cos","cos(value)"], ["atan2","atan2(y,x)"], ["rgba","rgba(r,g,b,a?)"],
-    ["floor","floor(value)"], ["ceil","ceil(value)"], ["round","round(value)"], ["min","min(a,b)"],
-    ["max","max(a,b)"], ["clamp","clamp(value,min,max)"], ["length","length(value)"],
-    ["push","push(array,value)"], ["pop","pop(array)"], ["time","time()"], ["dt","dt()"],
-    ["background","background(color)"], ["clear","clear(color?)"], ["rect","rect(x,y,width,height,color?)"], ["circle","circle(x,y,radius,color?)"],
-    ["line","line(x1,y1,x2,y2,color?,lineWidth?)"], ["text","text(value,x,y,color?,size?)"],
-    ["sprite","sprite(name,x,y,width?,height?)"], ["spriteAnim","spriteAnim(name,x,y,w,h,frameW,frameH,fps)"], ["camera","camera(x,y)"], ["overlapRect","overlapRect(ax,ay,aw,ah,bx,by,bw,bh)"], ["moveBody","moveBody(body,dt,gravity)"], ["object","object(name)"],
-    ["pointerX","pointerX()"], ["pointerY","pointerY()"], ["pointerDownNow","pointerDownNow()"],
-    ["touchCount","touchCount()"], ["touchX","touchX(index)"], ["touchY","touchY(index)"],
-    ["screenWidth","screenWidth()"], ["screenHeight","screenHeight()"], ["gameWidth","gameWidth()"], ["gameHeight","gameHeight()"],
-    ["orientationAngle","orientationAngle()"], ["isPortrait","isPortrait()"], ["tiltX","tiltX()"], ["tiltY","tiltY()"], ["tiltZ","tiltZ()"], ["requestMotion","requestMotion()"],
-    ["splice","splice(array,start,count,...items)"], ["shift","shift(array)"], ["unshift","unshift(array,value)"],
-    ["indexOf","indexOf(array,value)"], ["slice","slice(array,start,end?)"], ["pow","pow(a,b)"],
-    ["trim","trim(text)"], ["upper","upper(text)"], ["lower","lower(text)"],
-    ["startsWith","startsWith(text,prefix)"], ["endsWith","endsWith(text,suffix)"],
-    ["replace","replace(text,from,to)"], ["typeof","typeof(value)"]
+    ["print","print(value, ...values) — пишет значения в консоль"],
+    ["lerp","lerp(a,b,t) — линейная интерполяция"],["map","map(value,inMin,inMax,outMin,outMax) — перенос диапазона; если входной диапазон нулевой, возвращает outMin"],["sign","sign(x)"],["randomInt","randomInt(min,max) — случайное целое включительно с обеих сторон"],["random","random() — случайное число [0,1)"],["rand","rand(min,max) — случайное число в диапазоне"],
+    ["abs","abs(value)"],["sqrt","sqrt(value)"],["sin","sin(radians)"],["cos","cos(radians)"],["atan2","atan2(y,x)"],["pow","pow(a,b)"],["min","min(a,b)"],["max","max(a,b)"],["clamp","clamp(value,min,max)"],["floor","floor(value)"],["ceil","ceil(value)"],["round","round(value)"],
+    ["toString","toString(value)"],["toNumber","toNumber(value)"],["typeof","typeof(value) — возвращает тип; массивы обозначаются array"],
+    ["trim","trim(text)"],["upper","upper(text)"],["lower","lower(text)"],["startsWith","startsWith(text,prefix)"],["endsWith","endsWith(text,suffix)"],["replace","replace(text,from,to) — заменяет все совпадения"],["contains","contains(value,part) — проверяет элемент массива или подстроку"],
+    ["length","length(value) — длина строки/массива или количество собственных ключей объекта; null/числа дают 0"],["push","push(array,value) — добавляет элемент и возвращает массив"],["pop","pop(array) — удаляет и возвращает последний элемент"],["splice","splice(array,start,count,...items) — удаляет/вставляет элементы; возвращает удалённые элементы"],["shift","shift(array) — удаляет первый элемент"],["unshift","unshift(array,value) — добавляет элемент в начало и возвращает новую длину"],["join","join(array,separator)"],["split","split(text,separator)"],["indexOf","indexOf(array,value) — индекс элемента или -1"],["slice","slice(array,start,end?) — копия части массива"],
+    ["save","save(key,value) — сохраняет JSON-совместимое значение в localStorage; true при успехе, false при ошибке"],["load","load(key,defaultValue?) — читает сохранённое значение, иначе возвращает defaultValue или null"],["playTone","playTone(frequency,duration,volume?) — синтезированный тон; duration в секундах, громкость ограничена движком"],["stopSound","stopSound() — приостанавливает аудиоконтекст"],
+    ["time","time() — секунды с начала игры"],["dt","dt() — dt текущего кадра"],
+    ["background","background(color) — задаёт постоянный цвет фона"],["clear","clear(color?) — закрашивает текущий кадр; по умолчанию #0f172a"],["rect","rect(x,y,width,height,color?) — рисует залитый прямоугольник"],["circle","circle(x,y,radius,color?) — рисует залитый круг"],["line","line(x1,y1,x2,y2,color?,lineWidth?) — рисует линию; ширина по умолчанию 2"],["text","text(value,x,y,color?,size?) — рисует текст с верхней базовой линией; размер по умолчанию 16"],["sprite","sprite(name,x,y,width?,height?) — рисует импортированный PNG; размеры по умолчанию равны исходному изображению"],["spriteAnim","spriteAnim(name,x,y,w,h,frameW,frameH,fps) — циклическая анимация кадров сетки PNG"],["camera","camera(x,y) — задаёт смещение камеры для рисования"],["object","object(name) — возвращает объект с указанным именем из вкладки Сцена или null"],
+    ["overlapRect","overlapRect(ax,ay,aw,ah,bx,by,bw,bh) — строгое AABB-пересечение"],["moveBody","moveBody(body,dt,gravity) — изменяет и возвращает body {x,y,vx,vy}"],
+    ["pointerX","pointerX() — x последнего указателя в координатах сцены"],["pointerY","pointerY() — y последнего указателя в координатах сцены"],["pointerDownNow","pointerDownNow() — true, пока указатель удерживается"],["touchCount","touchCount() — число активных касаний/указателей"],["touchX","touchX(index) — x касания по индексу, 0 если нет такого касания"],["touchY","touchY(index) — y касания по индексу, 0 если нет такого касания"],
+    ["screenWidth","screenWidth() — ширина видимой области браузера в CSS-пикселях"],["screenHeight","screenHeight() — высота видимой области браузера в CSS-пикселях"],["gameWidth","gameWidth() — логическая ширина сцены, 800"],["gameHeight","gameHeight() — логическая высота сцены, 450"],["orientationAngle","orientationAngle() — угол ориентации экрана в градусах, обычно 0/90/180/270"],["isPortrait","isPortrait() — true, если высота окна не меньше ширины"],["tiltX","tiltX() — gamma наклона устройства в градусах"],["tiltY","tiltY() — beta наклона устройства в градусах"],["tiltZ","tiltZ() — alpha ориентации устройства в градусах"],["requestMotion","requestMotion() — просит разрешение/подключает события ориентации; асинхронный Promise<boolean>" ]
   ],
-  userSymbols: "Extract variables, constants, functions and function parameters from the current .mrr file.",
-  validation: "Never invent an undocumented command; if an API feature is missing, say so.",
-  unsupportedArrayMethods: [],
-  arrayFunctions: [
-    "push(array,value)", "pop(array)", "splice(array,start,count,...items)",
-    "shift(array)", "unshift(array,value)", "length(array)",
-    "join(array,separator)", "split(text,separator)",
-    "contains(array,value)", "indexOf(array,value)", "slice(array,start,end)"
-  ],
-  mathFunctions: [
-    "abs(x)", "sqrt(x)", "sin(a)", "cos(a)", "atan2(y,x)",
-    "min(a,b)", "max(a,b)", "clamp(value,min,max)", "floor(value)",
-    "ceil(value)", "round(value)", "random()", "rand(min,max)", "randomInt(min,max)"
-  ],
-  stringFunctions: [
-    "trim(text)", "upper(text)", "lower(text)", "startsWith(text,prefix)",
-    "endsWith(text,suffix)", "replace(text,from,to)"
-  ],
-  utilityFunctions: [
-    "typeof(value)", "toString(value)", "toNumber(value)"
-  ],
-
-  languageFeatures: ["arrays", "objects", "for-of", "modules", "compound assignment", "++/--", "break/continue", "member access", "short-circuit &&/||", "exponentiation **"],
-  persistence: ["save(key,value)", "load(key,defaultValue)"],
-  audio: ["playTone(frequency,duration,volume?)", "stopSound()"],
-  math: ["lerp(a,b,t)", "map(value,inMin,inMax,outMin,outMax)", "sign(x)", "randomInt(min,max)"],
-  strings: ["toString(value)", "toNumber(value)", "contains(text,part)", "join(array,separator)", "split(text,separator)" ]
+  userSymbols: "Переменные, функции и параметры проекта разрешены только после объявления или импорта.",
+  objectModel: {
+    arrays: "Создание [value1, value2], чтение/запись через array[index]. Для операций применяй builtins.",
+    objects: "Создание {x: 1, y: 2}, чтение/запись через body.x или body[\"x\"]. moveBody ожидает x,y,vx,vy.",
+    sceneObjects: {
+      lookup: "let player = object(\"player\");",
+      rect: ["x","y","w","h","color"],
+      circle: ["x","y","r","color"],
+      text: ["x","y","text","size","color"],
+      note: "object(name) работает с runtime-копией объекта сцены во время игры. Координаты x/y прямоугольника — левый верхний угол; у круга x/y — центр. Изменение scene-объекта из кода не означает редактирование исходника .mrr."
+    }
+  },
+  modules: {syntax:"from \"player\" import spawnPlayer, movePlayer;",details:["Имена файлов разрешаются как указаны или с добавлением .mrr.","Модуль выполняется один раз при первом импорте и затем кэшируется.","Циклические импорты запрещены.","Поддерживается import * и alias через as.","Запуск игры всегда начинается с main.mrr."]},
+  editorFeatures: ["Редактор сцены: прямоугольник, круг, текст; перемещение и изменение размера; необязательная сетка/привязка.","История версий проекта.","Проверка ссылок на ресурсы.","Автодополнение встроенных функций, ключевых слов, файлов, импортов и объектов/PNG ресурсов.","Консоль выполнения и сообщения об ошибках.","Отладочные точки остановки — функция интерфейса, не команда MrrCode."],
+  languageFeatures: ["arrays","object literals","member read/write","for-of","modules","compound assignment += -= *= /= %= **=","prefix/postfix ++ and --","break/continue","short-circuit &&/||","exponentiation **","ternary operator","template literals","line and block comments"],
+  arrayFunctions: ["push(array,value)","pop(array)","splice(array,start,count,...items)","shift(array)","unshift(array,value)","length(value)","join(array,separator)","split(text,separator)","contains(array,value)","indexOf(array,value)","slice(array,start,end?)"],
+  mathFunctions: ["abs(x)","sqrt(x)","sin(radians)","cos(radians)","atan2(y,x)","min(a,b)","max(a,b)","clamp(value,min,max)","floor(value)","ceil(value)","round(value)","pow(a,b)","random()","rand(min,max)","randomInt(min,max)","lerp(a,b,t)","map(value,inMin,inMax,outMin,outMax)","sign(x)"],
+  stringFunctions: ["trim(text)","upper(text)","lower(text)","startsWith(text,prefix)","endsWith(text,suffix)","replace(text,from,to)","contains(text,part)","split(text,separator)","join(array,separator)"],
+  utilityFunctions: ["typeof(value)","toString(value)","toNumber(value)","length(value)"],
+  persistence: ["save(key,value)","load(key,defaultValue?)"],
+  audio: ["playTone(frequency,duration,volume?)","stopSound()"],
+  input: ["pointerX()","pointerY()","pointerDownNow()","touchCount()","touchX(index)","touchY(index)","pointerDown(x,y)","pointerMove(x,y)","pointerUp(x,y)"],
+  screenAndSensors: ["screenWidth()","screenHeight()","gameWidth()","gameHeight()","orientationAngle()","isPortrait()","tiltX()","tiltY()","tiltZ()","requestMotion()"],
+  validation: "Список builtins используется валидатором и автодополнением. Если API добавлен в движок, обнови builtins и соответствующие категории вместе.",
+  unsupported: ["var declaration","=== and !== operators","built-in member method calls such as array.map(...) or string.trim()","browser DOM, fetch, arbitrary JavaScript APIs","keyboard-specific input functions","automatic synchronization of scene editor changes into source code"]
 };
 </script>
 <style>
