@@ -3,10 +3,7 @@
 <html lang="ru"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-title" content="mrrcode"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-<title>MrrCode</title>
+<title>MrrCode — Игра</title>
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-400-normal.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-600-normal.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-800-normal.css" rel="stylesheet"/>
@@ -1402,8 +1399,8 @@ function fmtValue(v,depth){
   return '{'+Object.keys(v).map(k=>k+': '+fmtValue(v[k],depth+1)).join(', ')+'}';
 }
 function numArg(v,def){
-  if(typeof v==='number'&&Number.isFinite(v))return v;
-  if(typeof v==='string'&&v.trim()!==''){const n=Number(v);if(Number.isFinite(n))return n;}
+  if(typeof v==='number'&&isFinite(v))return v;
+  if(typeof v==='string'){const n=parseFloat(v);if(!isNaN(n))return n;}
   return def===undefined?0:def;
 }
 
@@ -1602,13 +1599,8 @@ window.MRRCODE_API_REGISTRY = {"name":"MRRCODE_API_REGISTRY","version":"1.0.0","
       run('tiltX',[],v=>typeof v==='number','Returns numeric gamma value'); run('tiltY',[],v=>typeof v==='number','Returns numeric beta value'); run('tiltZ',[],v=>typeof v==='number','Returns numeric alpha value');
       run('time',[],v=>typeof v==='number'&&v>=0,'Non-negative seconds since game start'); run('dt',[],v=>typeof v==='number','Returns numeric frame delta');
       // Test persistence with a temporary, namespaced key and always clean it up.
-      try { const key='__mrr_api_audit_'+Date.now(); const saved=call('save',[key,{ok:7}]);
-        if(saved!==true){
-          manual('Runtime save/load','Browser storage is unavailable or writes are blocked in this origin; persistence could not be verified.');
-        }else{
-          const loaded=call('load',[key,null]);
-          add('Runtime save/load',eq(loaded,{ok:7}),'Expected saved object to round-trip; loaded='+safeDescribe(loaded));
-        }
+      try { const key='__mrr_api_audit_'+Date.now(); const saved=call('save',[key,{ok:7}]); const loaded=call('load',[key,null]);
+        add('Runtime save/load',saved===true&&eq(loaded,{ok:7}),'Expected saved object to round-trip; loaded='+safeDescribe(loaded));
         try { localStorage.removeItem('mrr-save:'+key); } catch(_) {}
       } catch(e) { manual('Runtime save/load','Storage unavailable or blocked in this browser: '+(e&&e.message||e)); }
       // Deliberately no audible sound, permission prompts, or drawing side effects during audit.
@@ -1732,9 +1724,7 @@ function tokenize(src){
         let j=i+1;if(src[j]==='+'||src[j]==='-')j++;
         if(/[0-9]/.test(src[j]||'')){s+=src.slice(i,j);i=j;while(i<src.length&&/[0-9]/.test(src[i]))s+=src[i++];}
       }
-      const numericValue=Number(s);
-      if(!Number.isFinite(numericValue))throw new PFError('Числовой литерал выходит за допустимый диапазон: '+s,line);
-      T.push({t:'num',v:numericValue,line});continue;
+      T.push({t:'num',v:Number(s),line});continue;
     }
     if(idStart.test(c)){
       let s='';while(i<src.length&&idPart.test(src[i]))s+=src[i++];
@@ -1843,7 +1833,6 @@ function parse(tokens){
       const nameTk=eat('id');
       let init=null;
       if(is('op','=')){next();init=parseExpr();}
-      else if(kind==='const'&&!is('kw','of'))throw new PFError('Для const обязательно начальное значение.',nameTk.line);
       decls.push({name:nameTk.v,init});
       if(is('punc',',')){next();continue;}
       break;
@@ -1865,9 +1854,8 @@ function parse(tokens){
       eat('punc',';');
     }
     if(varInit&&is('kw','of')){
-      if(init.decls.length!==1||init.decls[0].init)throw new PFError('В for...of укажи одну переменную без начального значения.',tk.line);
       next();const iter=parseExpr();eat('punc',')');const body=parseStmt();
-      return {n:'ForOf',name:init.decls[0].name,kind:init.kind,iter,body,line:tk.line};
+      return {n:'ForOf',name:init.decls[0].name,iter,body,line:tk.line};
     }
     let test=null;if(!is('punc',';'))test=parseExpr();eat('punc',';');
     let upd=null;if(!is('punc',')'))upd=parseExpr();eat('punc',')');
@@ -2039,10 +2027,7 @@ window.MrrCodeValidate = function(code, options){
     const mod=moduleAsts.get(file);
     if(!mod)throw new Error('Строка '+im.line+': файл модуля «'+file+'» не проходит синтаксическую проверку.');
     const exports=new Map();
-    for(const top of (mod.body||[])){
-      if(top.n==='FuncDecl')exports.set(top.name,'function');
-      else if(top.n==='VarDecl')for(const d of top.decls)exports.set(d.name,'variable');
-    }
+    visit(mod,n=>{if(n.n==='FuncDecl')exports.set(n.name,'function');if(n.n==='VarDecl')for(const d of n.decls)exports.set(d.name,'variable');});
     if(im.star){for(const [n,kind] of exports){declared.add(n);if(kind==='function')functions.add(n);importedNames.add(n);}}
     else for(const item of im.names){
       if(!exports.has(item.name))throw new Error('Строка '+im.line+': модуль «'+source+'» не экспортирует «'+item.name+'».');
@@ -2051,184 +2036,31 @@ window.MrrCodeValidate = function(code, options){
     }
   }
   // A declared function is valid; a variable cannot be presumed callable just because JS permits it.
-  function checkNode(n){
-    if(n.n==='Assign'&&(!n.target||!['Ident','Member'].includes(n.target.n)))
-      throw new Error('Строка '+n.line+': слева от оператора присваивания должна быть переменная или свойство объекта.');
-    if(n.n==='Update'&&(!n.arg||!['Ident','Member'].includes(n.arg.n)))
-      throw new Error('Строка '+n.line+': ++ и -- можно применять только к переменной или свойству объекта.');
+  visit(parsed,n=>{
     if(n.n==='Call'){
       if(n.callee&&n.callee.n==='Member'){
         const prop=n.callee.computed?'[вычисляемое свойство]':'.'+n.callee.prop;
         throw new Error('Строка '+n.line+': вызов через свойство '+prop+'() не описан как встроенный API MrrCode. Используй документированную функцию или объяви и импортируй функцию явно.');
       }
       if(!n.callee||n.callee.n!=='Ident')throw new Error('Строка '+n.line+': разрешены только вызовы по имени функции, описанной в спецификации или объявленной в проекте.');
-      if(!functions.has(n.callee.name))throw new Error('Строка '+n.line+': функция «'+n.callee.name+'()» не найдена в MRRCODE_API_REGISTRY и не объявлена как функция проекта.');
+      if(!functions.has(n.callee.name))throw new Error('Строка '+n.line+': функция «'+n.callee.name+'()» не найдена в MRRCODE_AI_SPEC и не объявлена как функция проекта.');
     }
     if(n.n==='Ident'&&!declared.has(n.name)){
       throw new Error('Строка '+n.line+': имя «'+n.name+'» отсутствует в спецификации и не объявлено в проекте.');
     }
-  }
-  // Validate every ${...} expression with the same closed-world rules as ordinary code.
-  const templateAsts=[];
-  const templateAstMap=new WeakMap();
-  visit(parsed,n=>{
-    if(n.n!=='Template')return;
-    const raw=String(n.v||'');
-    for(let i=0;i<raw.length;){
-      if(raw[i]!=='$'||raw[i+1]!=='{'){i++;continue;}
-      let j=i+2,depth=1,quote=null,esc=false;
-      for(;j<raw.length;j++){
-        const ch=raw[j];
-        if(quote){
-          if(esc){esc=false;continue;}
-          if(ch==='\\\\'){esc=true;continue;}
-          if(ch===quote){quote=null;continue;}
-          continue;
-        }
-        if(ch==='"'||ch==="'"||ch==='`'){quote=ch;continue;}
-        if(ch==='{')depth++;
-        else if(ch==='}'&&--depth===0)break;
-      }
-      if(depth!==0)throw new Error('Строка '+n.line+': незакрытое выражение ${...} в шаблонной строке.');
-      const expr=raw.slice(i+2,j).trim();
-      if(!expr)throw new Error('Строка '+n.line+': пустое выражение ${...}.');
-      let ep;
-      try{ep=parse(tokenize(expr));}catch(e){throw new Error('Строка '+n.line+': ошибка в ${...}: '+(e.message||e));}
-      templateAsts.push(ep);
-      const current=templateAstMap.get(n)||[];
-      current.push(ep);
-      templateAstMap.set(n,current);
-      i=j+1;
-    }
   });
-  visit(parsed,checkNode);
-  for(const ast of templateAsts)visit(ast,checkNode);
-  // Reject control-flow statements that cannot execute in their required context.
-  function checkControl(node,fnDepth,loopDepth){
-    if(!node||typeof node!=='object')return;
-    if(Array.isArray(node)){for(const x of node)checkControl(x,fnDepth,loopDepth);return;}
-    if(node.n==='Return'&&fnDepth===0)throw new Error('Строка '+node.line+': return разрешён только внутри функции.');
-    if((node.n==='Break'||node.n==='Continue')&&loopDepth===0)throw new Error('Строка '+node.line+': '+(node.n==='Break'?'break':'continue')+' разрешён только внутри цикла.');
-    const isFn=node.n==='FuncDecl'||node.n==='FuncExpr';
-    const isLoop=node.n==='While'||node.n==='For'||node.n==='ForOf';
-    for(const [k,v] of Object.entries(node)){
-      if(k==='line'||k==='name'||k==='kind'||k==='op'||k==='source'||k==='prop'||k==='key')continue;
-      if(v&&typeof v==='object')checkControl(v,fnDepth+(isFn?1:0),isFn?0:loopDepth+(isLoop?1:0));
-    }
-  }
-  checkControl(parsed,0,0);
-  // Lexical scope pass: avoid treating declarations inside functions/blocks as globals.
-  function newScope(parent){return {parent,bindings:new Map()};}
-  function bind(scope,name,kind,line){
-    if(!name)return;
-    if(scope.bindings.has(name)){
-      const previous=scope.bindings.get(name);
-      if(previous.kind==='builtin')throw new Error('Строка '+(line||1)+': нельзя переобъявлять встроенное имя «'+name+'». Выбери другое имя переменной.');
-      throw new Error('Строка '+(line||1)+': имя «'+name+'» уже объявлено в этой области.');
-    }
-    scope.bindings.set(name,{kind,line:line||1});
-  }
-  const rootScope=newScope(null);
-  for(const name of builtins)rootScope.bindings.set(name,{kind:'builtin',line:1});
-  function predeclareBody(body,scope){
-    for(const st of body||[]){
-      if(st.n==='VarDecl')for(const d of st.decls)bind(scope,d.name,st.kind,st.line);
-      else if(st.n==='FuncDecl')bind(scope,st.name,'function',st.line);
-      else if(st.n==='Import'){
-        if(st.star){
-          const source=String(st.source||'');
-          const file=[source,source+'.mrr'].find(n=>Object.prototype.hasOwnProperty.call(projectFiles,n));
-          const mod=file&&moduleAsts.get(file);
-          if(mod)for(const top of mod.body||[]){if(top.n==='FuncDecl')bind(scope,top.name,'import',st.line);if(top.n==='VarDecl')for(const d of top.decls)bind(scope,d.name,'import',st.line);}
-        }else for(const item of st.names)bind(scope,item.alias||item.name,'import',st.line);
-      }
-    }
-  }
-  function resolveBinding(scope,name){
-    for(let q=scope;q;q=q.parent)if(q.bindings.has(name))return q.bindings.get(name);
-    return null;
-  }
-  function scopeWalk(node,scope,fnDepth,loopDepth){
-    if(!node||typeof node!=='object')return;
-    if(Array.isArray(node)){for(const x of node)scopeWalk(x,scope,fnDepth,loopDepth);return;}
-    if(node.n==='Program'){
-      predeclareBody(node.body,scope);
-      for(const st of node.body)scopeWalk(st,scope,fnDepth,loopDepth);
-      return;
-    }
-    if(node.n==='Block'){
-      const blockScope=newScope(scope);predeclareBody(node.body,blockScope);
-      for(const st of node.body)scopeWalk(st,blockScope,fnDepth,loopDepth);
-      return;
-    }
-    if(node.n==='FuncDecl'||node.n==='FuncExpr'){
-      const fs=newScope(scope);
-      if(node.n==='FuncExpr'&&node.name)bind(fs,node.name,'function',node.line);
-      for(const p of node.params||[])bind(fs,p,'param',node.line);
-      scopeWalk(node.body,fs,fnDepth+1,0);
-      return;
-    }
-    if(node.n==='While'){
-      scopeWalk(node.test,scope,fnDepth,loopDepth);
-      scopeWalk(node.body,scope,fnDepth,loopDepth+1);
-      return;
-    }
-    if(node.n==='For'){
-      const ls=newScope(scope);
-      if(node.init&&node.init.n==='VarDecl')for(const d of node.init.decls)bind(ls,d.name,node.init.kind,node.init.line);
-      if(node.init)scopeWalk(node.init,ls,fnDepth,loopDepth);
-      if(node.test)scopeWalk(node.test,ls,fnDepth,loopDepth);
-      if(node.upd)scopeWalk(node.upd,ls,fnDepth,loopDepth);
-      scopeWalk(node.body,ls,fnDepth,loopDepth+1);
-      return;
-    }
-    if(node.n==='ForOf'){
-      const ls=newScope(scope);
-      if(node.name)bind(ls,node.name,node.kind||'let',node.line);
-      else if(node.assignTarget)scopeWalk(node.assignTarget,scope,fnDepth,loopDepth);
-      scopeWalk(node.iter,scope,fnDepth,loopDepth);
-      scopeWalk(node.body,ls,fnDepth,loopDepth+1);
-      return;
-    }
-    if(node.n==='Return'&&fnDepth===0)throw new Error('Строка '+node.line+': return разрешён только внутри функции.');
-    if((node.n==='Break'||node.n==='Continue')&&loopDepth===0)throw new Error('Строка '+node.line+': '+(node.n==='Break'?'break':'continue')+' разрешён только внутри цикла.');
-    if(node.n==='Ident'){
-      const binding=resolveBinding(scope,node.name);
-      if(!binding)throw new Error('Строка '+node.line+': имя «'+node.name+'» не объявлено в доступной области видимости.');
-      return;
-    }
-    if(node.n==='Assign'&&node.target&&node.target.n==='Ident'){
-      const binding=resolveBinding(scope,node.target.name);
-      if(binding&&binding.kind==='const')throw new Error('Строка '+node.line+': нельзя изменять const «'+node.target.name+'». Используй let, если значение должно меняться.');
-    }
-    if(node.n==='Update'&&node.arg&&node.arg.n==='Ident'){
-      const binding=resolveBinding(scope,node.arg.name);
-      if(binding&&binding.kind==='const')throw new Error('Строка '+node.line+': нельзя изменять const «'+node.arg.name+'». Используй let, если значение должно меняться.');
-    }
-    if(node.n==='VarDecl'){for(const d of node.decls)if(d.init)scopeWalk(d.init,scope,fnDepth,loopDepth);return;}
-    if(node.n==='Import')return;
-    if(node.n==='Template'){
-      for(const exprAst of (templateAstMap.get(node)||[]))scopeWalk(exprAst,scope,fnDepth,loopDepth);
-      return;
-    }
-    for(const [k,v] of Object.entries(node)){
-      if(['line','name','kind','op','source','prop','key'].includes(k))continue;
-      if(v&&typeof v==='object')scopeWalk(v,scope,fnDepth,loopDepth);
-    }
-  }
-  scopeWalk(parsed,rootScope,0,0);
   return true;
 };
 
 /* ---------------- MrrCode: интерпретатор ---------------- */
 const LIMIT_TOTAL=5000000, LIMIT_FRAME=2000000, MAX_DEPTH=250;
-function createEnv(parent){return {vars:new Map(),consts:new Set(),parent:parent||null};}
+function createEnv(parent){return {vars:new Map(),parent:parent||null};}
 function envGet(env,name,line){
   let e=env;while(e){if(e.vars.has(name))return e.vars.get(name);e=e.parent;}
   throw new PFError('Неизвестная переменная: «'+name+'»',line);
 }
 function envSet(env,name,val,line){
-  let e=env;while(e){if(e.vars.has(name)){if(e.consts&&e.consts.has(name))throw new PFError('Нельзя изменить const «'+name+'»',line);e.vars.set(name,val);return;}e=e.parent;}
+  let e=env;while(e){if(e.vars.has(name)){e.vars.set(name,val);return;}e=e.parent;}
   throw new PFError('Переменная не объявлена: «'+name+'» (используй let)',line);
 }
 function truthy(v){return !!v;}
@@ -2321,7 +2153,7 @@ function evalNode(nd,env,ctx){
     case 'Empty':return null;
     case 'ExprStmt':return evalNode(nd.e,env,ctx);
     case 'VarDecl':{
-      for(const d of nd.decls){if(env.vars.has(d.name))throw new PFError('Имя «'+d.name+'» уже объявлено в этой области',nd.line);env.vars.set(d.name,d.init?evalNode(d.init,env,ctx):null);if(nd.kind==='const')env.consts.add(d.name);}
+      for(const d of nd.decls)env.vars.set(d.name,d.init?evalNode(d.init,env,ctx):null);
       return null;
     }
     case 'Literal':return nd.v;
@@ -2383,7 +2215,7 @@ function evalNode(nd,env,ctx){
       const srcVal=evalNode(nd.iter,env,ctx);
       const items=Array.isArray(srcVal)?srcVal:(typeof srcVal==='string'?srcVal.split(''):(srcVal&&typeof srcVal==='object'?Object.values(srcVal):[]));
       const fe=createEnv(env);
-      if(nd.name){fe.vars.set(nd.name,null);if(nd.kind==='const')fe.consts.add(nd.name);}
+      if(nd.name)fe.vars.set(nd.name,null);
       for(const it of items){
         if(nd.name)fe.vars.set(nd.name,it);else setTarget(nd.assignTarget,it,env,ctx,nd.line);
         let doBreak=false;
@@ -3195,18 +3027,11 @@ gameCanvas.addEventListener('pointerup',e=>{
   firePointer('pointerUp',p);
 });
 gameCanvas.addEventListener('pointercancel',e=>{
-  const p=canvasPos(e);
   touchRemove(e.pointerId);
   Engine.pointer.down=Engine.touches.length>0;
-  firePointer('pointerUp',p);
-  if(Engine.touches.length){Engine.pointer.x=Engine.touches[0].x;Engine.pointer.y=Engine.touches[0].y;}
 });
 gameCanvas.addEventListener('contextmenu',e=>e.preventDefault());
-window.addEventListener('blur',()=>{
-  const active=Engine.touches.slice();
-  for(const t of active)firePointer('pointerUp',{x:t.x,y:t.y});
-  Engine.touches=[];Engine.pointer.down=false;
-});
+window.addEventListener('blur',()=>{Engine.touches=[];Engine.pointer.down=false;});
 
 /* ---------------- редактор: подсветка ---------------- */
 const codeInput=document.getElementById('codeInput');
@@ -3995,13 +3820,18 @@ async function aiSend(){
   messages.push({role:'user',content:prompt});
   try{
     const url=cfg.baseUrl.replace(/\/+$/,'')+'/chat/completions';
-    const rawResponse=await window.MrrCodeAINetwork.request(url,{
+    const resp=await fetch(url,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.apiKey},
       body:JSON.stringify({model:cfg.model,messages:messages,temperature:0.4,max_tokens:8192})
     });
-    let data;
-    try{data=JSON.parse(rawResponse);}catch(_){throw new Error('Провайдер вернул не JSON. Проверь endpoint и формат OpenAI-compatible API.');}
+    if(!resp.ok){
+      const t=await resp.text();
+      typing.remove();
+      aiAdd('err','Ошибка API '+resp.status+': '+t.slice(0,300));
+      return;
+    }
+    const data=await resp.json();
     const choice=data.choices&&data.choices[0];
     let reply=(choice&&choice.message&&choice.message.content)||'';
     const finishReason=choice&&choice.finish_reason;
@@ -4014,7 +3844,7 @@ async function aiSend(){
     if(typeof reply!=='string') reply=String(reply||'');
     AI.history.push({role:'user',content:prompt},{role:'assistant',content:reply});
     typing.remove();
-    applyAIReply(reply,prompt);
+    applyAIReply(reply);
   }catch(err){
     typing.remove();
     aiAdd('err','Сеть/CORS: '+err.message+'\nПроверь Base URL и что провайдер разрешает запросы из браузера.');
@@ -4022,7 +3852,7 @@ async function aiSend(){
     AI.busy=false;setAiSendState(false);
   }
 }
-function applyAIReply(reply,userPrompt){
+function applyAIReply(reply){
   const data=extractJSON(reply);
   if(!data){
     const cleaned=stripFences(reply).replace(/^\s*\(|\)\s*$/g,'').trim();
@@ -4099,17 +3929,10 @@ function applyAIReply(reply,userPrompt){
     }
   }
   if(Array.isArray(data.scene)){
-    const ask=String(userPrompt||'').toLowerCase();
-    const explicitClear=/(очисти|очистить|сбрось|сбросить|удали|удалить|убери|убрать)\s+(всю\s+)?(сцену|объекты)|\b(clear|empty)\s+(the\s+)?scene\b|\b(delete|remove)\s+all\s+objects\b/i.test(ask)
-      && !/(не\s+(очищай|очистить|сбрасывай|удаляй|удалить|убирай|убрать)|don't\s+(clear|empty|delete|remove)|do not\s+(clear|empty|delete|remove))/i.test(ask);
-    if(data.scene.length===0&&state.scene.length>0&&!explicitClear){
-      aiAdd('sys','Пустой массив scene проигнорирован: существующая сцена сохранена. Если нужно действительно очистить сцену, попроси ИИ явно удалить все объекты.');
-    }else{
-      state.scene=sanitizeScene(data.scene);
-      state.selectedId=null;
-      renderObjList();renderProps();renderScenePreview();
-      applied.push('▦ сцена: '+state.scene.length+' объектов');
-    }
+    state.scene=sanitizeScene(data.scene);
+    state.selectedId=null;
+    renderObjList();renderProps();renderScenePreview();
+    applied.push('▦ сцена: '+state.scene.length+' объектов');
   }
   if(validationFailed)aiAdd('sys','Часть предложенных файлов отклонена проверкой. Остальные прошедшие проверку изменения применены; исходная версия сохранена в «🕘 Версии».');
   const el=aiAdd('bot',String(data.message||'Готово.'));
@@ -4617,10 +4440,17 @@ document.getElementById('btnExportPxl').addEventListener('click',exportPxl);
 
   let busy=false;
 
-  function importMrrSource(name,source){
+  function importMrrSource(name,source,expectedBytes){
     source=String(source==null?'':source).replace(/^\uFEFF/,'');
     if(!source.trim())throw new Error('Файл пустой.');
 
+    // Сначала проверяем, что прочитали весь файл, а не только его часть.
+    const actualBytes=new TextEncoder().encode(source).length;
+    if(Number.isFinite(expectedBytes)&&expectedBytes>0&&actualBytes!==expectedBytes){
+      throw new Error('Файл прочитан не полностью: ожидалось '+expectedBytes+' байт, получено '+actualBytes+'. Повтори импорт.');
+    }
+
+    // Записываем в модель и редактор один и тот же полный исходный текст.
     state.files[name]=source;
     state.activeFile=name;
     codeInput.value=source;
@@ -4634,17 +4464,45 @@ document.getElementById('btnExportPxl').addEventListener('click',exportPxl);
     saveCode();
     pushEditSnapshot();
 
-    setNote('Импортирован '+name+'.');
-    logConsole('[Файлы] Успешно импортирован .mrr: '+name,'sys');
+    // Проверка после обновления интерфейса: рендерер не должен менять код.
+    if(codeInput.value!==source||state.files[name]!==source){
+      state.files[name]=source;
+      codeInput.value=source;
+      refreshEditor();
+      throw new Error('Редактор изменил содержимое при загрузке. Импорт остановлен для защиты кода.');
+    }
+
+    setNote('Импортирован '+name+' — '+source.length+' символов, '+actualBytes+' байт.');
+    logConsole('[Файлы] Импортирован полностью: '+name+' ('+source.length+' символов, '+actualBytes+' байт).','sys');
 
     try{
       parse(tokenize(source));
       logConsole('[MrrCode] Синтаксис импортированного файла корректен.','sys');
     }catch(err){
       const msg=err&&err.message?err.message:String(err);
-      setNote('Файл импортирован, но есть ошибка MrrCode: '+msg);
+      setNote('Файл импортирован полностью, но есть ошибка MrrCode: '+msg);
       logConsole('[MrrCode] Ошибка синтаксиса: '+msg,'err');
     }
+  }
+
+  function readFileCompletely(file){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=()=>{
+        try{
+          const buffer=reader.result;
+          if(!(buffer instanceof ArrayBuffer))throw new Error('Браузер вернул некорректные данные файла.');
+          if(file.size>0&&buffer.byteLength!==file.size){
+            throw new Error('Файл прочитан не полностью: размер файла '+file.size+' байт, прочитано '+buffer.byteLength+' байт.');
+          }
+          const decoder=new TextDecoder('utf-8',{fatal:false});
+          resolve(decoder.decode(buffer).replace(/^\uFEFF/,''));
+        }catch(err){reject(err);}
+      };
+      reader.onerror=()=>reject(reader.error||new Error('Не удалось прочитать файл.'));
+      reader.onabort=()=>reject(new Error('Чтение файла отменено.'));
+      reader.readAsArrayBuffer(file);
+    });
   }
 
   async function importWithFileSystemPicker(){
@@ -4680,8 +4538,8 @@ document.getElementById('btnExportPxl').addEventListener('click',exportPxl);
       throw new Error('Разрешены только файлы .mrr.');
     }
 
-    const source=await file.text();
-    importMrrSource(name,source);
+    const source=await readFileCompletely(file);
+    importMrrSource(name,source,file.size);
     return true;
   }
 
@@ -4702,15 +4560,8 @@ document.getElementById('btnExportPxl').addEventListener('click',exportPxl);
             throw new Error('Разрешены только файлы .mrr.');
           }
 
-          const source=await new Promise((res,rej)=>{
-            const reader=new FileReader();
-            reader.onload=()=>res(String(reader.result==null?'':reader.result));
-            reader.onerror=()=>rej(reader.error||new Error('Не удалось прочитать файл.'));
-            reader.onabort=()=>rej(new Error('Чтение файла отменено.'));
-            reader.readAsText(file,'UTF-8');
-          });
-
-          importMrrSource(name,source);
+          const source=await readFileCompletely(file);
+          importMrrSource(name,source,file.size);
           resolve(true);
         }catch(err){
           reject(err);
@@ -4848,18 +4699,10 @@ function exportGameHtml(options={}){
     const p=projectData();
     const source=String((p.files&&p.files[ENTRY_FILE])||'');
     if(!source.trim()) throw new Error('Файл main.mrr пуст.');
-    if(typeof window.MrrCodeValidate==='function'){
-      const projectFiles=p.files||{[ENTRY_FILE]:source};
-      for(const [fileName,fileCode] of Object.entries(projectFiles)){
-        if(!String(fileName).endsWith('.mrr')||typeof fileCode!=='string')continue;
-        window.MrrCodeValidate(fileCode,{projectFiles,currentFile:fileName});
-      }
-    }
-    // Экспорт использует отдельный автономный runtime; валидация выше блокирует неподдерживаемый синтаксис перед сборкой.
     // Экспортируем только проектный код и небольшой нативный Canvas API — без редактора и интерпретатора MrrCode.
     const pageData={title:'Игра',source,files:p.files||{[ENTRY_FILE]:source},entry:ENTRY_FILE,scene:p.scene||[],sprites:(p.sprites||[]).map(s=>({name:s.name,dataUrl:s.dataUrl}))};
     const encoded=JSON.stringify(pageData).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
-    const html='<!doctype html>\n'+`<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="mrrcode"><meta name="apple-mobile-web-app-status-bar-style" content="default"><title>Игра</title><style>
+    const html='<!doctype html>\n'+`<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Игра</title><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101827}body{display:grid;place-items:center;touch-action:none}#game{display:block;width:min(100vw,177.7778vh);height:min(100vh,56.25vw);background:#101827;touch-action:none}#error{position:fixed;left:12px;right:12px;bottom:12px;padding:12px;background:#3b1720;color:#fff;border-radius:8px;font:14px/1.4 system-ui;white-space:pre-wrap;display:none}
 </style></head><body><canvas id="game" width="800" height="450" aria-label="Игра"></canvas><div id="error" role="alert"></div><script>
 (()=>{'use strict';
