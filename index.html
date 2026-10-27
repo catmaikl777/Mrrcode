@@ -3,7 +3,18 @@
 <html lang="ru"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
-<title>MrrCode — Игра</title>
+<title>MrrCode Studio</title>
+<meta name="application-name" content="MrrCode Studio">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="mrrcode">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#111827">
+<meta name="description" content="MrrCode Studio — редактор игр на языке MrrCode">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./mrrcode-icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./mrrcode-icon-512.png">
+<link rel="apple-touch-icon" href="./mrrcode-icon-192.png">
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-400-normal.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-600-normal.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/cyrillic-800-normal.css" rel="stylesheet"/>
@@ -5064,5 +5075,15 @@ window.mrrBuildAIPrompt = function(userPrompt, currentCode){
     }
   };
 })();
+</script>
+
+<script>
+// PWA: регистрируем service worker только на HTTPS/localhost.
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .catch(err => console.warn('MrrCode: service worker не зарегистрирован', err));
+  });
+}
 </script>
 </body></html>
