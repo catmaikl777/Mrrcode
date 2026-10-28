@@ -963,16 +963,29 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 }
 ::selection{background:rgba(197,123,87,.28)!important}
 
-/* Keep only inner work areas scrollable when their content really needs it */
+/* Scroll is enabled for the whole workspace so every tab can be reached
+   even when its content is taller than the viewport. Fixed game overlays
+   and dedicated editors keep their own scrolling/interaction behavior. */
+body{
+  overflow:auto!important;
+}
+main{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
 main *{scrollbar-color:#52615d #0b2020}
 main *::-webkit-scrollbar-thumb{background:#52615d}
 main *::-webkit-scrollbar-track{background:#0b2020}
 
 @media(max-width:640px){
-  body{overflow:hidden!important}
+  body{overflow:auto!important}
   main{
     height:calc(100dvh - var(--header-h,62px))!important;
     max-height:calc(100dvh - var(--header-h,62px))!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
   }
 }
 @media(prefers-reduced-motion:reduce){
@@ -1187,314 +1200,652 @@ main *::-webkit-scrollbar-track{background:#0b2020}
 <!-- ================= HELP ================= -->
 <section class="tab" id="tab-help">
 <div class="help-wrap">
+
 <div class="panel doc-section">
-<h2><span class="num">1</span>Как устроен проект <span class="mrr-cat-paw">🐾</span></h2>
-<p><b>Игра</b> — запущенный на весь экран устройства экран. <b>Код</b> — логика на MrrCode. <b>Сцена</b> — прямоугольники, круги и текстовые объекты. <b>Файлы</b> — код и PNG-спрайты. <b>🤖 ИИ</b> — агент, который пишет код за тебя. Точка входа — <code>main.mrr</code>. Координаты игровой сцены всегда <b>800×450</b> — движок масштабирует её под экран. Для размера окна используй <code>screenWidth()</code>/<code>screenHeight()</code>, для логических координат — <code>gameWidth()</code>/<code>gameHeight()</code>.</p>
+<h2><span class="num">1</span>Главная идея MrrCode: как думать об игре <span class="mrr-cat-paw">🐾</span></h2>
+<p><b>MrrCode</b> — собственный игровой язык этого движка. Это не JavaScript и не Python. Главный файл проекта — <code>main.mrr</code>. Игра живёт внутри фиксированной логической сцены <b>800×450</b>, а движок масштабирует её под экран устройства.</p>
+<p>Почти любую игру удобно мыслить как четыре вещи:</p>
+<ol>
+<li><b>Состояние</b> — переменные, в которых хранятся игрок, враги, счёт, здоровье, предметы, таймеры и т. п.</li>
+<li><b>Ввод</b> — события <code>pointerDown/Move/Up</code> и состояние <code>pointerX/Y</code>, <code>touchX/Y</code>, <code>touchCount</code>.</li>
+<li><b>Обновление</b> — <code>update(dt)</code>: движение, физика, столкновения, правила игры.</li>
+<li><b>Рисование</b> — те же кадры: <code>rect</code>, <code>circle</code>, <code>sprite</code>, <code>text</code> и другие функции рисуют текущее состояние.</li>
+</ol>
+<p><b>Самая важная мысль:</b> код не «двигает картинку». Код меняет состояние игры, а затем каждый кадр заново рисует его. Поэтому игрок может быть объектом, спрайтом или просто прямоугольником — механика от этого не меняется.</p>
 </div>
+
 <div class="panel doc-section">
-<h2><span class="num">2</span>Переменные и типы <span class="mrr-cat-paw">🐾</span></h2>
-<pre class="doc-code"><span class="k">let</span> health = <span class="n">100</span>;
-<span class="k">let</span> title = <span class="s">"Моя игра"</span>;
-<span class="k">let</span> alive = <span class="k">true</span>;
-<span class="k">let</span> inventory = [<span class="s">"ключ"</span>, <span class="s">"зелье"</span>];
-<span class="k">let</span> stats = {speed: <span class="n">120</span>, score: <span class="n">0</span>};
-<span class="k">const</span> maxHealth = <span class="n">100</span>;</pre>
-<p>Используй <code>let</code> для изменяемого значения и <code>const</code> для постоянного. Поддерживаются числа, строки, boolean, null, массивы и объекты.</p>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">3</span>Условия, циклы и функции <span class="mrr-cat-paw">🐾</span></h2>
-<pre class="doc-code"><span class="k">if</span> (health &lt;= <span class="n">0</span>) {
-    <span class="f">print</span>(<span class="s">"Игра окончена"</span>);
-} <span class="k">else if</span> (health &lt; <span class="n">30</span>) {
-    <span class="f">print</span>(<span class="s">"Опасно!"</span>);
+<h2><span class="num">2</span>Игровой цикл: start → ввод → update → рисунок</h2>
+<pre class="doc-code"><span class="k">function</span> <span class="f">start</span>() {
+    <span class="f">background</span>(<span class="s">"#101827"</span>);
+    <span class="c">// начальные значения, загрузка состояния, подготовка игры</span>
 }
 
-<span class="k">let</span> i = <span class="n">0</span>;
-<span class="k">while</span> (i &lt; <span class="n">5</span>) { i += <span class="n">1</span>; }
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="c">// 1. изменить состояние</span>
+    <span class="c">// 2. проверить столкновения и правила</span>
+    <span class="c">// 3. нарисовать новый кадр</span>
+}</pre>
+<p><code>start()</code> вызывается один раз после успешного запуска. <code>update(dt)</code> вызывается каждый кадр. <code>dt</code> — время между кадрами в секундах.</p>
+<p><b>Важно:</b> внутри <code>function update(dt)</code> <code>dt</code> — уже число. Пиши <code>x += speed * dt</code>, а не <code>dt()</code>. Вызов <code>dt()</code> допустим вне функции, когда имя <code>dt</code> не затенено локальным параметром.</p>
+<p>Ввод-события можно объявить в <code>main.mrr</code>:</p>
+<pre class="doc-code"><span class="k">function</span> <span class="f">pointerDown</span>(x, y) {
+    <span class="c">// один или несколько пальцев коснулись поля</span>
+}
 
-<span class="k">for</span> (<span class="k">let</span> n = <span class="n">0</span>; n &lt; <span class="n">3</span>; n++) { <span class="f">print</span>(n); }
-<span class="k">for</span> (<span class="k">let</span> item <span class="k">of</span> inventory) { <span class="f">print</span>(item); }
+<span class="k">function</span> <span class="f">pointerMove</span>(x, y) {
+    <span class="c">// палец движется</span>
+}
+
+<span class="k">function</span> <span class="f">pointerUp</span>(x, y) {
+    <span class="c">// палец отпущен</span>
+}</pre>
+<p>Движок ориентирован на сенсорный ввод и мультитач. Клавиатурные и мышиные игровые функции не входят в документированный API.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">3</span>Синтаксис: переменные, значения, выражения</h2>
+<pre class="doc-code"><span class="k">let</span> score = <span class="n">0</span>;
+<span class="k">let</span> name = <span class="s">"Cat"</span>;
+<span class="k">let</span> alive = <span class="k">true</span>;
+<span class="k">let</span> items = [<span class="s">"coin"</span>, <span class="s">"key"</span>];
+<span class="k">let</span> player = {x: <span class="n">100</span>, y: <span class="n">200</span>, vx: <span class="n">0</span>, vy: <span class="n">0</span>};
+<span class="k">const</span> speed = <span class="n">240</span>;</pre>
+<p>Объявления — только <code>let</code> и <code>const</code>. Поддерживаются числа, строки, <code>true</code>, <code>false</code>, <code>null</code>, массивы и объекты. <code>let</code> используй для изменяемых значений, <code>const</code> — для постоянных.</p>
+<p>Доступ к данным: <code>items[0]</code>, <code>player.x</code>, <code>player["x"]</code>. Массивы и объекты можно менять напрямую.</p>
+<p><b>Не используй методы через точку.</b> Нельзя писать <code>items.push(x)</code>, <code>items.map(...)</code>, <code>text.trim()</code>, <code>Math.floor(...)</code> и другие вызовы <code>obj.method(...)</code>. Вместо них используй встроенные функции MrrCode: <code>push(items, x)</code>, <code>trim(text)</code>, <code>floor(x)</code> и т. д.</p>
+<p>Строгое равенство <code>===</code> и <code>!==</code> не поддерживается. Используй <code>==</code> и <code>!=</code>.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">4</span>Условия, циклы и функции</h2>
+<pre class="doc-code"><span class="k">if</span> (score &gt;= <span class="n">10</span>) {
+    <span class="f">print</span>(<span class="s">"Победа!"</span>);
+} <span class="k">else</span> {
+    <span class="f">print</span>(<span class="s">"Продолжай"</span>);
+}
+
+<span class="k">for</span> (<span class="k">let</span> i = <span class="n">0</span>; i &lt; <span class="n">10</span>; i++) {
+    <span class="f">print</span>(i);
+}
+
+<span class="k">for</span> (<span class="k">let</span> item <span class="k">of</span> items) {
+    <span class="f">print</span>(item);
+}
 
 <span class="k">function</span> <span class="f">damage</span>(amount) {
-    health -= amount;
-    <span class="k">return</span> health;
+    score -= amount;
+    <span class="k">return</span> score;
 }</pre>
-<p>Операторы: <code>+ - * / % **</code>, сравнения <code>== != &lt; &gt; &lt;= &gt;=</code>, логические <code>&amp;&amp; || !</code>, присваивания <code>= += -= *= /= %=</code>, инкремент <code>++ --</code>. Вставлять их удобно кнопками на панели над редактором.</p>
+<p>Есть <code>if / else</code>, <code>while</code>, два вида <code>for</code>, <code>break</code>, <code>continue</code>, пользовательские функции и <code>return</code>. Условное значение можно получить через тернарный оператор: <code>let label = alive ? "Жив" : "Игра окончена";</code>.</p>
+<p>Операторы: <code>+ - * / % **</code>; сравнения <code>== != &lt; &gt; &lt;= &gt;=</code>; логика <code>! &amp;&amp; ||</code>; присваивания <code>= += -= *= /= %= **=</code>; <code>++ --</code>; унарные <code>+x</code> и <code>-x</code>.</p>
+<p>Логические <code>&amp;&amp;</code> и <code>||</code> работают с коротким замыканием, поэтому можно строить условия вроде <code>alive &amp;&amp; hp &gt; 0</code>.</p>
 </div>
+
 <div class="panel doc-section">
-<h2><span class="num">4</span>Игровые события и управление касаниями <span class="mrr-cat-paw">🐾</span></h2>
-<pre class="doc-code"><span class="k">function</span> <span class="f">start</span>() {
-    <span class="c">// один раз при старте</span>
-}
-<span class="k">function</span> <span class="f">update</span>(dt) {
-    <span class="c">// каждый кадр; dt — секунды с прошлого кадра</span>
-}
-<span class="k">function</span> <span class="f">pointerDown</span>(x, y) { <span class="f">print</span>(<span class="s">"Палец коснулся"</span>, x, y); }
-<span class="k">function</span> <span class="f">pointerMove</span>(x, y) { <span class="c">// палец движется по полю</span> }
-<span class="k">function</span> <span class="f">pointerUp</span>(x, y)   { <span class="c">// палец отпущен</span> }</pre>
-<p>Состояние касаний прямо в <code>update</code>:</p>
-<pre class="doc-code"><span class="f">pointerX</span>()        <span class="c">// X последнего касания (0..800)</span>
-<span class="f">pointerY</span>()        <span class="c">// Y последнего касания (0..450)</span>
-<span class="f">pointerDownNow</span>()  <span class="c">// true, пока палец держит поле</span>
-<span class="f">touchCount</span>()      <span class="c">// сколько пальцев сейчас на поле</span>
-<span class="f">touchX</span>(i)         <span class="c">// X i-го пальца (0 … touchCount()-1)</span>
-<span class="f">touchY</span>(i)         <span class="c">// Y i-го пальца</span></pre>
-<p>Мультитач — кружок под каждым пальцем:</p>
-<pre class="doc-code"><span class="k">function</span> <span class="f">update</span>(dt) {
-    <span class="f">clear</span>(<span class="s">"#101827"</span>);
-    <span class="k">let</span> i = <span class="n">0</span>;
-    <span class="k">while</span> (i &lt; <span class="f">touchCount</span>()) {
-        <span class="f">circle</span>(<span class="f">touchX</span>(i), <span class="f">touchY</span>(i), <span class="n">30</span>, <span class="s">"#70d6ff"</span>);
-        i += <span class="n">1</span>;
+<h2><span class="num">5</span>Координаты и геометрия — основа любой игры</h2>
+<p>Игровая сцена всегда <b>800×450</b>. <code>x</code> растёт вправо, <code>y</code> — вниз. Точка <code>(0,0)</code> находится в левом верхнем углу.</p>
+<table style="width:100%;border-collapse:collapse;margin:8px 0 12px;font-size:12.5px">
+<tr><th style="text-align:left;padding:7px;border-bottom:1px solid var(--border)">Форма</th><th style="text-align:left;padding:7px;border-bottom:1px solid var(--border)">Координаты</th><th style="text-align:left;padding:7px;border-bottom:1px solid var(--border)">Что означает</th></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)"><code>rect</code></td><td style="padding:7px;border-bottom:1px solid var(--border)"><code>x,y,w,h</code></td><td style="padding:7px;border-bottom:1px solid var(--border)">левый верхний угол + размер</td></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)"><code>circle</code></td><td style="padding:7px;border-bottom:1px solid var(--border)"><code>x,y,r</code></td><td style="padding:7px;border-bottom:1px solid var(--border)">центр + радиус</td></tr>
+<tr><td style="padding:7px"><code>text</code></td><td style="padding:7px"><code>x,y</code></td><td style="padding:7px">начальная точка текста</td></tr>
+</table>
+<p>Размер окна устройства — другое понятие. <code>screenWidth()</code>/<code>screenHeight()</code> дают CSS-размер видимой области браузера. Для игрового мира используй <code>gameWidth()</code>/<code>gameHeight()</code>: они возвращают 800 и 450.</p>
+<p><b>Практика:</b> если нужно держать объект внутри экрана, ограничивай его логическими координатами:</p>
+<pre class="doc-code">player.x = <span class="f">clamp</span>(player.x, <span class="n">0</span>, <span class="f">gameWidth</span>() - player.w);
+player.y = <span class="f">clamp</span>(player.y, <span class="n">0</span>, <span class="f">gameHeight</span>() - player.h);</pre>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">6</span>Состояние игры: игрок, враги, предметы и списки</h2>
+<p>Храни игровую модель в переменных. Для одного персонажа достаточно объекта:</p>
+<pre class="doc-code"><span class="k">let</span> player = {x: <span class="n">100</span>, y: <span class="n">300</span>, w: <span class="n">48</span>, h: <span class="n">48</span>, vx: <span class="n">0</span>, vy: <span class="n">0</span>, hp: <span class="n">3</span>};</pre>
+<p>Для множества однотипных объектов используй массив:</p>
+<pre class="doc-code"><span class="k">let</span> coins = [
+    {x: <span class="n">150</span>, y: <span class="n">200</span>, w: <span class="n">24</span>, h: <span class="n">24</span>},
+    {x: <span class="n">350</span>, y: <span class="n">160</span>, w: <span class="n">24</span>, h: <span class="n">24</span>}
+];
+
+<span class="k">for</span> (<span class="k">let</span> coin <span class="k">of</span> coins) {
+    <span class="f">circle</span>(coin.x + <span class="n">12</span>, coin.y + <span class="n">12</span>, <span class="n">12</span>, <span class="s">"#ffd166"</span>);
+}</pre>
+<p>Для добавления и удаления элементов используй <code>push</code>, <code>pop</code>, <code>splice</code>, <code>shift</code>, <code>unshift</code>. Для поиска — <code>indexOf</code> и <code>contains</code>. Для длины — <code>length</code>.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">7</span>Ввод: тап, удержание и мультитач</h2>
+<p>Есть два основных подхода:</p>
+<ul>
+<li><b>Событие</b> — когда важен сам факт действия: <code>pointerDown(x,y)</code>, например прыжок или нажатие кнопки.</li>
+<li><b>Состояние</b> — когда действие продолжается, пока палец держит экран: <code>pointerDownNow()</code>, <code>pointerX()</code>, <code>pointerY()</code>.</li>
+</ul>
+<pre class="doc-code"><span class="k">function</span> <span class="f">pointerDown</span>(x, y) {
+    <span class="k">if</span> (x &gt; <span class="n">600</span>) {
+        player.vx = <span class="n">240</span>;
     }
-}</pre>
-<p>Клавиатуры и мыши в движке нет — только касания. Типичная схема: зоны экрана (левая треть — влево, правая — вправо, тап в центре — прыжок).</p>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">5</span>Рисование</h2>
-<pre class="doc-code"><span class="f">clear</span>(<span class="s">"#101827"</span>);
-<span class="f">rect</span>(<span class="n">20</span>, <span class="n">30</span>, <span class="n">120</span>, <span class="n">60</span>, <span class="s">"#ff8844"</span>);
-<span class="f">circle</span>(<span class="n">220</span>, <span class="n">100</span>, <span class="n">30</span>, <span class="s">"#70d6ff"</span>);
-<span class="f">line</span>(<span class="n">10</span>, <span class="n">10</span>, <span class="n">300</span>, <span class="n">200</span>, <span class="s">"#ffffff"</span>, <span class="n">2</span>);
-<span class="f">text</span>(<span class="s">"Привет!"</span>, <span class="n">20</span>, <span class="n">140</span>, <span class="s">"#ffffff"</span>, <span class="n">20</span>);</pre>
-<p>Движок <b>сам очищает экран в начале каждого кадра</b> — старая графика не наслаивается. Вызови <code>background(color)</code> один раз в <code>start()</code>, чтобы задать постоянный фон. <code>clear(color)</code> меняет заливку только текущего кадра; если вызывать его в каждом <code>update</code>, он будет перекрашивать каждый кадр и перекроет заданный фон. Для «следа» от пальца копи точки в массив и перерисовывай их каждый кадр.</p><p>Для прокрутки мира используй <code>camera(x,y)</code>; она сдвигает рисование, но не координаты касаний. Для столкновений прямоугольников есть <code>overlapRect(...)</code>, а <code>moveBody(body,dt,gravity)</code> обновляет объект с полями <code>x,y,vx,vy</code>. Анимированный спрайт-лист рисуется через <code>spriteAnim(...)</code>.</p>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">6</span>Объекты вкладки «Сцена»</h2>
-<p>Выбери объект и задай уникальное имя <code>name</code>, например <code>hero</code>:</p>
-<pre class="doc-code"><span class="k">let</span> hero = <span class="f">object</span>(<span class="s">"hero"</span>);
+}
 
 <span class="k">function</span> <span class="f">update</span>(dt) {
     <span class="k">if</span> (<span class="f">pointerDownNow</span>()) {
-        hero.x = <span class="f">pointerX</span>() - <span class="n">32</span>;   <span class="c">// объект идёт за пальцем</span>
-        hero.y = <span class="f">pointerY</span>() - <span class="n">32</span>;
+        player.x = <span class="f">lerp</span>(player.x, <span class="f">pointerX</span>() - player.w / <span class="n">2</span>, <span class="n">0.15</span>);
     }
 }</pre>
-<p>Прямоугольник: <code>x, y, w, h, color</code>; круг: <code>x, y, r, color</code>; текст: <code>x, y, text, size, color</code>. Объекты сцены рисуются поверх игрового кадра. Сцену может создавать и ИИ-агент.</p>
+<p>Мультитач: <code>touchCount()</code> сообщает количество пальцев, а <code>touchX(i)</code>/<code>touchY(i)</code> — координаты пальца с индексом <code>i</code>. Поэтому можно сделать управление «лево + прыжок» двумя пальцами одновременно.</p>
+<pre class="doc-code"><span class="k">let</span> dir = <span class="n">0</span>;
+<span class="k">let</span> i = <span class="n">0</span>;
+<span class="k">while</span> (i &lt; <span class="f">touchCount</span>()) {
+    <span class="k">let</span> x = <span class="f">touchX</span>(i);
+    <span class="k">if</span> (x &lt; <span class="n">270</span>) dir = -<span class="n">1</span>;
+    <span class="k">if</span> (x &gt; <span class="n">530</span>) dir = <span class="n">1</span>;
+    i += <span class="n">1</span>;
+}</pre>
 </div>
+
 <div class="panel doc-section">
-<h2><span class="num">7</span>PNG-спрайты</h2>
-<p>Открой «Файлы» → «Импорт PNG-спрайта» и используй имя ресурса в <code>sprite(name, x, y, width, height)</code>:</p>
+<h2><span class="num">8</span>Рисование: кадр за кадром</h2>
+<pre class="doc-code"><span class="f">background</span>(<span class="s">"#101827"</span>);
+
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="f">rect</span>(<span class="n">40</span>, <span class="n">60</span>, <span class="n">100</span>, <span class="n">60</span>, <span class="s">"#ff8844"</span>);
+    <span class="f">circle</span>(<span class="n">260</span>, <span class="n">100</span>, <span class="n">30</span>, <span class="s">"#70d6ff"</span>);
+    <span class="f">line</span>(<span class="n">20</span>, <span class="n">200</span>, <span class="n">400</span>, <span class="n">250</span>, <span class="s">"#ffffff"</span>, <span class="n">2</span>);
+    <span class="f">text</span>(<span class="s">"Счёт: "</span> + score, <span class="n">20</span>, <span class="n">20</span>, <span class="s">"#ffffff"</span>, <span class="n">20</span>);
+}</pre>
+<p>В начале кадра движок очищает игровое поле. Поэтому «постоянный» рисунок не сохраняется сам: его нужно нарисовать снова в следующем <code>update</code>. Для постоянного фона используй <code>background(color)</code>. <code>clear(color)</code> закрашивает текущий кадр.</p>
+<p>Для следов, рисования пальцем и частиц сохраняй точки/частицы в массиве и перерисовывай их каждый кадр.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">9</span>Спрайты и анимация</h2>
+<p>Импортируй PNG во вкладке «Файлы». Имя ресурса — имя файла без расширения, например <code>hero.png</code> → <code>sprite("hero", ...)</code>.</p>
+<pre class="doc-code"><span class="f">sprite</span>(<span class="s">"hero"</span>, player.x, player.y, <span class="n">64</span>, <span class="n">64</span>);</pre>
+<p>Если размеры не указаны, используется исходный размер PNG. Если ресурса нет, движок показывает placeholder и пишет предупреждение в консоль.</p>
+<p>Для sprite sheet используй <code>spriteAnim</code>. <code>frameW</code> и <code>frameH</code> — размеры одного кадра <b>в исходном PNG</b>, а <code>fps</code> — скорость анимации.</p>
+<pre class="doc-code"><span class="f">spriteAnim</span>(<span class="s">"hero"</span>, <span class="n">320</span>, <span class="n">150</span>, <span class="n">128</span>, <span class="n">128</span>, <span class="n">32</span>, <span class="n">32</span>, <span class="n">8</span>);</pre>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">10</span>Столкновения: overlapRect</h2>
+<p><code>overlapRect</code> проверяет пересечение двух осевых прямоугольников. Важно: если прямоугольники только соприкасаются краями, это <b>не</b> считается столкновением.</p>
+<pre class="doc-code"><span class="k">if</span> (<span class="f">overlapRect</span>(
+    player.x, player.y, player.w, player.h,
+    coin.x, coin.y, coin.w, coin.h
+)) {
+    score += <span class="n">1</span>;
+}</pre>
+<p>Это базовый строительный блок для монет, пуль, врагов, стен и предметов. Для круга или сложной формы обычно удобно иметь простой невидимый прямоугольник-«хитбокс».</p>
+<p>Пример удаления собранной монеты:</p>
+<pre class="doc-code"><span class="k">let</span> i = <span class="n">length</span>(coins) - <span class="n">1</span>;
+<span class="k">while</span> (i &gt;= <span class="n">0</span>) {
+    <span class="k">let</span> c = coins[i];
+    <span class="k">if</span> (<span class="f">overlapRect</span>(player.x, player.y, player.w, player.h, c.x, c.y, c.w, c.h)) {
+        <span class="f">splice</span>(coins, i, <span class="n">1</span>);
+        score += <span class="n">1</span>;
+    }
+    i -= <span class="n">1</span>;
+}</pre>
+<p>Удалять элементы при проходе массива с конца удобно: индексы уже обработанных элементов не сдвигаются.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">11</span>Физика: скорость, гравитация и moveBody</h2>
+<p>Простая физическая модель хранит позицию и скорость: <code>x, y, vx, vy</code>. <code>moveBody(body, dt, gravity)</code> сначала меняет вертикальную скорость по гравитации, затем перемещает объект.</p>
+<pre class="doc-code"><span class="k">let</span> ball = {x: <span class="n">100</span>, y: <span class="n">100</span>, vx: <span class="n">180</span>, vy: <span class="n">0</span>};
+
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="f">moveBody</span>(ball, dt, <span class="n">600</span>);
+    <span class="f">circle</span>(ball.x, ball.y, <span class="n">16</span>, <span class="s">"#ffd166"</span>);
+}</pre>
+<p>Вызов ограничивает используемый <code>dt</code> диапазоном 0..0.1 секунды. Это полезная защита от слишком большого скачка физики.</p>
+<p>Отскок от пола можно сделать вручную через столкновение:</p>
+<pre class="doc-code"><span class="k">if</span> (ball.y &gt; <span class="n">400</span>) {
+    ball.y = <span class="n">400</span>;
+    ball.vy = -<span class="f">abs</span>(ball.vy) * <span class="n">0.7</span>;
+}</pre>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">12</span>Камера и большие миры</h2>
+<p><code>camera(x,y)</code> сдвигает последующее рисование. Координаты объектов и касаний при этом не меняются. Поэтому мир можно хранить в координатах больше 800×450.</p>
 <pre class="doc-code"><span class="k">function</span> <span class="f">update</span>(dt) {
-    <span class="f">clear</span>(<span class="s">"#182235"</span>);
-    <span class="f">sprite</span>(<span class="s">"heroSprite"</span>, <span class="n">100</span>, <span class="n">120</span>, <span class="n">64</span>, <span class="n">64</span>);
+    <span class="f">clear</span>(<span class="s">"#101827"</span>);
+
+    <span class="f">camera</span>(player.x - <span class="n">300</span>, <span class="n">0</span>);
+
+    <span class="f">rect</span>(<span class="n">0</span>, <span class="n">380</span>, <span class="n">2000</span>, <span class="n">70</span>, <span class="s">"#2a3a55"</span>);
+    <span class="f">sprite</span>(<span class="s">"hero"</span>, player.x, player.y, <span class="n">64</span>, <span class="n">64</span>);
+
+    <span class="f">camera</span>(<span class="n">0</span>, <span class="n">0</span>);
+    <span class="f">text</span>(<span class="s">"Счёт: "</span> + score, <span class="n">20</span>, <span class="n">20</span>, <span class="s">"#ffffff"</span>, <span class="n">20</span>);
 }</pre>
-<p>Имя спрайта — имя файла без расширения. Повторный импорт того же файла <b>заменяет</b> спрайт. Если игру делает ИИ, он напишет в чат список изображений, которые нужно импортировать, и их имена.</p>
+<p>После рисования мира верни <code>camera(0,0)</code>, если дальше рисуешь интерфейс, чтобы HUD не двигался вместе с миром.</p>
+<p><b>Важно:</b> камера влияет на функции рисования, но не переводит координаты <code>pointerX()</code>/<code>pointerY()</code>. Если игрок касается экрана, тебе самому нужно сопоставить экранную координату с мировой, например добавить смещение камеры.</p>
 </div>
+
 <div class="panel doc-section">
-<h2><span class="num">8</span>Импорт из других файлов (модули)</h2>
-<p>Создай <code>player.mrr</code> («Файлы» → «Новый .mrr»):</p>
-<pre class="doc-code"><span class="c">// файл player.mrr</span>
-<span class="k">function</span> <span class="f">spawnPlayer</span>() {
-    <span class="f">print</span>(<span class="s">"Игрок появился!"</span>);
+<h2><span class="num">13</span>Объекты вкладки «Сцена»</h2>
+<p>Сцена — отдельный визуальный слой редактора. Можно создать прямоугольник, круг или текст, дать ему уникальное имя и получить его из кода через <code>object("name")</code>.</p>
+<pre class="doc-code"><span class="k">let</span> hero = <span class="f">object</span>(<span class="s">"hero"</span>);
+
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="k">if</span> (hero != <span class="k">null</span> &amp;&amp; <span class="f">pointerDownNow</span>()) {
+        hero.x = <span class="f">pointerX</span>() - hero.w / <span class="n">2</span>;
+        hero.y = <span class="f">pointerY</span>() - hero.h / <span class="n">2</span>;
+    }
 }</pre>
-<p>В <code>main.mrr</code> импортируй имена:</p>
-<pre class="doc-code"><span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> spawnPlayer;
-<span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> spawnPlayer, movePlayer;
-<span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> spawnPlayer <span class="k">as</span> spawn;
-<span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> *;
+<p>У прямоугольника доступны <code>x,y,w,h,color</code>; у круга — <code>x,y,r,color</code>; у текста — <code>x,y,text,size,color</code>. Координаты прямоугольника — левый верхний угол, координаты круга — центр.</p>
+<p><b>Два независимых подхода:</b> сценой можно управлять из кода, либо рисовать всё непосредственно функциями. Перетаскивание объекта в редакторе не переписывает произвольные вызовы <code>rect()</code> в исходном коде.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">14</span>Модули: как разделить большую игру на файлы</h2>
+<p>Когда игра растёт, вынеси системы в отдельные <code>.mrr</code>-файлы. Например, <code>player.mrr</code> может хранить движение игрока, а <code>main.mrr</code> — главный цикл.</p>
+<pre class="doc-code"><span class="c">// player.mrr</span>
+<span class="k">let</span> px = <span class="n">100</span>;
+
+<span class="k">function</span> <span class="f">resetPlayer</span>() {
+    px = <span class="n">100</span>;
+}
+
+<span class="k">function</span> <span class="f">getPlayerX</span>() {
+    <span class="k">return</span> px;
+}</pre>
+<pre class="doc-code"><span class="c">// main.mrr</span>
+<span class="k">from</span> <span class="s">"player"</span> <span class="k">import</span> resetPlayer, getPlayerX;
 
 <span class="k">function</span> <span class="f">start</span>() {
-    spawnPlayer();
-}</pre>
-<p>«Запуск» всегда выполняет <b>main.mrr</b>. Имя файла можно писать без <code>.mrr</code> и без кавычек. Код модуля выполняется один раз при первом импорте; циклические импорты запрещены. События (<code>update</code>, <code>pointerDown</code>…) должны быть в main.mrr или импортированы в него.</p>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">9</span>Полезные встроенные функции</h2>
-<div class="api-groups" id="apiChips">
-<div class="api-group"><h3>🎮 Управление, экран и датчики</h3><div class="api-chips"><code>start()</code><code>update(dt)</code><code>pointerDown(x,y)</code><code>pointerMove(x,y)</code><code>pointerUp(x,y)</code><code>pointerX()</code><code>pointerY()</code><code>pointerDownNow()</code><code>touchCount()</code><code>touchX(i)</code><code>touchY(i)</code><code>screenWidth()</code><code>screenHeight()</code><code>gameWidth()</code><code>gameHeight()</code><code>orientationAngle()</code><code>isPortrait()</code><code>tiltX()</code><code>tiltY()</code><code>tiltZ()</code><code>requestMotion()</code></div></div>
-<div class="api-group"><h3>🎨 Рисование и фон</h3><div class="api-chips"><code>background(color)</code><code>clear(color?)</code><code>rect(x,y,w,h,color)</code><code>circle(x,y,r,color)</code><code>line(x1,y1,x2,y2,color,width?)</code><code>text(value,x,y,color,size?)</code><code>sprite(name,x,y,w?,h?)</code><code>spriteAnim(name,x,y,w,h,frameW,frameH,fps)</code><code>camera(x,y)</code><code>rgba(r,g,b,a)</code><code>object(name)</code></div></div>
-<div class="api-group"><h3>🧮 Математика и время</h3><div class="api-chips"><code>random()</code><code>rand(min,max)</code><code>randomInt(min,max)</code><code>abs(x)</code><code>sqrt(x)</code><code>sin(a)</code><code>cos(a)</code><code>atan2(y,x)</code><code>floor(x)</code><code>ceil(x)</code><code>round(x)</code><code>min(a,b)</code><code>max(a,b)</code><code>clamp(value,min,max)</code><code>pow(a,b)</code><code>lerp(a,b,t)</code><code>map(value,inMin,inMax,outMin,outMax)</code><code>sign(x)</code><code>time()</code><code>dt()</code></div></div>
-<div class="api-group"><h3>📦 Массивы и строки</h3><div class="api-chips"><code>length(value)</code><code>push(array,value)</code><code>pop(array)</code><code>splice(array,start,count,...items)</code><code>shift(array)</code><code>unshift(array,value)</code><code>indexOf(array,value)</code><code>slice(array,start,end?)</code><code>join(array,separator)</code><code>split(text,separator)</code><code>contains(collection,value)</code><code>trim(text)</code><code>upper(text)</code><code>lower(text)</code><code>startsWith(text,prefix)</code><code>endsWith(text,suffix)</code><code>replace(text,from,to)</code><code>typeof(value)</code><code>toString(value)</code><code>toNumber(value)</code></div></div>
-<div class="api-group"><h3>🛠️ Физика, данные и звук</h3><div class="api-chips"><code>overlapRect(ax,ay,aw,ah,bx,by,bw,bh)</code><code>moveBody(body,dt,gravity)</code><code>save(key,value)</code><code>load(key,defaultValue)</code><code>playTone(frequency,duration,volume?)</code><code>stopSound()</code><code>print(...values)</code></div></div>
-</div>
-<p>Функции сгруппированы по назначению. Нажми на «📖 Шпаргалка» во вкладке «Код», чтобы найти сигнатуру, прочитать описание и вставить вызов в редактор. Для фона игры используй <code>background("#182235")</code>; в отличие от <code>clear(color)</code>, этот цвет сохраняется между кадрами.</p>
-<div class="row-btns" style="margin-top:12px"><button class="btn ai" id="btnRunApiAudit" type="button">🧪 Проверить API движка</button><span id="mrrApiAuditSummary" style="color:var(--muted);font-size:12px"></span></div><pre id="mrrApiAuditOutput" class="doc-code" style="display:none;max-height:380px;white-space:pre-wrap;overflow:auto"></pre>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">10</span>Редактор на сенсоре, сохранение и ограничения</h2>
-<p><b>Всё делается пальцем:</b> панель над редактором вставляет скобки, операторы, шаблоны и функции; пока печатаешь имя — всплывает список дополнений (тапни вариант); после <code>from "</code> подсказываются файлы, после <code>import</code> — функции из файла, после <code>object("</code> и <code>sprite("</code> — имена сцены и спрайтов. «📖 Шпаргалка» — поиск по функциям с кнопкой «Вставить».</p>
-<p>Используй «⬇ .mrr» для кода и «⬇ Проект» для пакета исходников и ресурсов. Данные хранятся в памяти страницы — экспортируй проект, чтобы не потерять. MrrCode — ограниченный собственный язык, а не полный JavaScript. Выполнение имеет лимит операций для защиты от зависания.</p>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">11</span>Визуальный выбор цвета</h2>
-<p>В редакторе кода можно менять HEX-цвета без ручного ввода. Установи курсор внутри значения вида <code>#70d6ff</code> и нажми <b>🎨 Цвет</b>. Выбери нужный оттенок — редактор заменит HEX-код прямо в текущем месте.</p>
-<p>Поддерживаются цвета <code>#RGB</code>, <code>#RGBA</code>, <code>#RRGGBB</code> и <code>#RRGGBBAA</code>. Также можно дважды тапнуть по HEX-цвету в коде, чтобы открыть выбор цвета.</p>
-<pre class="doc-code"><span class="f">clear</span>(<span class="s">"#101827"</span>);
-<span class="f">rect</span>(<span class="n">20</span>, <span class="n">30</span>, <span class="n">120</span>, <span class="n">60</span>, <span class="s">"#ff8844"</span>);</pre>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">12</span>ИИ-агент</h2>
-<p>Кнопка <b>«🤖 ИИ»</b> в шапке открывает агента. Подключение — на тебе:</p>
-<p>1. Нажми «⚙ Подключение».<br/>
-        2. <b>Base URL</b> — адрес OpenAI-совместимого API без завершающего <code>/chat/completions</code> (например <code>https://api.openai.com/v1</code>, OpenRouter, Together, локальный LM Studio и т.п.).<br/>
-        3. <b>API-ключ</b> и <b>имя модели</b> (например <code>gpt-4o-mini</code>).<br/>
-        4. «💾 Сохранить» — ключ хранится только в твоём браузере (localStorage), запросы идут напрямую провайдеру.</p>
-<p>Напиши задачу, например: «Сделай игру: зелёный квадрат бегает за пальцем и собирает жёлтые монеты, со счётом». ИИ получит <b>контекст проекта</b>: код всех файлов, список спрайтов и сцену. Он может:</p>
-<p>• создавать и перезаписывать <b>файлы кода</b> (.mrr), включая модули с импортами;<br/>
-        • работать <b>со сценой как агент</b> — создавать/заменять объекты (прямоугольники, круги, текст);<br/>
-        • сообщать, <b>какие изображения нужно импортировать</b> (имя PNG + описание) — картинки ИИ не генерирует, их импортируешь ты во вкладке «Файлы».</p>
-<p>Все изменения применяются сразу и помечаются в чате тегами. Провайдер должен разрешать запросы из браузера (CORS); при ошибке сообщение появится в чате.</p>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">13</span>Актуальная документация для ИИ</h2>
-<p>ИИ получает встроенную спецификацию MrrCode 0.2.0 перед запросом. Она содержит расширение <code>.mrr</code>, ключевые слова и встроенные команды.</p>
-<p>ИИ также должен учитывать текущий код проекта: пользовательские переменные, функции и параметры извлекаются из текущего файла и используются как контекст.</p>
-</div><div class="panel doc-section">
-<h2><span class="num">14</span>Шпаргалка по синтаксису языка</h2>
-<p><b>Переменные и значения:</b> <code>let score = 0;</code>, <code>const speed = 120;</code>; числа, строки в кавычках, <code>true</code>, <code>false</code>, <code>null</code>, массивы <code>[10, 20]</code> и объекты <code>{x: 10, y: 20}</code>.</p>
-<p><b>Массивы и свойства:</b> <code>items[0]</code> читает первый элемент; <code>items[1] = 42</code> меняет элемент. У строк и массивов есть свойство <code>length</code>. У объекта доступны поля через <code>player.x</code> или <code>player["x"]</code>. Не вызывай методы JavaScript через точку — стандартные операции записываются функциями, например <code>push(items, value)</code>, <code>slice(items, 0, 2)</code>.</p>
-<p><b>Операторы:</b> арифметика <code>+ - * / % **</code>; сравнения <code>== != &lt; &gt; &lt;= &gt;=</code>; логика <code>! &amp;&amp; ||</code>; присваивания <code>= += -= *= /= %= **=</code>; увеличение/уменьшение <code>++ --</code>; выбор значения <code>условие ? значение1 : значение2</code>.</p>
-<p><b>Условия и циклы:</b> <code>if (условие) { ... } else { ... }</code>, <code>while (условие) { ... }</code>, счётчик <code>for (let i = 0; i &lt; 10; i++) { ... }</code>, перебор <code>for (let item of items) { ... }</code>. В циклах поддерживаются <code>break</code> и <code>continue</code>.</p>
-<p><b>Функции и шаблонные строки:</b> <code>function double(n) { return n * 2; }</code>; вызов — <code>double(4)</code>. В шаблонной строке обратные кавычки позволяют вставлять выражение: <code>`Score: ${score}`</code>.</p>
-<p><b>Строковые функции:</b> <code>trim</code>, <code>upper</code>, <code>lower</code>, <code>startsWith</code>, <code>endsWith</code>, <code>replace</code>, <code>contains</code>, <code>split</code>, <code>join</code>. Для массивов: <code>push</code>, <code>pop</code>, <code>splice</code>, <code>shift</code>, <code>unshift</code>, <code>indexOf</code>, <code>slice</code>, <code>length</code>. Также доступны <code>toString</code>, <code>toNumber</code>, <code>typeof</code>, математические функции, сохранения <code>save/load</code> и синтезированный звук <code>playTone/stopSound</code>. Ищи любую функцию в «📖 Шпаргалке» или начинай печатать имя в редакторе.</p>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">15</span>Быстрый старт: от пустого проекта до игры</h2>
-<ol>
-<li>Открой вкладку <b>«Код»</b> и выбери <code>main.mrr</code>. Это главный файл, с которого начинается запуск.</li>
-<li>Напиши игровой цикл: <code>function start() { ... }</code> для начальной настройки и <code>function update(dt) { ... }</code> для рисования и логики каждого кадра.</li>
-<li>Нажми <b>▶ Запуск</b> в шапке или кнопку ▶ над редактором. Игра запускается на холсте 800×450, масштабируемом под экран.</li>
-<li>Если игра ведёт себя неправильно, посмотри вкладку <b>«Игра» → «Консоль»</b>. Ошибки и сообщения <code>print(...)</code> помогают найти причину.</li>
-<li>Сохрани проект кнопкой 💾 или экспортируй пакет через <b>«Файлы» → «⬇ Проект»</b>. Экспорт особенно важен перед крупными изменениями или переносом на другое устройство.</li>
-</ol>
-<pre class="doc-code">function start() {
-    background("#101827"); // постоянный фон игры
-    print("Игра запущена!");
+    resetPlayer();
 }
-function update(dt) {
-    rect(80, 80, 100, 70, "#70d6ff");
-    text("Привет, MrrCode!", 80, 190, "#ffffff", 22);
+
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="f">rect</span>(getPlayerX(), <span class="n">200</span>, <span class="n">48</span>, <span class="n">48</span>, <span class="s">"#3ddc84"</span>);
 }</pre>
+<p>Поддерживаются обычный импорт, несколько имён, <code>import *</code> и псевдоним через <code>as</code>. Расширение <code>.mrr</code> можно не писать. Модуль выполняется один раз при первом импорте и затем кэшируется. Циклические импорты запрещены.</p>
+<p><b>Точка входа всегда <code>main.mrr</code>.</b> Обработчики игры должны быть объявлены там или импортированы туда.</p>
 </div>
+
 <div class="panel doc-section">
-<h2><span class="num">16</span>Вкладка «Игра»: запуск, экран и консоль</h2>
-<p><b>▶ Запуск</b> выполняет <code>main.mrr</code>. <b>■ Стоп</b> останавливает игровой цикл. Если полноэкранный режим недоступен в текущем браузере или WebView, игра может остаться в обычном окне — это ограничение среды, а не обязательно ошибка кода.</p>
-<p><b>⛶ Во весь экран</b> просит браузер расширить игровую область; браузер может потребовать запуск по нажатию пользователя. В полноэкранном режиме есть кнопки остановки и выхода.</p>
-<p><b>Консоль</b> показывает системные сообщения, предупреждения, ошибки и вывод <code>print(...)</code>. «Очистить» удаляет видимые записи, но не исправляет причину ошибки. Смотри первую ошибку после запуска: последующие сообщения иногда являются её следствием.</p>
-<p>В движке управление игрой ориентировано на касания и мультитач. Для мобильного управления используй зоны холста или координаты <code>pointerX()</code>, <code>pointerY()</code>, <code>touchX(i)</code>, <code>touchY(i)</code>. Обычные события клавиатуры и мыши не являются документированным игровым API.</p>
+<h2><span class="num">15</span>Строки, массивы и полезные преобразования</h2>
+<table style="width:100%;border-collapse:collapse;margin:8px 0 12px;font-size:12.5px">
+<tr><th style="text-align:left;padding:7px;border-bottom:1px solid var(--border)">Задача</th><th style="text-align:left;padding:7px;border-bottom:1px solid var(--border)">Функция</th></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)">размер</td><td style="padding:7px;border-bottom:1px solid var(--border)"><code>length(value)</code></td></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)">добавить в конец</td><td style="padding:7px;border-bottom:1px solid var(--border)"><code>push(array, value)</code></td></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)">удалить последний</td><td style="padding:7px;border-bottom:1px solid var(--border)"><code>pop(array)</code></td></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)">удалить/вставить по индексу</td><td style="padding:7px;border-bottom:1px solid var(--border)"><code>splice(array,start,count,...items)</code></td></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)">найти индекс</td><td style="padding:7px;border-bottom:1px solid var(--border)"><code>indexOf(array,value)</code></td></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)">часть массива</td><td style="padding:7px;border-bottom:1px solid var(--border)"><code>slice(array,start,end?)</code></td></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)">склеить массив</td><td style="padding:7px;border-bottom:1px solid var(--border)"><code>join(array,separator)</code></td></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)">разделить строку</td><td style="padding:7px;border-bottom:1px solid var(--border)"><code>split(text,separator)</code></td></tr>
+<tr><td style="padding:7px">поиск</td><td style="padding:7px"><code>contains(value,part)</code></td></tr>
+</table>
+<p>Для строк доступны <code>trim</code>, <code>upper</code>, <code>lower</code>, <code>startsWith</code>, <code>endsWith</code>, <code>replace</code>. Для преобразований — <code>toString</code>, <code>toNumber</code>, <code>typeof</code>.</p>
+<pre class="doc-code"><span class="k">let</span> scoreText = <span class="s">"Score: "</span> + <span class="f">toString</span>(score);
+<span class="f">text</span>(scoreText, <span class="n">20</span>, <span class="n">20</span>, <span class="s">"#ffffff"</span>, <span class="n">20</span>);</pre>
 </div>
+
 <div class="panel doc-section">
-<h2><span class="num">17</span>Вкладка «Код»: инструменты редактора</h2>
-<ul>
-<li><b>Выбор файла</b> — название текущего <code>.mrr</code> видно над редактором; файлы проекта переключаются во вкладке «Файлы».</li>
-<li><b>«Примеры…»</b> — загружает пример кода в редактор. Перед заменой собственного кода сохрани его или экспортируй проект.</li>
-<li><b>📖</b> — открывает поисковую шпаргалку по встроенным функциям. Найди название и нажми «Вставить» у нужного варианта.</li>
-<li><b>🤖</b> — открывает ИИ-агента с контекстом проекта.</li>
-<li><b>▶</b> — запускает проект; <b>⬇ .mrr</b> экспортирует текущий файл, а <b>⬆ .mrr</b> импортирует кодовый файл.</li>
-<li><b>↶ / ↷</b> — отмена и повтор изменений в редакторе. Это история редактирования текста, а не то же самое, что «🕘 Версии» всего проекта.</li>
-<li><b>💾</b> — сохраняет проект в локальное хранилище браузера. <b>🐞 Debug</b> открывает инструменты отладки.</li>
-<li><b>🎨 Цвет</b> — позволяет изменить HEX-цвет рядом с курсором. Двойное касание HEX-значения тоже может открыть выбор цвета.</li>
-</ul>
-<p>На сенсорном устройстве используй панель символов над кодом для скобок, операторов и ключевых слов. При вводе имени появляются варианты автодополнения; коснись нужного. После <code>from "</code> доступны имена файлов, после <code>import</code> — экспортируемые имена модулей, а в аргументах <code>sprite("...")</code> и <code>object("...")</code> — имена ресурсов сцены.</p>
-<p>Если подсказка закрывает нужную строку, прокрути список или введи больше букв, чтобы сузить варианты. Автодополнение помогает вводить код, но не заменяет запуск и проверку консоли.</p>
+<h2><span class="num">16</span>Математика, случайность и плавность</h2>
+<p>Основные функции: <code>abs</code>, <code>sqrt</code>, <code>sin</code>, <code>cos</code>, <code>atan2</code>, <code>pow</code>, <code>min</code>, <code>max</code>, <code>clamp</code>, <code>floor</code>, <code>ceil</code>, <code>round</code>, <code>sign</code>, <code>lerp</code>, <code>map</code>.</p>
+<pre class="doc-code"><span class="c">// плавно ведём объект к цели</span>
+player.x = <span class="f">lerp</span>(player.x, targetX, <span class="n">0.1</span>);
+
+<span class="c">// случайная позиция</span>
+<span class="k">let</span> x = <span class="f">randomInt</span>(<span class="n">40</span>, <span class="n">760</span>);
+<span class="k">let</span> y = <span class="f">rand</span>(<span class="n">80</span>, <span class="n">400</span>);
+
+<span class="c">// расстояние между двумя точками</span>
+<span class="k">let</span> dx = targetX - player.x;
+<span class="k">let</span> dy = targetY - player.y;
+<span class="k">let</span> distance = <span class="f">sqrt</span>(dx * dx + dy * dy);</pre>
+<p><code>sin</code>, <code>cos</code> и <code>atan2</code> используют радианы. Для угла, который постоянно увеличивается, обычно удобно делать <code>angle += speed * dt</code>.</p>
 </div>
+
 <div class="panel doc-section">
-<h2><span class="num">18</span>Вкладка «Сцена»: визуальные объекты</h2>
-<ol>
-<li>Нажми «Прямоуг.», «Круг» или «Текст», чтобы добавить объект.</li>
-<li>Выбери его в списке или коснись объекта на холсте. После выбора открываются его свойства.</li>
-<li>Перетаскивай объект по холсту. Если включён режим изменения размера, потяни угловой маркер.</li>
-<li><b>Сетка</b> показывает направляющие; <b>Привязка</b> включает шаг привязки 10 пикселей; <b>Размер</b> включает/выключает изменение размера.</li>
-<li>Используй дублирование и удаление выбранного объекта, если эти кнопки доступны рядом с его свойствами.</li>
-</ol>
-<p><b>⬇ Сцена</b> экспортирует данные сцены, <b>⬆ Сцена</b> загружает сцену из файла, <b>Очистить</b> удаляет объекты сцены, а <b>⌘ В код</b> генерирует MrrCode на основе объектов. Преобразование сцены в код — отдельная операция: произвольные команды <code>rect()</code> из исходника автоматически не превращаются в редактируемые объекты сцены.</p>
-<p>Чтобы обращаться к объекту из кода, назначь ему имя, например <code>hero</code>, и используй <code>object("hero")</code>. Имена должны совпадать. Изменения в визуальной сцене и рисование непосредственно кодом — два разных рабочих процесса. Редактор сцены не преобразует произвольные вызовы <code>rect()</code> в редактируемые объекты автоматически.</p>
+<h2><span class="num">17</span>Время, счётчики и логика «раз в несколько секунд»</h2>
+<p><code>time()</code> — секунды с момента запуска игры. Для логики, зависящей от кадров, используй <code>dt</code>.</p>
+<pre class="doc-code"><span class="k">let</span> spawnTimer = <span class="n">0</span>;
+
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    spawnTimer += dt;
+    <span class="k">if</span> (spawnTimer &gt;= <span class="n">2</span>) {
+        spawnTimer = <span class="n">0</span>;
+        <span class="c">// создать нового врага</span>
+    }
+}</pre>
+<p>Такой таймер не зависит от того, сколько кадров в секунду рисует устройство. То же правило подходит для движения: <code>x += speed * dt</code>, а не просто <code>x += speed</code>.</p>
 </div>
+
 <div class="panel doc-section">
-<h2><span class="num">19</span>Вкладка «Файлы»: исходники, ресурсы и перенос проекта</h2>
-<p><b>Новый .mrr</b> создаёт файл исходного кода. <code>main.mrr</code> — точка входа; дополнительные файлы подключаются оператором <code>from "имя" import функция;</code>. После создания файла открой его и объяви в нём функции, которые импортируются в главный модуль.</p>
-<p><b>Импорт PNG-спрайта</b> добавляет изображение в ресурсы проекта. Имя ресурса — имя файла без расширения; например <code>hero.png</code> используется как <code>sprite("hero", x, y, w, h)</code>. Если PNG является листом кадров, используй <code>spriteAnim(...)</code> и размеры одного кадра в исходном изображении.</p>
-<p><b>⬇ Проект / ⬆ Проект</b> экспортируют и импортируют пакет проекта, в котором могут храниться исходники, спрайты и сцена. Используй этот вариант для резервной копии или переноса проекта; экспорт одного <code>.mrr</code> сохраняет только код выбранного файла.</p>
-<p><b>💾 Автосейв</b> сохраняет проект локально в этом браузере. Локальное сохранение не является резервной копией и не переносится автоматически на другое устройство или в другой браузер. Для надёжности периодически экспортируй проект в файл.</p>
-<p><b>🕘 Версии</b> открывает историю снимков проекта: можно выбрать сохранённую версию и восстановить её. История хранится локально и ограничена количеством снимков, поэтому экспорт проекта остаётся важным.</p>
-<p><b>🔎 Проверить ресурсы</b> ищет буквальные ссылки на спрайты и объекты сцены, для которых нет соответствующего ресурса. Проверка не может гарантированно обнаружить имена, которые формируются динамически во время выполнения.</p>
-<p><b>🎮 Сборка HTML</b> создаёт отдельный HTML-файл игры. Это экспорт запускаемой игры, а не редактора MrrCode Studio: интерфейс вкладок, редактор и инструменты проекта в итоговый файл не входят. Проверь готовую сборку отдельно после экспорта.</p>
+<h2><span class="num">18</span>Сохранения и звук</h2>
+<pre class="doc-code"><span class="k">let</span> best = <span class="f">load</span>(<span class="s">"bestScore"</span>, <span class="n">0</span>);
+
+<span class="k">function</span> <span class="f">finishGame</span>() {
+    <span class="k">if</span> (score &gt; best) {
+        best = score;
+        <span class="f">save</span>(<span class="s">"bestScore"</span>, best);
+    }
+    <span class="f">playTone</span>(<span class="n">660</span>, <span class="n">0.15</span>, <span class="n">0.08</span>);
+}</pre>
+<p><code>save(key,value)</code> сохраняет JSON-совместимое значение в локальном хранилище браузера. <code>load(key,defaultValue)</code> возвращает сохранённое значение или значение по умолчанию.</p>
+<p><code>playTone(frequency,duration,volume?)</code> создаёт короткий синтезированный тон. Громкость ограничивается движком. <code>stopSound()</code> приостанавливает аудиоконтекст. На некоторых браузерах звук надёжнее запускать после действия пользователя.</p>
 </div>
+
 <div class="panel doc-section">
-<h2><span class="num">20</span>Отладка и диагностика ошибок</h2>
-<p>Включи <b>🐞 Debug</b> в редакторе. В панели отладки можно указать номер строки и добавить точку останова; список показывает активные точки. «Очистить точки» убирает все установленные точки. Точка останова помогает остановить выполнение на выбранной строке, но не объясняет автоматически, как исправить логику.</p>
-<p>Рекомендуемый порядок поиска проблемы:</p>
-<ol>
-<li>Останови игру и запусти её снова, чтобы получить свежие сообщения.</li>
-<li>Прочитай первую ошибку в консоли и проверь указанную строку/имя функции.</li>
-<li>Убедись, что все файлы, которые импортируются, существуют, а имя функции действительно объявлено в модуле.</li>
-<li>Для невидимого спрайта проверь имя PNG, совпадение имени в <code>sprite()</code> и наличие файла в списке спрайтов.</li>
-<li>Для невидимого объекта сцены проверь его имя в <code>object("...")</code> и то, что объект существует на вкладке «Сцена».</li>
-<li>Если код синтаксически корректен, но игра ведёт себя не так, временно добавь <code>print(...)</code> и проверь значения переменных.</li>
-</ol>
-<p>Валидатор и проверка ресурсов находят часть проблем заранее, но не доказывают, что игра работает правильно во время выполнения.</p>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">21</span>ИИ-агент: безопасный рабочий процесс</h2>
-<p>Открой «🤖 ИИ», затем «⚙ Подключение». Укажи Base URL совместимого API, API-ключ и имя модели; нажми «Сохранить». Адрес должен быть базовым адресом API без пути <code>/chat/completions</code>. Провайдер должен разрешать запросы из браузера (CORS).</p>
-<p>Формулируй запрос с конкретной целью и ограничениями: жанр игры, управление касаниями, графика, условия победы/поражения, какие файлы можно менять. Например: «Добавь счёт монет, не меняй управление и сохрани имя главного спрайта hero».</p>
-<p>Агент может учитывать код файлов, спрайты и объекты сцены; создавать или менять файлы и сцену; подсказывать, какие PNG импортировать. Он не генерирует изображения сам. После применения результата обязательно запусти игру, посмотри консоль и проверь результат глазами.</p>
-<p><b>Приватность:</b> API-ключ хранится в локальном хранилище браузера и отправляется напрямую выбранному провайдеру. Не используй ключ, который не имеешь права применять; не вставляй в запросы пароли или другие секреты. Если не доверяешь провайдеру, не отправляй ему содержимое проекта.</p>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">22</span>Сохранение, импорт и экспорт: что выбрать</h2>
-<ul>
-<li><b>Сохранить текущий код:</b> «⬇ .mrr» в редакторе.</li>
-<li><b>Сохранить весь проект:</b> «Файлы» → «⬇ Проект».</li>
-<li><b>Продолжить на этом устройстве:</b> «💾» или «Автосейв» сохраняют локальную копию.</li>
-<li><b>Вернуться к предыдущему состоянию:</b> «🕘 Версии» восстанавливает снимок проекта, если он был сохранён.</li>
-<li><b>Получить отдельную игру:</b> «🎮 Сборка HTML» создаёт автономный HTML игры.</li>
-<li><b>Перенести визуальную сцену отдельно:</b> используй «⬇ Сцена» и затем «⬆ Сцена» в другом проекте.</li>
-</ul>
-<p>Если импорт файла не сработал, проверь, что выбран правильный тип: <code>.mrr</code> — исходник, пакет проекта — файл проекта, PNG — графический ресурс, файл сцены — экспорт сцены. Не подтверждай замену главного файла, если не хочешь перезаписать текущий <code>main.mrr</code>. Перед импортом с заменой экспортируй резервную копию.</p>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">23</span>Ограничения движка и полезные привычки</h2>
-<ul>
-<li>MrrCode — собственный язык с ограниченной грамматикой, а не полный JavaScript. Используй функции и операторы, описанные в этой справке и шпаргалке.</li>
-<li>Игровое поле использует логические координаты 800×450; движок масштабирует его под устройство.</li>
-<li>Ввод ориентирован на касания и мультитач. Для игры на мобильном устройстве проектируй удобные зоны управления и не полагайся на клавиатуру.</li>
-<li>Рисование обновляется каждый кадр. Если нужен след или постоянный рисунок, храни точки/объекты в переменных и рисуй их заново каждый кадр.</li>
-<li>Встроенный лимит операций защищает от бесконечных циклов, но сложный код всё равно может тормозить.</li>
-<li>Локальное хранилище браузера может быть очищено, а данные не гарантированно переносятся между браузерами. Делай экспорт проекта.</li>
-<li>Полноэкранный режим, загрузка файлов и сетевые запросы зависят от браузера, WebView и разрешений устройства.</li>
-</ul>
-</div>
-<div class="panel doc-section">
-<h2><span class="num">24</span>Размер экрана и наклон телефона</h2>
-<p><code>screenWidth()</code> и <code>screenHeight()</code> возвращают размер видимой области браузера в CSS-пикселях — в том числе после перехода в полноэкранный режим. Это размеры окна устройства, а не координаты рисования. Игровые координаты по-прежнему фиксированы: <code>gameWidth()</code> возвращает <b>800</b>, <code>gameHeight()</code> — <b>450</b>. Используй последние для размещения объектов на сцене.</p>
-<p><code>orientationAngle()</code> сообщает угол поворота экрана, <code>isPortrait()</code> — вертикально ли расположено окно. <code>tiltX()</code> возвращает наклон влево/вправо (gamma), <code>tiltY()</code> — вперёд/назад (beta), <code>tiltZ()</code> — alpha. Это углы датчика, а не гарантированное направление на север.</p>
-<p>На некоторых телефонах браузер требует разрешение на датчики. Вызывай <code>requestMotion()</code> в ответ на касание/нажатие пользователя. На неподдерживаемом устройстве или без разрешения углы могут оставаться нулевыми; датчики обычно требуют HTTPS или localhost.</p>
-<pre class="doc-code">function pointerDown(x, y) {
-    requestMotion(); // запросить разрешение после касания
+<h2><span class="num">19</span>Состояния игры: меню, игра, пауза, победа</h2>
+<p>Для небольших игр достаточно одной переменной состояния:</p>
+<pre class="doc-code"><span class="k">let</span> state = <span class="s">"menu"</span>;
+
+<span class="k">function</span> <span class="f">pointerDown</span>(x, y) {
+    <span class="k">if</span> (state == <span class="s">"menu"</span>) state = <span class="s">"playing"</span>;
+    <span class="k">else if</span> (state == <span class="s">"playing"</span> &amp;&amp; score &gt;= <span class="n">10</span>) state = <span class="s">"win"</span>;
 }
-function update(dt) {
-    clear("#101827");
-    let x = gameWidth() / 2 + tiltX() * 3;
-    let y = gameHeight() / 2 + tiltY() * 2;
-    circle(clamp(x, 20, gameWidth() - 20),
-           clamp(y, 20, gameHeight() - 20), 20, "#70d6ff");
-    text("Окно: " + screenWidth() + "×" + screenHeight(), 16, 18, "#ffffff", 16);
-    text("Наклон: " + round(tiltX()) + ", " + round(tiltY()), 16, 42, "#c5d2e8", 14);
+
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="f">clear</span>(<span class="s">"#101827"</span>);
+
+    <span class="k">if</span> (state == <span class="s">"menu"</span>) {
+        <span class="f">text</span>(<span class="s">"ТАП — НАЧАТЬ"</span>, <span class="n">280</span>, <span class="n">210</span>, <span class="s">"#ffffff"</span>, <span class="n">24</span>);
+    } <span class="k">else if</span> (state == <span class="s">"playing"</span>) {
+        <span class="c">// игровая логика</span>
+    } <span class="k">else</span> {
+        <span class="f">text</span>(<span class="s">"ПОБЕДА!"</span>, <span class="n">330</span>, <span class="n">210</span>, <span class="s">"#ffd166"</span>, <span class="n">30</span>);
+    }
 }</pre>
+<p>Это простой способ не смешивать меню и игровую механику. Для большой игры можно хранить дополнительные флаги и таймеры, но принцип тот же: сначала состояние, затем правила этого состояния, затем рисунок.</p>
 </div>
+
 <div class="panel doc-section">
-<h2><span class="num">25</span>Деплой игры в интернет (GitHub Pages)</h2>
-<p>Деплой публикует собранную игру как сайт. В MrrCode Studio открой вкладку <b>«Файлы»</b> и нажми <b>«Опубликовать на GitHub Pages»</b>. Инструмент собирает отдельный <code>index.html</code> из текущего проекта и отправляет его в репозиторий GitHub; исходный редактор в опубликованную игру не входит.</p>
-<h3>Шаг 1. Создай репозиторий</h3>
-<ol><li>Войди на <a href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a>.</li><li>Задай имя, например <code>my-mrr-game</code>, и создай репозиторий. Для простого деплоя можно выбрать Public.</li><li>Запомни имя владельца GitHub, имя репозитория и ветку (обычно <code>main</code>).</li></ol>
-<h3>Шаг 2. Создай токен с правом записи</h3>
-<ol><li>Открой <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained personal access tokens</a> и создай токен.</li><li>В <b>Repository access</b> выбери <b>Only select repositories</b> и отметь только свой репозиторий.</li><li>В <b>Repository permissions</b> найди <b>Contents</b> и выставь <b>Read and write</b>, затем создай токен и скопируй его.</li></ol>
-<p><b>Если пункта Contents нет:</b> проверь, что создаёшь именно Fine-grained token, а не другой тип. Для Classic token эквивалентный старый вариант — scope <code>repo</code> (он даёт более широкие права). В организации создание токена может ограничиваться её политикой; тогда используй личный репозиторий или попроси владельца организации разрешить такой доступ. Не отправляй токен в чат и не публикуй его.</p>
-<h3>Шаг 3. Заполни окно публикации</h3>
-<ol><li>В поле <b>Владелец</b> укажи имя пользователя/организации GitHub.</li><li>В <b>Репозиторий</b> — имя репозитория без URL.</li><li>В <b>Ветка</b> — <code>main</code> (или выбранную ветку).</li><li>Вставь токен в поле пароля и нажми <b>«Собрать и опубликовать»</b>. Токен нужен только для запроса к GitHub; закрой окно после публикации, чтобы очистить поле.</li></ol>
-<h3>Шаг 4. Включи GitHub Pages</h3>
-<ol><li>Открой репозиторий на GitHub → <b>Settings</b> → <b>Pages</b>.</li><li>В разделе сборки выбери <b>Deploy from a branch</b>, ветку, которую указал при публикации (обычно <code>main</code>) и папку <code>/(root)</code>, затем сохрани. Если этот источник уже настроен, повторно менять его не нужно.</li><li>Подожди несколько минут и обнови страницу Pages. GitHub покажет адрес сайта. Для обычного репозитория адрес обычно выглядит как <code>https://ВЛАДЕЛЕЦ.github.io/ИМЯ-РЕПОЗИТОРИЯ/</code>; для репозитория вида <code>владелец.github.io</code> адрес корневой.</li></ol>
-<p>После повторной публикации <code>index.html</code> обновится; Pages может потребовать несколько минут, чтобы показать новую версию. Если сайт выдаёт 404, проверь, что файл <code>index.html</code> находится в корне выбранной ветки и Pages настроен на эту ветку/папку. Ошибка 401 обычно означает неверный или истёкший токен; 403 — недостаточно прав; 404 в окне публикации может означать неправильное имя владельца/репозитория.</p>
-<p><b>Важно:</b> игра на GitHub Pages будет публичным сайтом, если репозиторий и настройки Pages допускают публичный доступ. Не добавляй секретные ключи API в код игры — всё, что включено в HTML, посетители могут прочитать. Если игра использует сохранение, оно хранится в браузере каждого игрока отдельно.</p>
+<h2><span class="num">20</span>Как сделать нормальную игру: универсальный каркас</h2>
+<p>Ниже — хороший шаблон для большинства небольших 2D-игр: состояние игрока → ввод → движение → границы → столкновения → создание/удаление объектов → UI.</p>
+<pre class="doc-code"><span class="k">let</span> player = {x:<span class="n">80</span>, y:<span class="n">300</span>, w:<span class="n">48</span>, h:<span class="n">48</span>, vx:<span class="n">0</span>, vy:<span class="n">0</span>};
+<span class="k">let</span> coins = [];
+<span class="k">let</span> score = <span class="n">0</span>;
+<span class="k">let</span> gameState = <span class="s">"playing"</span>;
+
+<span class="k">function</span> <span class="f">start</span>() {
+    <span class="f">background</span>(<span class="s">"#101827"</span>);
+    <span class="f">push</span>(coins, {x:<span class="n">300</span>, y:<span class="n">280</span>, w:<span class="n">24</span>, h:<span class="n">24</span>});
+    <span class="f">push</span>(coins, {x:<span class="n">500</span>, y:<span class="n">180</span>, w:<span class="n">24</span>, h:<span class="n">24</span>});
+}
+
+<span class="k">function</span> <span class="f">pointerDown</span>(x, y) {
+    <span class="k">if</span> (x &lt; <span class="n">260</span>) player.vx = -<span class="n">240</span>;
+    <span class="k">else</span> <span class="k">if</span> (x &gt; <span class="n">540</span>) player.vx = <span class="n">240</span>;
+    <span class="k">else</span> player.vy = -<span class="n">420</span>;
+}
+
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="f">moveBody</span>(player, dt, <span class="n">900</span>);
+
+    player.x = <span class="f">clamp</span>(player.x, <span class="n">0</span>, <span class="f">gameWidth</span>() - player.w);
+
+    <span class="k">let</span> i = <span class="f">length</span>(coins) - <span class="n">1</span>;
+    <span class="k">while</span> (i &gt;= <span class="n">0</span>) {
+        <span class="k">let</span> c = coins[i];
+        <span class="k">if</span> (<span class="f">overlapRect</span>(player.x, player.y, player.w, player.h, c.x, c.y, c.w, c.h)) {
+            <span class="f">splice</span>(coins, i, <span class="n">1</span>);
+            score += <span class="n">1</span>;
+            <span class="f">playTone</span>(<span class="n">880</span>, <span class="n">0.08</span>, <span class="n">0.06</span>);
+        }
+        i -= <span class="n">1</span>;
+    }
+
+    <span class="f">clear</span>(<span class="s">"#101827"</span>);
+    <span class="f">rect</span>(<span class="n">0</span>, <span class="n">390</span>, <span class="n">800</span>, <span class="n">60</span>, <span class="s">"#263650"</span>);
+    <span class="f">rect</span>(player.x, player.y, player.w, player.h, <span class="s">"#70d6ff"</span>);
+
+    <span class="k">for</span> (<span class="k">let</span> c <span class="k">of</span> coins) {
+        <span class="f">circle</span>(c.x + <span class="n">12</span>, c.y + <span class="n">12</span>, <span class="n">12</span>, <span class="s">"#ffd166"</span>);
+    }
+
+    <span class="f">text</span>(<span class="s">"Счёт: "</span> + score, <span class="n">20</span>, <span class="n">20</span>, <span class="s">"#ffffff"</span>, <span class="n">22</span>);
+}</pre>
+<p>Это не «движок внутри движка», а образ мышления. Меняй механику, графику и структуру данных, сохраняя последовательность: <b>ввод → состояние → правила → столкновения → рисование → UI</b>.</p>
 </div>
+
+<div class="panel doc-section">
+<h2><span class="num">21</span>Архитектура больших проектов</h2>
+<p>Когда проект становится сложнее, разделяй ответственность. Например:</p>
+<ul>
+<li><code>main.mrr</code> — точка входа, состояние игры и главный цикл;</li>
+<li><code>player.mrr</code> — состояние и движение игрока;</li>
+<li><code>enemies.mrr</code> — создание и поведение врагов;</li>
+<li><code>levels.mrr</code> — данные уровня;</li>
+<li><code>ui.mrr</code> — функции отрисовки интерфейса.</li>
+</ul>
+<p>Модули должны обмениваться небольшими понятными функциями. Не делай один гигантский файл, если несколько систем можно разделить. При этом помни: экспортируемыми становятся объявленные в модуле функции и переменные, которые импортируются в <code>main.mrr</code>.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">22</span>Сцена, код и ресурсы — что за что отвечает</h2>
+<table style="width:100%;border-collapse:collapse;margin:8px 0 12px;font-size:12.5px">
+<tr><th style="text-align:left;padding:7px;border-bottom:1px solid var(--border)">Инструмент</th><th style="text-align:left;padding:7px;border-bottom:1px solid var(--border)">Используй для</th></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)"><b>Код</b></td><td style="padding:7px;border-bottom:1px solid var(--border)">логики, движения, правил, столкновений, процедурного рисования</td></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)"><b>Сцена</b></td><td style="padding:7px;border-bottom:1px solid var(--border)">готовых прямоугольников, кругов и текстовых объектов, которыми удобно управлять по имени</td></tr>
+<tr><td style="padding:7px;border-bottom:1px solid var(--border)"><b>Файлы</b></td><td style="padding:7px;border-bottom:1px solid var(--border)">.mrr-модули и PNG-ресурсы</td></tr>
+<tr><td style="padding:7px"><b>ИИ</b></td><td style="padding:7px">создание/изменение кода и сцены по описанию; изображения он не генерирует</td></tr>
+</table>
+<p>Например, герой может быть PNG-спрайтом, а его хитбокс — обычным объектом <code>{x,y,w,h}</code>. Графика и физическая модель не обязаны быть одним и тем же объектом.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">23</span>Датчики телефона</h2>
+<p><code>orientationAngle()</code> даёт угол ориентации экрана, <code>isPortrait()</code> — вертикально ли окно. <code>tiltX()</code>, <code>tiltY()</code>, <code>tiltZ()</code> возвращают углы ориентации устройства.</p>
+<pre class="doc-code"><span class="k">function</span> <span class="f">pointerDown</span>(x, y) {
+    <span class="f">requestMotion</span>();
+}
+
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="k">let</span> x = <span class="f">clamp</span>(<span class="f">gameWidth</span>() / <span class="n">2</span> + <span class="f">tiltX</span>() * <span class="n">3</span>, <span class="n">20</span>, <span class="f">gameWidth</span>() - <span class="n">20</span>);
+    <span class="f">circle</span>(x, <span class="n">220</span>, <span class="n">20</span>, <span class="s">"#70d6ff"</span>);
+}</pre>
+<p>На некоторых устройствах браузер требует разрешение. Поэтому <code>requestMotion()</code> лучше вызывать в ответ на пользовательское касание. Без поддержки или разрешения значения наклона могут оставаться нулевыми.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">24</span>Полный справочник API — что помнить</h2>
+<div class="api-groups">
+<div class="api-group"><h3>🎮 Жизненный цикл и ввод</h3><div class="api-chips">
+<code>start()</code><code>update(dt)</code><code>pointerDown(x,y)</code><code>pointerMove(x,y)</code><code>pointerUp(x,y)</code>
+<code>pointerX()</code><code>pointerY()</code><code>pointerDownNow()</code><code>touchCount()</code><code>touchX(i)</code><code>touchY(i)</code>
+</div></div>
+<div class="api-group"><h3>📐 Экран и устройство</h3><div class="api-chips">
+<code>screenWidth()</code><code>screenHeight()</code><code>gameWidth()</code><code>gameHeight()</code><code>orientationAngle()</code><code>isPortrait()</code><code>tiltX()</code><code>tiltY()</code><code>tiltZ()</code><code>requestMotion()</code>
+</div></div>
+<div class="api-group"><h3>🎨 Рисование</h3><div class="api-chips">
+<code>background(color)</code><code>clear(color?)</code><code>rect(x,y,w,h,color?)</code><code>circle(x,y,r,color?)</code><code>line(x1,y1,x2,y2,color?,width?)</code><code>text(value,x,y,color?,size?)</code><code>sprite(name,x,y,w?,h?)</code><code>spriteAnim(name,x,y,w,h,frameW,frameH,fps)</code><code>camera(x,y)</code><code>rgba(r,g,b,a?)</code><code>object(name)</code>
+</div></div>
+<div class="api-group"><h3>🧮 Математика и время</h3><div class="api-chips">
+<code>random()</code><code>rand(min,max)</code><code>randomInt(min,max)</code><code>abs(x)</code><code>sqrt(x)</code><code>sin(a)</code><code>cos(a)</code><code>atan2(y,x)</code><code>pow(a,b)</code><code>min(a,b)</code><code>max(a,b)</code><code>clamp(value,min,max)</code><code>floor(x)</code><code>ceil(x)</code><code>round(x)</code><code>sign(x)</code><code>lerp(a,b,t)</code><code>map(value,inMin,inMax,outMin,outMax)</code><code>time()</code><code>dt()</code>
+</div></div>
+<div class="api-group"><h3>📦 Данные и строки</h3><div class="api-chips">
+<code>length(value)</code><code>push(array,value)</code><code>pop(array)</code><code>splice(array,start,count,...items)</code><code>shift(array)</code><code>unshift(array,value)</code><code>indexOf(array,value)</code><code>slice(array,start,end?)</code><code>join(array,separator)</code><code>split(text,separator)</code><code>contains(value,part)</code><code>trim(text)</code><code>upper(text)</code><code>lower(text)</code><code>startsWith(text,prefix)</code><code>endsWith(text,suffix)</code><code>replace(text,from,to)</code><code>typeof(value)</code><code>toString(value)</code><code>toNumber(value)</code>
+</div></div>
+<div class="api-group"><h3>🛠️ Игра, сохранение и звук</h3><div class="api-chips">
+<code>overlapRect(ax,ay,aw,ah,bx,by,bw,bh)</code><code>moveBody(body,dt,gravity)</code><code>save(key,value)</code><code>load(key,defaultValue?)</code><code>playTone(frequency,duration,volume?)</code><code>stopSound()</code><code>print(...values)</code>
+</div></div>
+</div>
+<p>Если название функции есть в этой документации, используй именно указанную сигнатуру. Если возможности здесь нет, не считай её автоматически доступной из JavaScript или другого языка.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">25</span>Чего MrrCode не умеет</h2>
+<ul>
+<li><code>var</code> не поддерживается.</li>
+<li><code>===</code> и <code>!==</code> не поддерживаются.</li>
+<li>Вызовы методов через точку вроде <code>array.map()</code> или <code>text.trim()</code> запрещены.</li>
+<li>Произвольный DOM, <code>fetch</code> и произвольные JavaScript API не являются API игры.</li>
+<li>Клавиатурные функции не являются документированным способом управления игрой.</li>
+<li>Автоматической синхронизации изменений вкладки «Сцена» с исходным кодом нет.</li>
+<li>Сцена и код — разные рабочие процессы; преобразование сцены в код выполняется отдельной командой.</li>
+</ul>
+<p>Это важнее, чем похожесть синтаксиса на JavaScript: знакомая конструкция не становится поддерживаемой только потому, что она существует в другом языке.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">26</span>Отладка: как быстро найти ошибку</h2>
+<ol>
+<li><b>Запусти игру.</b> Если есть синтаксическая ошибка, смотри первую ошибку в консоли.</li>
+<li><b>Проверь имя.</b> Файл, функция, спрайт и объект сцены должны называться именно так, как написано в коде.</li>
+<li><b>Проверь тип данных.</b> Например, <code>moveBody</code> требует объект с <code>x,y,vx,vy</code>.</li>
+<li><b>Проверь координаты.</b> Помни про 800×450 и про разницу между центром круга и углом прямоугольника.</li>
+<li><b>Проверь dt.</b> В <code>update(dt)</code> используй число <code>dt</code>, не <code>dt()</code>.</li>
+<li><b>Поставь print.</b> Выведи значения прямо перед подозрительным условием.</li>
+<li><b>Включи Debug.</b> Точки останова помогают остановить выполнение на выбранной строке.</li>
+</ol>
+<pre class="doc-code"><span class="f">print</span>(<span class="s">"player"</span>, player.x, player.y, player.vx, player.vy);
+<span class="f">print</span>(<span class="s">"touch"</span>, <span class="f">pointerX</span>(), <span class="f">pointerY</span>(), <span class="f">touchCount</span>());</pre>
+<p>Валидатор помогает найти часть проблем заранее, но только реальный запуск показывает, правильно ли работает игровая логика.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">27</span>Правильный рабочий процесс от идеи до готовой игры</h2>
+<ol>
+<li><b>Сформулируй механику:</b> кто игрок, что он делает, как побеждает и проигрывает.</li>
+<li><b>Сделай прототип без графики:</b> прямоугольники и круги вместо спрайтов.</li>
+<li><b>Добавь управление:</b> сначала один понятный способ касания, затем мультитач при необходимости.</li>
+<li><b>Добавь движение через dt:</b> скорость в единицах в секунду, а не «пикселей за кадр».</li>
+<li><b>Добавь столкновения:</b> <code>overlapRect</code> и простые хитбоксы.</li>
+<li><b>Добавь состояние:</b> меню, игра, пауза, победа/поражение, счёт, здоровье.</li>
+<li><b>Замени прототипную графику:</b> импортируй PNG и используй <code>sprite</code>/<code>spriteAnim</code>.</li>
+<li><b>Раздели код:</b> когда файл растёт, вынеси системы в модули.</li>
+<li><b>Добавь звук и сохранения:</b> <code>playTone</code>, <code>save/load</code>.</li>
+<li><b>Проверь игру на устройстве:</b> касания, ориентацию, полноэкранный режим и ресурсы.</li>
+<li><b>Экспортируй проект:</b> не полагайся только на локальный автосейв.</li>
+</ol>
+<p><b>Золотое правило:</b> сначала механика, потом графика. Если игра работает на простых фигурах, заменить их на красивые PNG намного проще, чем отлаживать механику одновременно с графикой.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">28</span>Шпаргалка перед написанием игры</h2>
+<pre class="doc-code"><span class="c">// 1. СОСТОЯНИЕ</span>
+<span class="k">let</span> player = {x:<span class="n">100</span>, y:<span class="n">300</span>, vx:<span class="n">0</span>, vy:<span class="n">0</span>};
+<span class="k">let</span> enemies = [];
+<span class="k">let</span> score = <span class="n">0</span>;
+
+<span class="c">// 2. СТАРТ</span>
+<span class="k">function</span> <span class="f">start</span>() {
+    <span class="f">background</span>(<span class="s">"#101827"</span>);
+}
+
+<span class="c">// 3. ВВОД</span>
+<span class="k">function</span> <span class="f">pointerDown</span>(x, y) {
+    <span class="c">// изменить состояние</span>
+}
+
+<span class="c">// 4. ОБНОВЛЕНИЕ</span>
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="f">moveBody</span>(player, dt, <span class="n">900</span>);
+
+    <span class="c">// границы</span>
+    player.x = <span class="f">clamp</span>(player.x, <span class="n">0</span>, <span class="f">gameWidth</span>() - <span class="n">48</span>);
+
+    <span class="c">// столкновения</span>
+    <span class="c">// if (overlapRect(...)) { ... }</span>
+
+    <span class="c">// РИСОВАНИЕ</span>
+    <span class="f">clear</span>(<span class="s">"#101827"</span>);
+    <span class="f">rect</span>(player.x, player.y, <span class="n">48</span>, <span class="n">48</span>, <span class="s">"#70d6ff"</span>);
+    <span class="f">text</span>(<span class="s">"Счёт: "</span> + score, <span class="n">20</span>, <span class="n">20</span>, <span class="s">"#fff"</span>, <span class="n">20</span>);
+}</pre>
+<p>Если ты понимаешь этот шаблон, умеешь хранить состояние, читать касания, обновлять его через <code>dt</code>, проверять <code>overlapRect</code> и рисовать результат — у тебя уже есть базовый набор для платформера, аркады, раннера, кликера, головоломки, простого шутера, игры на реакцию и многих других 2D-игр.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">29</span>Инструменты проекта: когда что нажимать</h2>
+<ul>
+<li><b>▶ Запуск</b> — проверить текущий <code>main.mrr</code>.</li>
+<li><b>■ Стоп</b> — остановить игровой цикл.</li>
+<li><b>📖 Шпаргалка</b> — найти сигнатуру и описание встроенной функции.</li>
+<li><b>Примеры…</b> — быстро загрузить рабочий пример; перед заменой своего проекта сохрани его.</li>
+<li><b>↶ / ↷</b> — отмена/повтор редактирования текста.</li>
+<li><b>🐞 Debug</b> — точки останова и остановка выполнения.</li>
+<li><b>💾</b> — локальное сохранение проекта.</li>
+<li><b>⬇ .mrr</b> — экспорт текущего исходного файла.</li>
+<li><b>⬇ Проект</b> — экспорт проекта с исходниками и ресурсами.</li>
+<li><b>⬇ Сцена</b> — отдельный экспорт сцены.</li>
+<li><b>🎮 Сборка HTML</b> — отдельная запускаемая игра, без редактора MrrCode Studio.</li>
+</ul>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">30</span>ИИ-агент: как получать хороший код</h2>
+<p>ИИ получает контекст проекта и может создавать/изменять <code>.mrr</code>-файлы, работать со сценой и сообщать, какие PNG нужно импортировать. Изображения сам агент не генерирует.</p>
+<p>Хороший запрос описывает <b>жанр + управление + механику + условия победы/поражения + ограничения по изменяемым файлам</b>. Например: «Сделай раннер на 800×450: персонаж автоматически бежит, тап прыгает, монеты дают очки, столкновение с препятствием заканчивает игру. Используй только касания, не меняй имя спрайта hero».</p>
+<p>После применения результата всегда запускай игру и смотри консоль. Не считай код правильным только потому, что он выглядит правдоподобно: MrrCode имеет собственную грамматику и собственный API.</p>
+<p><b>Приватность:</b> API-ключ хранится локально в браузере и отправляется выбранному провайдеру. Не помещай в запросы пароли и другие секреты.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">31</span>Сохранение, экспорт и публикация</h2>
+<ul>
+<li><b>⬇ .mrr</b> сохраняет только выбранный исходный файл.</li>
+<li><b>⬇ Проект</b> — резервная копия проекта с исходниками, ресурсами и сценой.</li>
+<li><b>💾 / Автосейв</b> — локальная копия в текущем браузере.</li>
+<li><b>🕘 Версии</b> — локальная история снимков проекта.</li>
+<li><b>🎮 Сборка HTML</b> — отдельный HTML запускаемой игры.</li>
+</ul>
+<p>Локальное сохранение не является полноценной резервной копией и не обязано переноситься на другое устройство. Перед крупным изменением экспортируй проект.</p>
+<p>При публикации через GitHub Pages помни: опубликованный HTML доступен посетителям. Секретные API-ключи нельзя встраивать в клиентский код — всё, что попало в HTML, можно прочитать.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">32</span>Ограничения, которые нужно помнить всегда</h2>
+<ul>
+<li>Логическая сцена: <b>800×450</b>.</li>
+<li>Ввод игры: <b>касания и мультитач</b>.</li>
+<li><code>update(dt)</code>: <b>dt — секунды</b>; внутри update не вызывай <code>dt()</code>.</li>
+<li><code>moveBody</code>: объект должен иметь <b>x,y,vx,vy</b>.</li>
+<li><code>overlapRect</code>: только строгое пересечение, касание границ не считается.</li>
+<li><code>camera</code>: сдвигает рисование, но не координаты ввода.</li>
+<li><code>spriteAnim</code>: нужны импортированный PNG и размеры кадра в исходных пикселях.</li>
+<li>Модули: выполняются один раз и кэшируются; циклические импорты запрещены.</li>
+<li>Не вызывай JavaScript-методы через точку и не придумывай функции, которых нет в API.</li>
+<li>Лимит операций защищает от зависания, но бесконечные/очень тяжёлые вычисления всё равно делать не следует.</li>
+</ul>
+<p>Эта страница описывает фактическую модель движка и его документированный API. Если функция не описана здесь или в шпаргалке, сначала проверь встроенный справочник, а не предполагай её наличие по аналогии с другим языком.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">33</span>Минимум, который стоит запомнить</h2>
+<pre class="doc-code"><span class="c">// СОСТОЯНИЕ</span>
+<span class="k">let</span> player = {x:<span class="n">100</span>, y:<span class="n">300</span>, w:<span class="n">48</span>, h:<span class="n">48</span>, vx:<span class="n">0</span>, vy:<span class="n">0</span>};
+
+<span class="c">// СТАРТ</span>
+<span class="k">function</span> <span class="f">start</span>() {
+    <span class="f">background</span>(<span class="s">"#101827"</span>);
+}
+
+<span class="c">// ВВОД</span>
+<span class="k">function</span> <span class="f">pointerDown</span>(x, y) {
+    player.vy = -<span class="n">420</span>;
+}
+
+<span class="c">// КАДР</span>
+<span class="k">function</span> <span class="f">update</span>(dt) {
+    <span class="f">moveBody</span>(player, dt, <span class="n">900</span>);
+    player.x = <span class="f">clamp</span>(player.x, <span class="n">0</span>, <span class="f">gameWidth</span>() - player.w);
+
+    <span class="f">clear</span>(<span class="s">"#101827"</span>);
+    <span class="f">rect</span>(player.x, player.y, player.w, player.h, <span class="s">"#70d6ff"</span>);
+}</pre>
+<p><b>Ментальная формула:</b> <code>данные → ввод → update(dt) → правила/столкновения → рисование</code>. Всё остальное — комбинации этих частей: уровни, враги, монеты, оружие, здоровье, таймеры, меню, частицы, камеры, анимации и сохранения.</p>
+</div>
+
+<div class="panel doc-section">
+<h2><span class="num">34</span>Куда идти дальше</h2>
+<p>После изучения этой страницы не нужно запоминать каждую функцию дословно. Запомни карту движка: <b>800×450 → main.mrr → start/update → касания → состояние → dt → рисование → overlapRect/moveBody → спрайты → модули → save/load → отладка</b>.</p>
+<p>Для конкретной функции используй «📖 Шпаргалку», но механику игры строй из принципов выше. Тогда новые функции становятся инструментами, а не набором магических команд.</p>
+</div>
+
 <div class="panel doc-section">
 <h2>Примеры</h2>
 <div class="examples-grid" id="examplesGrid"></div>
-</div></div>
+</div>
+
+</div>
 </section>
-</main>
 <!-- шпаргалка -->
 <div class="sheet-backdrop hidden" id="sheetBackdrop">
 <div class="sheet">
