@@ -2397,6 +2397,56 @@ body.tour-open{overflow:hidden}
   .find-case{height:38px;padding:0 7px}
 }
 
+@media (max-width:640px){
+  .ai-sheet{height:92dvh;max-height:92dvh;overflow:hidden}
+  .ai-settings{max-height:46dvh;overflow:auto;padding:12px;gap:7px}
+  .ai-settings label{font-size:11.5px;gap:4px}
+  .ai-settings input{height:40px;padding:8px 10px}
+  .ai-hint{font-size:11px;line-height:1.45}
+  .ai-chat{flex:1 1 auto;min-height:0;padding:12px}
+  .ai-input{flex:none;position:sticky;bottom:0;z-index:2}
+  .ai-msg{max-width:96%}
+  .sheet-head .sh-btns .btn.mini{height:30px;padding:0 8px}
+}
+
+@media (max-width:640px){
+  .code-toolbar{flex-wrap:wrap;overflow:visible;gap:6px;row-gap:6px;margin-bottom:8px;padding-bottom:0}
+  .code-toolbar .spacer{display:none}
+  .code-toolbar .btn{height:34px;padding:0 10px;font-size:12px}
+  .code-toolbar .color-tool{display:none}
+  #examplesSelect{flex:1 1 110px;max-width:none}
+  .palette{scroll-snap-type:x proximity;padding-right:14px}
+  .pal-btn{scroll-snap-align:start}
+}
+
+@media (max-width:640px){
+  .minimap{display:none}
+  .gutter{flex-basis:34px;width:34px}
+  .gutter-inner{font:11px/26px var(--font-code);padding:14px 4px 40px 0}
+  .hl,#codeInput{padding:14px 10px 44px}
+  .code-status{flex-wrap:nowrap;align-items:flex-start;gap:7px;padding:8px 10px}
+  #caretPos{flex:none;font-size:11px}
+  .code-status .status-sep{display:none}
+  #hintBar{
+    flex:1 1 auto;
+    min-width:0;
+    font-size:11px;
+    line-height:1.35;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  #btnWrapToggle{flex:none;height:26px;padding:0 7px;font-size:11px}
+}
+
+.editor-wrap.wrap-on .gutter,.editor-wrap.wrap-on .minimap{display:none}
+.editor-wrap.wrap-on #codeInput,.editor-wrap.wrap-on .hl{
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{
     animation-duration:.01ms!important;
@@ -2562,6 +2612,7 @@ body.tour-open{overflow:hidden}
 <span id="caretPos">Строка 29, столбец 2</span>
 <span class="status-sep"></span>
 <span id="hintBar">💡 Печатай имя — появится список, тапни вариант · «📖» — шпаргалка · «🤖» — ИИ напишет код за тебя</span>
+<button aria-pressed="false" class="btn mini ghost" id="btnWrapToggle" title="Переносить длинные строки на телефоне">↩ Перенос</button>
 </div>
 <div class="ac-popup hidden" id="acPopup" style="left: 31.3646px; top: 141.531px;">
 <button id="acClose">✕</button>
@@ -7741,6 +7792,73 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
       }
     }
   }, true);
+})();
+</script>
+
+<script id="mrrcode-mobile-ux">
+(function(){
+  const input = document.getElementById('codeInput');
+  const wrap = document.getElementById('editorWrap');
+  const btn = document.getElementById('btnWrapToggle');
+  const KEY = 'mrrcode-wrap-lines';
+
+  function apply(on){
+    if (wrap) wrap.classList.toggle('wrap-on', on);
+    if (input) {
+      try { input.wrap = on ? 'soft' : 'off'; } catch (_) {}
+    }
+    if (btn) {
+      btn.setAttribute('aria-pressed', String(on));
+      btn.textContent = on ? '↩ Перенос: вкл' : '↩ Перенос';
+    }
+  }
+
+  let stored = false;
+  try { stored = localStorage.getItem(KEY) === '1'; } catch (_) {}
+  apply(stored);
+
+  if (btn) btn.addEventListener('click', () => {
+    const next = !(wrap && wrap.classList.contains('wrap-on'));
+    apply(next);
+    try { localStorage.setItem(KEY, next ? '1' : '0'); } catch (_) {}
+  });
+
+  const settingsBtn = document.getElementById('btnAiSettings');
+  const mq = window.matchMedia ? window.matchMedia('(max-width:640px)') : null;
+  const compactLabels = {
+    btnExportPxl: '⬇',
+    btnImportPxl: '⬆',
+    btnDebug: '🐞',
+    btnColorPicker: '🎨'
+  };
+
+  function paintSettingsLabel(){
+    if (!settingsBtn) return;
+    settingsBtn.textContent = mq && mq.matches ? '⚙' : '⚙ Подключение';
+    settingsBtn.setAttribute('aria-label', 'Подключение ИИ');
+    settingsBtn.title = 'Подключение ИИ';
+  }
+
+  function paintCodeTools(){
+    const compact = !mq || mq.matches;
+    Object.keys(compactLabels).forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (!el.dataset.full) el.dataset.full = el.textContent;
+      el.textContent = compact ? compactLabels[id] : el.dataset.full;
+    });
+  }
+
+  paintSettingsLabel();
+  paintCodeTools();
+  if (mq) {
+    const onMedia = () => {
+      paintSettingsLabel();
+      paintCodeTools();
+    };
+    if (mq.addEventListener) mq.addEventListener('change', onMedia);
+    else if (mq.addListener) mq.addListener(onMedia);
+  }
 })();
 </script>
 
