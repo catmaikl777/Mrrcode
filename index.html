@@ -1080,6 +1080,36 @@ header::after{
 #runStatus.error{color:var(--red);border-color:rgba(224,138,118,.3)}
 #runStatus.error::before{background:var(--red);box-shadow:0 0 0 3px rgba(224,138,118,.15)}
 
+.save-status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  flex:none;
+  height:30px;
+  padding:0 10px;
+  border:1px solid var(--border-soft);
+  border-radius:999px;
+  background:rgba(5,22,21,.6);
+  color:var(--muted);
+  font-size:11.5px;
+  font-weight:500;
+  white-space:nowrap;
+  transition:color .2s ease,border-color .2s ease,background .2s ease;
+}
+.save-status i{
+  width:7px;
+  height:7px;
+  flex:none;
+  border-radius:50%;
+  background:var(--muted-2);
+  box-shadow:0 0 0 3px rgba(142,127,109,.12);
+  transition:background .2s ease,box-shadow .2s ease;
+}
+.save-status.saved{color:var(--sage);border-color:rgba(143,195,164,.25)}
+.save-status.saved i{background:var(--sage);box-shadow:0 0 0 3px rgba(143,195,164,.14)}
+.save-status.dirty{color:var(--amber);border-color:rgba(232,192,125,.3)}
+.save-status.dirty i{background:var(--amber);box-shadow:0 0 0 3px rgba(232,192,125,.14)}
+
 /* ---------- кнопки ---------- */
 
 .btn{
@@ -2064,6 +2094,11 @@ main *{scrollbar-color:#3b5a57 #0a201f}
   @keyframes sheetUp{from{transform:translateY(16px) scale(.99);opacity:0}to{transform:none;opacity:1}}
 }
 
+@media (min-width:1180px){
+  header{flex-wrap:nowrap}
+  .tabs{min-width:0}
+}
+
 @media (min-width:1200px){
   .files-layout{grid-template-columns:minmax(0,1fr) 360px}
 }
@@ -2077,6 +2112,8 @@ main *{scrollbar-color:#3b5a57 #0a201f}
   .tabs{order:3;flex:1 1 100%;padding:3px;border-radius:12px}
   .tab-btn{padding:8px 10px;font-size:12px;border-radius:9px}
   .run-controls{order:2;margin-left:auto;gap:6px}
+  .save-status{width:26px;height:26px;padding:0;justify-content:center;border-color:transparent;background:transparent}
+  .save-status .save-text{display:none}
   #btnRun{min-width:0;padding:0 12px}
   #btnStop{min-width:0;padding:0 11px}
   #runStatus{display:none}
@@ -2280,6 +2317,7 @@ main *{scrollbar-color:#3b5a57 #0a201f}
 <button class="tab-btn" data-tab="help">? Справка</button>
 </nav>
 <div class="run-controls">
+<span aria-live="polite" class="save-status saved" id="saveStatus" title="Проект сохранён в браузере"><i aria-hidden="true"></i><span class="save-text">Сохранено</span></span>
 <button class="btn ai" id="btnAI" title="ИИ-агент">🤖 ИИ</button>
 <button class="btn primary" id="btnRun" title="Запуск main.mrr на весь экран">▶ Запуск</button>
 <button class="btn stop" disabled="" id="btnStop">■ Стоп</button>
@@ -4938,7 +4976,7 @@ function redoEdit(){if(!editRedo.length)return;const v=editRedo.pop();editUndo.p
 function projectData(){syncCodeToFile();return {app:'MrrCode',format:'mrrcode-project',version:8,activeFile:state.activeFile,files:state.files,sprites:state.sprites.map(s=>({name:s.name,dataUrl:s.dataUrl})),scene:state.scene.map(o=>{const c=Object.assign({},o);delete c.id;return c;})};}
 function saveProjectLocal(){try{localStorage.setItem('mrrcode-project-v2',JSON.stringify(projectData()));setNote('Проект сохранён в браузере.');logConsole('[MrrCode] Автосохранение выполнено.','sys');}catch(err){setNote('Не удалось сохранить проект: '+err.message);}}
 function restoreProjectLocal(){if(window.__MRRCODE_STANDALONE__)return false;try{const raw=localStorage.getItem('mrrcode-project-v2');if(!raw)return false;const data=JSON.parse(raw);if(!data||!data.files)return false;state.files={};for(const k of Object.keys(data.files))state.files[k]=String(data.files[k]);if(!state.files[ENTRY_FILE])state.files[ENTRY_FILE]=DEFAULT_CODE;state.activeFile=state.files[data.activeFile]?data.activeFile:ENTRY_FILE;state.sprites=(data.sprites||[]).map(s=>{const img=new Image();img.src=s.dataUrl;return {name:String(s.name),dataUrl:s.dataUrl,img,sizeKb:Math.max(1,Math.round((s.dataUrl||'').length*.75/1024))};});state.scene=sanitizeScene(data.scene||[]);codeInput.value=state.files[state.activeFile];document.getElementById('codeFileName').textContent=state.activeFile;renderObjList();renderProps();renderScenePreview();renderFiles();return true;}catch(_){return false;}}
-setInterval(()=>{try{localStorage.setItem('mrrcode-project-v2',JSON.stringify(projectData()));}catch(_){}},15000);
+setInterval(()=>{try{localStorage.setItem('mrrcode-project-v2',JSON.stringify(projectData()));if(window.mrrNoteAutosave)window.mrrNoteAutosave();}catch(_){}},15000);
 function saveProjectVersion(label){try{const key='mrrcode-history-v1';const list=JSON.parse(localStorage.getItem(key)||'[]');const snap=projectData();snap.savedAt=new Date().toISOString();snap.label=label||'Автосохранение';list.unshift(snap);localStorage.setItem(key,JSON.stringify(list.slice(0,12)));return true;}catch(err){setNote('Не удалось сохранить версию: '+err.message);return false;}}
 function showProjectHistory(){try{const list=JSON.parse(localStorage.getItem('mrrcode-history-v1')||'[]');if(!list.length){setNote('История пуста. Сохрани версию через «🕘 Версии».');return;}const choice=prompt('История версий (введи номер для восстановления; отмена — выход):\n'+list.map((v,i)=>(i+1)+'. '+(v.label||'Версия')+' — '+(v.savedAt||'дата неизвестна')+'; файлов '+Object.keys(v.files||{}).length).join('\n'));if(choice===null)return;const idx=Number(choice)-1;if(!Number.isInteger(idx)||idx<0||idx>=list.length){setNote('Номер версии не распознан.');return;}if(!confirm('Восстановить версию? Текущее состояние сначала сохранится в истории.'))return;saveProjectVersion('Перед восстановлением');const d=list[idx];state.files={};Object.keys(d.files||{}).forEach(k=>state.files[k]=String(d.files[k]));if(!state.files[ENTRY_FILE])state.files[ENTRY_FILE]=DEFAULT_CODE;state.activeFile=state.files[d.activeFile]?d.activeFile:ENTRY_FILE;state.sprites=(d.sprites||[]).map(sp=>{const img=new Image();img.src=sp.dataUrl;return {name:String(sp.name),dataUrl:sp.dataUrl,img,sizeKb:Math.max(1,Math.round((sp.dataUrl||'').length*.75/1024))};});state.scene=sanitizeScene(d.scene||[]);state.selectedId=null;codeInput.value=state.files[state.activeFile];document.getElementById('codeFileName').textContent=state.activeFile;refreshEditor();renderFiles();renderObjList();renderProps();renderScenePreview();setNote('Версия восстановлена: '+(d.savedAt||''));}catch(err){setNote('История недоступна: '+err.message);}}
 document.getElementById('btnProjectHistory').addEventListener('click',()=>{saveProjectVersion('Снимок вручную');showProjectHistory();});
@@ -7277,6 +7315,99 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
   document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => setTimeout(schedule, 60)));
   window.addEventListener('load', schedule);
   setTimeout(schedule, 100);
+})();
+</script>
+
+<script id="mrrcode-save-status">
+(function(){
+  const el = document.getElementById('saveStatus');
+  if (!el) return;
+  const text = el.querySelector('.save-text');
+  const input = document.getElementById('codeInput');
+  let savedSig = '';
+  let dirty = false;
+
+  function signature(){
+    try {
+      return JSON.stringify({
+        active: state.activeFile,
+        files: state.files,
+        sprites: state.sprites.map(sprite => sprite.name),
+        scene: state.scene.map(obj => ({
+          type: obj.type, name: obj.name, x: obj.x, y: obj.y,
+          w: obj.w, h: obj.h, r: obj.r, color: obj.color,
+          text: obj.text, size: obj.size
+        }))
+      });
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function time(){
+    const now = new Date();
+    return String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  }
+
+  function paint(){
+    el.classList.toggle('dirty', dirty);
+    el.classList.toggle('saved', !dirty);
+    el.setAttribute('aria-label', dirty ? 'Есть несохранённые изменения' : 'Проект сохранён в браузере');
+  }
+
+  function markDirty(){
+    if (dirty) return;
+    dirty = true;
+    if (text) text.textContent = 'Не сохранено';
+    el.title = 'Есть несохранённые изменения. Автосохранение раз в 15 секунд.';
+    paint();
+  }
+
+  function markSaved(){
+    savedSig = signature();
+    dirty = false;
+    if (text) text.textContent = 'Сохранено ' + time();
+    el.title = 'Сохранено в браузере в ' + time();
+    paint();
+  }
+
+  window.mrrNoteAutosave = markSaved;
+
+  if (typeof window.saveProjectLocal === 'function') {
+    const base = window.saveProjectLocal;
+    window.saveProjectLocal = function(){
+      const result = base.apply(this, arguments);
+      markSaved();
+      return result;
+    };
+  }
+
+  if (input) input.addEventListener('input', markDirty);
+
+  function checkSoon(delay){
+    setTimeout(() => {
+      if (signature() !== savedSig) markDirty();
+    }, delay);
+  }
+
+  document.querySelectorAll('.pal-btn').forEach(btn => btn.addEventListener('click', () => checkSoon(30)));
+  ['btnUndo','btnRedo','btnColorPicker','btnSaveNow'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', () => checkSoon(70));
+  });
+
+  setInterval(() => {
+    if (!dirty && signature() !== savedSig) markDirty();
+  }, 1200);
+
+  window.addEventListener('beforeunload', event => {
+    if (!dirty) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
+
+  savedSig = signature();
+  paint();
 })();
 </script>
 </body></html>
