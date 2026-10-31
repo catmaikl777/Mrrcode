@@ -2117,6 +2117,118 @@ main *{scrollbar-color:#3b5a57 #0a201f}
   .tab-btn{padding:8px 8px;font-size:11.5px}
 }
 
+/* ---------- справка: оглавление и сворачиваемые секции ---------- */
+
+.help-nav{
+  position:sticky;
+  top:0;
+  z-index:30;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:12px;
+  background:linear-gradient(180deg,rgba(18,41,42,.98),rgba(14,34,35,.97));
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:0 12px 30px rgba(0,0,0,.3);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+}
+.help-nav-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.help-search{position:relative;display:flex;align-items:center;flex:1 1 240px;min-width:0}
+.help-search>span{position:absolute;left:11px;color:var(--muted-2);font-size:15px;pointer-events:none}
+#helpSearch{
+  width:100%;
+  height:38px;
+  padding:0 12px 0 34px;
+  background:#0a201f;
+  border:1px solid var(--border);
+  border-radius:11px;
+  color:var(--text);
+  font:14px var(--font-ui);
+  font-size:16px;
+  outline:none;
+  transition:border-color .16s ease,box-shadow .16s ease;
+}
+#helpSearch:focus{border-color:var(--accent);box-shadow:var(--focus-ring)}
+.help-nav-actions{display:flex;gap:6px;flex:none}
+.help-toc{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:3px;
+  max-height:150px;
+  overflow:auto;
+  padding-right:2px;
+  scrollbar-width:thin;
+  -webkit-mask-image:linear-gradient(#000 calc(100% - 16px),transparent);
+  mask-image:linear-gradient(#000 calc(100% - 16px),transparent);
+}
+.help-toc a{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+  padding:6px 8px;
+  border-radius:8px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.35;
+  text-decoration:none;
+  transition:background .14s ease,color .14s ease,opacity .14s ease;
+}
+.help-toc a:hover{background:rgba(207,127,87,.1);color:var(--text)}
+.help-toc a .n{
+  flex:none;
+  min-width:19px;
+  height:19px;
+  padding:0 4px;
+  border-radius:6px;
+  display:grid;
+  place-items:center;
+  background:rgba(207,127,87,.1);
+  color:var(--accent-hi);
+  font:700 10px var(--font-code);
+}
+.help-toc a .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.help-toc a.dim{opacity:.28}
+.help-search-info{font-size:11.5px;color:var(--muted-2);line-height:1.4}
+.doc-section{scroll-margin-top:10px}
+.doc-section h2{position:relative;padding-right:42px}
+.doc-toggle{
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--border-soft);
+  border-radius:9px;
+  background:rgba(10,32,31,.55);
+  color:var(--muted);
+  font-size:14px;
+  line-height:1;
+  cursor:pointer;
+  transition:background .16s ease,border-color .16s ease,color .16s ease;
+}
+.doc-toggle:hover{border-color:var(--accent);background:rgba(207,127,87,.1);color:var(--accent-hi)}
+.doc-toggle span{display:block;transition:transform .18s ease}
+.doc-section.collapsed .doc-toggle span{transform:rotate(-90deg)}
+.doc-section.collapsed .doc-body{display:none}
+.doc-section.search-hit{border-color:rgba(207,127,87,.42)}
+.doc-section[hidden]{display:none}
+
+@media (max-width:640px){
+  .help-nav{padding:10px;border-radius:13px;gap:8px}
+  .help-toc{grid-template-columns:1fr 1fr;max-height:118px}
+  .help-toc a{font-size:11px;padding:5px 6px}
+  .help-toc a .n{min-width:17px;height:17px;font-size:9px}
+  .help-nav-actions .btn{padding:0 8px;font-size:11.5px}
+  .doc-section h2{padding-right:36px}
+  .doc-toggle{width:28px;height:28px}
+}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{
     animation-duration:.01ms!important;
@@ -2335,6 +2447,18 @@ main *{scrollbar-color:#3b5a57 #0a201f}
 <!-- ================= HELP ================= -->
 <section class="tab" id="tab-help">
 <div class="help-wrap">
+
+<div class="panel help-nav" id="helpNav">
+<div class="help-nav-row">
+<label class="help-search"><span aria-hidden="true">⌕</span><input autocomplete="off" id="helpSearch" placeholder="Найти раздел: столкновения, спрайты, звук…" type="search" aria-label="Поиск по справке"/></label>
+<div class="help-nav-actions">
+<button class="btn mini ghost" id="helpExpandAll" type="button">Развернуть</button>
+<button class="btn mini ghost" id="helpCollapseAll" type="button">Свернуть</button>
+</div>
+</div>
+<div aria-label="Оглавление справки" class="help-toc" id="helpToc"></div>
+<div aria-live="polite" class="help-search-info" hidden="" id="helpSearchInfo"></div>
+</div>
 
 <div class="panel doc-section">
 <h2><span class="num">1</span>Главная идея MrrCode: как думать об игре <span class="mrr-cat-paw">🐾</span></h2>
@@ -6842,5 +6966,162 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
       .catch(err => console.warn('MrrCode: service worker не зарегистрирован', err));
   });
 }
+</script>
+
+<script id="mrrcode-help-nav">
+(function(){
+  const wrap = document.querySelector('#tab-help .help-wrap');
+  if (!wrap) return;
+  const toc = document.getElementById('helpToc');
+  const search = document.getElementById('helpSearch');
+  const info = document.getElementById('helpSearchInfo');
+  const nav = document.getElementById('helpNav');
+  const scroller = document.querySelector('main');
+  const sections = Array.from(wrap.querySelectorAll('.doc-section'));
+  if (!toc || !search || !sections.length) return;
+
+  let savedOpen = null;
+  let filterTimer = 0;
+
+  function cleanTitle(el){
+    const copy = el.cloneNode(true);
+    copy.querySelectorAll('.num,.mrr-cat-paw,.doc-toggle').forEach(node => node.remove());
+    return copy.textContent.replace(/\s+/g,' ').trim();
+  }
+
+  function scrollToSection(sec){
+    if (!scroller) return sec.scrollIntoView({block:'start'});
+    const offset = (nav ? nav.offsetHeight : 0) + 12;
+    const top = sec.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - offset;
+    scroller.scrollTo({top: Math.max(0, top), behavior:'smooth'});
+  }
+
+  sections.forEach((sec, i) => {
+    const h2 = sec.querySelector('h2');
+    if (!h2) return;
+    if (!sec.id) sec.id = 'help-sec-' + (i + 1);
+
+    const title = cleanTitle(h2);
+    const numNode = h2.querySelector('.num');
+    sec.dataset.title = title;
+    sec.dataset.num = numNode ? numNode.textContent.trim() : '';
+
+    const body = document.createElement('div');
+    body.className = 'doc-body';
+    body.id = sec.id + '-body';
+    Array.from(sec.children).forEach(child => {
+      if (child !== h2) body.appendChild(child);
+    });
+    sec.appendChild(body);
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'doc-toggle';
+    toggle.setAttribute('aria-controls', body.id);
+    toggle.innerHTML = '<span aria-hidden="true">▾</span>';
+    h2.appendChild(toggle);
+
+    function setOpen(open){
+      sec.classList.toggle('collapsed', !open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', (open ? 'Свернуть' : 'Развернуть') + ' раздел: ' + title);
+    }
+    sec.__setOpen = setOpen;
+
+    toggle.addEventListener('click', () => setOpen(sec.classList.contains('collapsed')));
+
+    const link = document.createElement('a');
+    link.href = '#' + sec.id;
+    link.innerHTML = '<span class="n"></span><span class="t"></span>';
+    link.querySelector('.n').textContent = sec.dataset.num || '•';
+    link.querySelector('.t').textContent = title;
+    link.title = title;
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      if (search.value) {
+        search.value = '';
+        applyFilter('');
+      }
+      setOpen(true);
+      scrollToSection(sec);
+    });
+    toc.appendChild(link);
+    sec.__link = link;
+
+    setOpen(i === 0);
+  });
+
+  function setAll(open){
+    sections.forEach(sec => {
+      if (sec.__setOpen) sec.__setOpen(open);
+    });
+  }
+
+  const expandAll = document.getElementById('helpExpandAll');
+  const collapseAll = document.getElementById('helpCollapseAll');
+  if (expandAll) expandAll.addEventListener('click', () => setAll(true));
+  if (collapseAll) collapseAll.addEventListener('click', () => setAll(false));
+
+  function applyFilter(query){
+    query = String(query || '').trim().toLowerCase();
+    const terms = query.split(/\s+/).filter(Boolean);
+
+    if (!terms.length) {
+      sections.forEach(sec => {
+        sec.hidden = false;
+        sec.classList.remove('search-hit');
+        if (sec.__link) sec.__link.classList.remove('dim');
+        if (savedOpen && sec.id in savedOpen && sec.__setOpen) sec.__setOpen(savedOpen[sec.id]);
+      });
+      savedOpen = null;
+      if (info) { info.hidden = true; info.textContent = ''; }
+      return;
+    }
+
+    if (!savedOpen) {
+      savedOpen = {};
+      sections.forEach(sec => { savedOpen[sec.id] = !sec.classList.contains('collapsed'); });
+    }
+
+    let found = 0;
+    sections.forEach(sec => {
+      const body = sec.querySelector('.doc-body') || sec;
+      const haystack = (sec.dataset.title + ' ' + body.textContent).toLowerCase();
+      const hit = terms.every(term => haystack.includes(term));
+      sec.hidden = !hit;
+      sec.classList.toggle('search-hit', hit);
+      if (sec.__link) sec.__link.classList.toggle('dim', !hit);
+      if (hit) {
+        found += 1;
+        if (sec.__setOpen) sec.__setOpen(true);
+      }
+    });
+
+    if (info) {
+      info.hidden = false;
+      info.textContent = found ? 'Найдено разделов: ' + found : 'Ничего не найдено. Попробуй другое слово.';
+    }
+  }
+
+  search.addEventListener('input', () => {
+    clearTimeout(filterTimer);
+    filterTimer = setTimeout(() => applyFilter(search.value), 120);
+  });
+  search.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      search.value = '';
+      applyFilter('');
+      search.blur();
+    }
+  });
+
+  if (location.hash && location.hash.indexOf('#help-sec-') === 0) {
+    const target = document.getElementById(location.hash.slice(1));
+    if (target && target.classList.contains('doc-section')) {
+      if (target.__setOpen) target.__setOpen(true);
+      setTimeout(() => scrollToSection(target), 80);
+    }
+  }
+})();
 </script>
 </body></html>
