@@ -1422,6 +1422,32 @@ select.sel:focus{border-color:var(--accent);box-shadow:var(--focus-ring);outline
 }
 #codeInput::selection{background:rgba(207,127,87,.32)}
 
+.active-line{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:26px;
+  z-index:0;
+  pointer-events:none;
+  opacity:0;
+  border-left:2px solid rgba(240,178,138,.5);
+  background:linear-gradient(90deg,rgba(240,178,138,.09),rgba(240,178,138,.025));
+  will-change:transform;
+}
+
+.minimap{
+  flex:0 0 74px;
+  width:74px;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(180deg,#081c1b,#071918);
+  border-left:1px solid #223c3b;
+  cursor:pointer;
+  touch-action:none;
+}
+#codeMinimap{display:block;width:100%;height:100%}
+
 .c-com{color:#7b8d84;font-style:italic}
 .c-str{color:#b9d3a3}
 .c-num{color:#e8b07a}
@@ -2068,6 +2094,7 @@ main *{scrollbar-color:#3b5a57 #0a201f}
   .gutter{flex-basis:40px;width:40px}
   .gutter-inner{font:12px/26px var(--font-code);padding:14px 6px 40px 0}
   .hl,#codeInput{padding:14px 12px 44px}
+  .minimap{flex-basis:44px;width:44px}
   .palette{padding:6px;gap:5px;border-radius:12px;margin-bottom:10px}
   .pal-btn{min-width:35px;height:34px;padding:0 8px;font-size:12px}
   .code-status{padding:9px 11px;gap:8px;font-size:12px}
@@ -2115,6 +2142,7 @@ main *{scrollbar-color:#3b5a57 #0a201f}
   #btnRun{padding:0 10px}
   #btnStop{padding:0 9px}
   .tab-btn{padding:8px 8px;font-size:11.5px}
+  .minimap{flex-basis:36px;width:36px}
 }
 
 /* ---------- справка: оглавление и сворачиваемые секции ---------- */
@@ -2334,6 +2362,7 @@ main *{scrollbar-color:#3b5a57 #0a201f}
 29
 </div></div>
 <div class="editor-area" id="editorArea">
+<div aria-hidden="true" class="active-line" id="activeLine"></div>
 <pre aria-hidden="true" class="hl" id="hlLayer"><code id="hlCode"><span class="c-com">// Добро пожаловать в MrrCode!</span>
 <span class="c-com">// «Запуск» откроет игру на весь экран устройства.</span>
 <span class="c-com">// На телефоне выход — системная кнопка «назад».</span>
@@ -2366,6 +2395,7 @@ main *{scrollbar-color:#3b5a57 #0a201f}
 </code></pre>
 <textarea autocapitalize="off" autocomplete="off" autocorrect="off" enterkeyhint="next" id="codeInput" spellcheck="false" wrap="off"></textarea>
 </div>
+<div class="minimap" id="editorMinimap" title="Мини-карта: нажми или потяни, чтобы перейти к строке"><canvas aria-hidden="true" id="codeMinimap"></canvas></div>
 </div>
 <div class="panel code-status">
 <span id="caretPos">Строка 29, столбец 2</span>
@@ -7122,6 +7152,131 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
       setTimeout(() => scrollToSection(target), 80);
     }
   }
+})();
+</script>
+
+<script id="mrrcode-editor-enhance">
+(function(){
+  const input = document.getElementById('codeInput');
+  const area = document.getElementById('editorArea');
+  const lineEl = document.getElementById('activeLine');
+  const mm = document.getElementById('codeMinimap');
+  const mmWrap = document.getElementById('editorMinimap');
+  if (!input || !area || !lineEl || !mm || !mmWrap) return;
+
+  const LINE = 26;
+  const PAD = 14;
+  let frame = 0;
+  let dragging = false;
+
+  function caretLine(){
+    const pos = input.selectionStart || 0;
+    const value = input.value;
+    let line = 0;
+    for (let i = 0; i < pos && i < value.length; i++) {
+      if (value.charCodeAt(i) === 10) line++;
+    }
+    return line;
+  }
+
+  function drawActiveLine(){
+    const top = PAD + caretLine() * LINE - input.scrollTop;
+    lineEl.style.transform = 'translateY(' + top + 'px)';
+    lineEl.style.opacity = (top + LINE > 0 && top < area.clientHeight) ? '1' : '0';
+  }
+
+  function metrics(){
+    const lines = input.value.split('\n');
+    const h = mmWrap.clientHeight;
+    const lh = Math.max(0.7, Math.min(3, (h - 8) / Math.max(lines.length, 1)));
+    return { lines, h, lh, pad: 4 };
+  }
+
+  function drawMinimap(){
+    const w = mmWrap.clientWidth;
+    const h = mmWrap.clientHeight;
+    if (!w || !h) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const pw = Math.round(w * dpr);
+    const ph = Math.round(h * dpr);
+    if (mm.width !== pw || mm.height !== ph) { mm.width = pw; mm.height = ph; }
+    const ctx = mm.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const { lines, lh, pad } = metrics();
+    const codeColor = 'rgba(143,195,164,.6)';
+    const commentColor = 'rgba(123,141,132,.55)';
+
+    for (let i = 0; i < lines.length; i++) {
+      const raw = lines[i];
+      const text = raw.trim();
+      if (!text) continue;
+      const indent = raw.length - raw.replace(/^\s+/, '').length;
+      const x = 5 + Math.min(indent, 36) * 0.5;
+      const width = Math.min(w - x - 4, 4 + text.length * 1.1);
+      if (width <= 0) continue;
+      ctx.fillStyle = text.indexOf('//') === 0 ? commentColor : codeColor;
+      ctx.fillRect(x, pad + i * lh, width, Math.max(0.8, lh - 0.4));
+    }
+
+    const viewTop = pad + (input.scrollTop / LINE) * lh;
+    const viewH = Math.max(3, (area.clientHeight / LINE) * lh);
+    const y = Math.max(pad, Math.min(viewTop, h - pad - 2));
+    const vh = Math.max(2, Math.min(viewH, h - pad - y));
+    ctx.fillStyle = 'rgba(240,178,138,.12)';
+    ctx.fillRect(0, y, w, vh);
+    ctx.strokeStyle = 'rgba(240,178,138,.55)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, y + 0.5, w - 1, Math.max(1, vh - 1));
+  }
+
+  function render(){
+    frame = 0;
+    drawActiveLine();
+    drawMinimap();
+  }
+
+  function schedule(){
+    if (frame) return;
+    frame = requestAnimationFrame(render);
+  }
+
+  function jump(clientY){
+    const rect = mmWrap.getBoundingClientRect();
+    const { lines, lh, pad } = metrics();
+    const line = Math.max(0, Math.min(lines.length - 1, Math.floor((clientY - rect.top - pad) / lh)));
+    let pos = 0;
+    for (let i = 0; i < line; i++) pos += lines[i].length + 1;
+    input.focus();
+    input.setSelectionRange(pos, pos);
+    input.scrollTop = Math.max(0, line * LINE - area.clientHeight / 2 + LINE / 2);
+    schedule();
+  }
+
+  ['input','keyup','click','select','focus'].forEach(name => input.addEventListener(name, schedule));
+  input.addEventListener('scroll', schedule, { passive: true });
+  document.addEventListener('selectionchange', () => {
+    if (document.activeElement === input) schedule();
+  });
+
+  mmWrap.addEventListener('pointerdown', event => {
+    event.preventDefault();
+    dragging = true;
+    try { mmWrap.setPointerCapture(event.pointerId); } catch (_) {}
+    jump(event.clientY);
+  });
+  mmWrap.addEventListener('pointermove', event => {
+    if (dragging) jump(event.clientY);
+  });
+  window.addEventListener('pointerup', () => { dragging = false; });
+  window.addEventListener('pointercancel', () => { dragging = false; });
+
+  if (window.ResizeObserver) new ResizeObserver(schedule).observe(area);
+  window.addEventListener('resize', schedule);
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => setTimeout(schedule, 60)));
+  window.addEventListener('load', schedule);
+  setTimeout(schedule, 100);
 })();
 </script>
 </body></html>
