@@ -2343,6 +2343,60 @@ body.tour-open{overflow:hidden}
   .doc-toggle{width:28px;height:28px}
 }
 
+.find-bar{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:9px;
+  margin-bottom:10px;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:12px;
+}
+.find-bar.hidden{display:none}
+.find-row{display:flex;align-items:center;gap:6px}
+.find-row input{
+  flex:1 1 auto;
+  min-width:0;
+  height:38px;
+  padding:0 11px;
+  background:#0a201f;
+  border:1px solid var(--border);
+  border-radius:10px;
+  color:var(--text);
+  font:16px var(--font-ui);
+  outline:none;
+  -webkit-appearance:none;
+  appearance:none;
+  transition:border-color .16s ease,box-shadow .16s ease;
+}
+.find-row input:focus{border-color:var(--accent);box-shadow:var(--focus-ring)}
+.find-row input::-webkit-search-cancel-button{-webkit-appearance:none}
+.find-count{flex:none;min-width:44px;text-align:center;font:12px var(--font-code);color:var(--muted-2)}
+.find-case{
+  flex:none;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  height:38px;
+  padding:0 8px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  color:var(--muted);
+  font:12px var(--font-ui);
+  cursor:pointer;
+}
+.find-case input{width:15px;height:15px;margin:0;accent-color:var(--accent)}
+
+@media (max-width:640px){
+  .find-bar{padding:8px;gap:5px;border-radius:11px}
+  .find-row{gap:5px}
+  .find-row .btn.mini{min-width:38px;height:38px;padding:0 8px}
+  .find-row input{height:38px;padding:0 9px}
+  .find-count{min-width:38px;font-size:11.5px}
+  .find-case{height:38px;padding:0 7px}
+}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{
     animation-duration:.01ms!important;
@@ -2404,6 +2458,7 @@ body.tour-open{overflow:hidden}
 <span class="spacer"></span>
 <select class="sel" id="examplesSelect" title="Примеры"><option value="">Примеры…</option></select>
 <button class="btn" id="btnSheet" title="Шпаргалка по языку">📖</button>
+<button class="btn" id="btnFind" title="Найти и заменить в файле">🔍</button>
 <button class="btn ai" id="btnAiCode" title="ИИ-агент">🤖</button>
 <button class="btn primary" id="btnRunCode" title="Запуск main.mrr">▶</button>
 <button class="btn ghost" id="btnExportPxl" title="Экспорт текущего файла .mrr">⬇ .mrr</button>
@@ -2417,6 +2472,25 @@ body.tour-open{overflow:hidden}
 <input aria-label="Выбор цвета" class="color-picker-input" data-end="26" data-original="#fffffff" data-start="18" id="codeColorInput" type="color" value="#70d6ff"/>
 </div>
 <div class="palette" id="touchPalette"><button class="pal-btn" title="Отступ" type="button">⇥</button><button class="pal-btn" title="Новая строка с отступом" type="button">⏎</button><div class="pal-sep"></div><button class="pal-btn" type="button">(</button><button class="pal-btn" type="button">)</button><button class="pal-btn" type="button">{</button><button class="pal-btn" type="button">}</button><button class="pal-btn" type="button">[</button><button class="pal-btn" type="button">]</button><button class="pal-btn" type="button">"</button><button class="pal-btn" type="button">,</button><button class="pal-btn" type="button">;</button><div class="pal-sep"></div><button class="pal-btn" type="button">=</button><button class="pal-btn" type="button">+</button><button class="pal-btn" type="button">-</button><button class="pal-btn" type="button">*</button><button class="pal-btn" type="button">/</button><button class="pal-btn" type="button">%</button><button class="pal-btn" type="button">&lt;</button><button class="pal-btn" type="button">&gt;</button><button class="pal-btn" type="button">==</button><button class="pal-btn" type="button">!=</button><button class="pal-btn" type="button">&lt;=</button><button class="pal-btn" type="button">&gt;=</button><button class="pal-btn" type="button">!</button><button class="pal-btn" type="button">&amp;&amp;</button><button class="pal-btn" type="button">||</button><div class="pal-sep"></div><button class="pal-btn" type="button">let</button><button class="pal-btn" type="button">const</button><button class="pal-btn" type="button">if</button><button class="pal-btn" type="button">else</button><button class="pal-btn" type="button">while</button><button class="pal-btn" type="button">for</button><button class="pal-btn" type="button">func</button><button class="pal-btn" type="button">return</button><button class="pal-btn" type="button">true</button><button class="pal-btn" type="button">false</button><button class="pal-btn" type="button">null</button><div class="pal-sep"></div><button class="pal-btn" type="button">start()</button><button class="pal-btn" type="button">update()</button><button class="pal-btn" type="button">from…import</button><div class="pal-sep"></div><button class="pal-btn" type="button">print</button><button class="pal-btn" type="button">clear</button><button class="pal-btn" type="button">rect</button><button class="pal-btn" type="button">circle</button><button class="pal-btn" type="button">line</button><button class="pal-btn" type="button">text</button><button class="pal-btn" type="button">sprite</button><button class="pal-btn" type="button">object</button><div class="pal-sep"></div><button class="pal-btn" type="button">pointerX()</button><button class="pal-btn" type="button">pointerY()</button><button class="pal-btn" type="button">pointerDownNow()</button><button class="pal-btn" type="button">touchCount()</button><button class="pal-btn" type="button">touchX()</button><button class="pal-btn" type="button">touchY()</button><div class="pal-sep"></div><button class="pal-btn" type="button">time()</button><button class="pal-btn" type="button">dt()</button><button class="pal-btn" type="button">random()</button><button class="pal-btn" type="button">rand()</button><button class="pal-btn" type="button">clamp()</button><button class="pal-btn" type="button">length()</button><button class="pal-btn" type="button">push()</button><button class="pal-btn" type="button">pop()</button><button class="pal-btn" type="button">sqrt()</button><button class="pal-btn" type="button">abs()</button><button class="pal-btn" type="button">sin()</button><button class="pal-btn" type="button">cos()</button><button class="pal-btn" type="button">floor()</button><button class="pal-btn" type="button">round()</button><button class="pal-btn" type="button">min()</button><button class="pal-btn" type="button">max()</button><button class="pal-btn" title="Отступ" type="button">⇥</button><button class="pal-btn" title="Новая строка с отступом" type="button">⏎</button><div class="pal-sep"></div><button class="pal-btn" type="button">(</button><button class="pal-btn" type="button">)</button><button class="pal-btn" type="button">{</button><button class="pal-btn" type="button">}</button><button class="pal-btn" type="button">[</button><button class="pal-btn" type="button">]</button><button class="pal-btn" type="button">"</button><button class="pal-btn" type="button">,</button><button class="pal-btn" type="button">;</button><div class="pal-sep"></div><button class="pal-btn" type="button">=</button><button class="pal-btn" type="button">+</button><button class="pal-btn" type="button">-</button><button class="pal-btn" type="button">*</button><button class="pal-btn" type="button">/</button><button class="pal-btn" type="button">%</button><button class="pal-btn" type="button">&lt;</button><button class="pal-btn" type="button">&gt;</button><button class="pal-btn" type="button">==</button><button class="pal-btn" type="button">!=</button><button class="pal-btn" type="button">&lt;=</button><button class="pal-btn" type="button">&gt;=</button><button class="pal-btn" type="button">!</button><button class="pal-btn" type="button">&amp;&amp;</button><button class="pal-btn" type="button">||</button><div class="pal-sep"></div><button class="pal-btn" type="button">let</button><button class="pal-btn" type="button">const</button><button class="pal-btn" type="button">if</button><button class="pal-btn" type="button">else</button><button class="pal-btn" type="button">while</button><button class="pal-btn" type="button">for</button><button class="pal-btn" type="button">func</button><button class="pal-btn" type="button">return</button><button class="pal-btn" type="button">true</button><button class="pal-btn" type="button">false</button><button class="pal-btn" type="button">null</button><div class="pal-sep"></div><button class="pal-btn" type="button">start()</button><button class="pal-btn" type="button">update()</button><button class="pal-btn" type="button">from…import</button><div class="pal-sep"></div><button class="pal-btn" type="button">print</button><button class="pal-btn" type="button">clear</button><button class="pal-btn" type="button">rect</button><button class="pal-btn" type="button">circle</button><button class="pal-btn" type="button">line</button><button class="pal-btn" type="button">text</button><button class="pal-btn" type="button">sprite</button><button class="pal-btn" type="button">object</button><div class="pal-sep"></div><button class="pal-btn" type="button">pointerX()</button><button class="pal-btn" type="button">pointerY()</button><button class="pal-btn" type="button">pointerDownNow()</button><button class="pal-btn" type="button">touchCount()</button><button class="pal-btn" type="button">touchX()</button><button class="pal-btn" type="button">touchY()</button><div class="pal-sep"></div><button class="pal-btn" type="button">time()</button><button class="pal-btn" type="button">dt()</button><button class="pal-btn" type="button">random()</button><button class="pal-btn" type="button">rand()</button><button class="pal-btn" type="button">clamp()</button><button class="pal-btn" type="button">length()</button><button class="pal-btn" type="button">push()</button><button class="pal-btn" type="button">pop()</button><button class="pal-btn" type="button">sqrt()</button><button class="pal-btn" type="button">abs()</button><button class="pal-btn" type="button">sin()</button><button class="pal-btn" type="button">cos()</button><button class="pal-btn" type="button">floor()</button><button class="pal-btn" type="button">round()</button><button class="pal-btn" type="button">min()</button><button class="pal-btn" type="button">max()</button><button class="pal-btn" title="Отступ" type="button">⇥</button><button class="pal-btn" title="Новая строка с отступом" type="button">⏎</button><div class="pal-sep"></div><button class="pal-btn" type="button">(</button><button class="pal-btn" type="button">)</button><button class="pal-btn" type="button">{</button><button class="pal-btn" type="button">}</button><button class="pal-btn" type="button">[</button><button class="pal-btn" type="button">]</button><button class="pal-btn" type="button">"</button><button class="pal-btn" type="button">,</button><button class="pal-btn" type="button">;</button><div class="pal-sep"></div><button class="pal-btn" type="button">=</button><button class="pal-btn" type="button">+</button><button class="pal-btn" type="button">-</button><button class="pal-btn" type="button">*</button><button class="pal-btn" type="button">/</button><button class="pal-btn" type="button">%</button><button class="pal-btn" type="button">&lt;</button><button class="pal-btn" type="button">&gt;</button><button class="pal-btn" type="button">==</button><button class="pal-btn" type="button">!=</button><button class="pal-btn" type="button">&lt;=</button><button class="pal-btn" type="button">&gt;=</button><button class="pal-btn" type="button">!</button><button class="pal-btn" type="button">&amp;&amp;</button><button class="pal-btn" type="button">||</button><div class="pal-sep"></div><button class="pal-btn" type="button">let</button><button class="pal-btn" type="button">const</button><button class="pal-btn" type="button">if</button><button class="pal-btn" type="button">else</button><button class="pal-btn" type="button">while</button><button class="pal-btn" type="button">for</button><button class="pal-btn" type="button">func</button><button class="pal-btn" type="button">return</button><button class="pal-btn" type="button">true</button><button class="pal-btn" type="button">false</button><button class="pal-btn" type="button">null</button><div class="pal-sep"></div><button class="pal-btn" type="button">start()</button><button class="pal-btn" type="button">update()</button><button class="pal-btn" type="button">from…import</button><div class="pal-sep"></div><button class="pal-btn" type="button">print</button><button class="pal-btn" type="button">clear</button><button class="pal-btn" type="button">rect</button><button class="pal-btn" type="button">circle</button><button class="pal-btn" type="button">line</button><button class="pal-btn" type="button">text</button><button class="pal-btn" type="button">sprite</button><button class="pal-btn" type="button">object</button><div class="pal-sep"></div><button class="pal-btn" type="button">pointerX()</button><button class="pal-btn" type="button">pointerY()</button><button class="pal-btn" type="button">pointerDownNow()</button><button class="pal-btn" type="button">touchCount()</button><button class="pal-btn" type="button">touchX()</button><button class="pal-btn" type="button">touchY()</button><div class="pal-sep"></div><button class="pal-btn" type="button">time()</button><button class="pal-btn" type="button">dt()</button><button class="pal-btn" type="button">random()</button><button class="pal-btn" type="button">rand()</button><button class="pal-btn" type="button">clamp()</button><button class="pal-btn" type="button">length()</button><button class="pal-btn" type="button">push()</button><button class="pal-btn" type="button">pop()</button><button class="pal-btn" type="button">sqrt()</button><button class="pal-btn" type="button">abs()</button><button class="pal-btn" type="button">sin()</button><button class="pal-btn" type="button">cos()</button><button class="pal-btn" type="button">floor()</button><button class="pal-btn" type="button">round()</button><button class="pal-btn" type="button">min()</button><button class="pal-btn" type="button">max()</button><button class="pal-btn" title="Отступ" type="button">⇥</button><button class="pal-btn" title="Новая строка с отступом" type="button">⏎</button><div class="pal-sep"></div><button class="pal-btn" type="button">(</button><button class="pal-btn" type="button">)</button><button class="pal-btn" type="button">{</button><button class="pal-btn" type="button">}</button><button class="pal-btn" type="button">[</button><button class="pal-btn" type="button">]</button><button class="pal-btn" type="button">"</button><button class="pal-btn" type="button">,</button><button class="pal-btn" type="button">;</button><div class="pal-sep"></div><button class="pal-btn" type="button">=</button><button class="pal-btn" type="button">+</button><button class="pal-btn" type="button">-</button><button class="pal-btn" type="button">*</button><button class="pal-btn" type="button">/</button><button class="pal-btn" type="button">%</button><button class="pal-btn" type="button">&lt;</button><button class="pal-btn" type="button">&gt;</button><button class="pal-btn" type="button">==</button><button class="pal-btn" type="button">!=</button><button class="pal-btn" type="button">&lt;=</button><button class="pal-btn" type="button">&gt;=</button><button class="pal-btn" type="button">!</button><button class="pal-btn" type="button">&amp;&amp;</button><button class="pal-btn" type="button">||</button><div class="pal-sep"></div><button class="pal-btn" type="button">let</button><button class="pal-btn" type="button">const</button><button class="pal-btn" type="button">if</button><button class="pal-btn" type="button">else</button><button class="pal-btn" type="button">while</button><button class="pal-btn" type="button">for</button><button class="pal-btn" type="button">func</button><button class="pal-btn" type="button">return</button><button class="pal-btn" type="button">true</button><button class="pal-btn" type="button">false</button><button class="pal-btn" type="button">null</button><div class="pal-sep"></div><button class="pal-btn" type="button">start()</button><button class="pal-btn" type="button">update()</button><button class="pal-btn" type="button">from…import</button><div class="pal-sep"></div><button class="pal-btn" type="button">print</button><button class="pal-btn" type="button">clear</button><button class="pal-btn" type="button">rect</button><button class="pal-btn" type="button">circle</button><button class="pal-btn" type="button">line</button><button class="pal-btn" type="button">text</button><button class="pal-btn" type="button">sprite</button><button class="pal-btn" type="button">object</button><div class="pal-sep"></div><button class="pal-btn" type="button">pointerX()</button><button class="pal-btn" type="button">pointerY()</button><button class="pal-btn" type="button">pointerDownNow()</button><button class="pal-btn" type="button">touchCount()</button><button class="pal-btn" type="button">touchX()</button><button class="pal-btn" type="button">touchY()</button><div class="pal-sep"></div><button class="pal-btn" type="button">time()</button><button class="pal-btn" type="button">dt()</button><button class="pal-btn" type="button">random()</button><button class="pal-btn" type="button">rand()</button><button class="pal-btn" type="button">clamp()</button><button class="pal-btn" type="button">length()</button><button class="pal-btn" type="button">push()</button><button class="pal-btn" type="button">pop()</button><button class="pal-btn" type="button">sqrt()</button><button class="pal-btn" type="button">abs()</button><button class="pal-btn" type="button">sin()</button><button class="pal-btn" type="button">cos()</button><button class="pal-btn" type="button">floor()</button><button class="pal-btn" type="button">round()</button><button class="pal-btn" type="button">min()</button><button class="pal-btn" type="button">max()</button></div>
+<div class="panel find-bar hidden" id="findBar">
+<div class="find-row">
+<input aria-label="Найти в файле" autocomplete="off" id="findQuery" placeholder="Найти в файле" type="search"/>
+<span aria-live="polite" class="find-count" id="findCount">0/0</span>
+<button aria-label="Предыдущее совпадение" class="btn mini" id="findPrev" type="button">↑</button>
+<button aria-label="Следующее совпадение" class="btn mini" id="findNext" type="button">↓</button>
+<button aria-label="Закрыть поиск" class="btn mini ghost" id="findClose" type="button">✕</button>
+</div>
+<div class="find-row">
+<input aria-label="Заменить на" autocomplete="off" id="findReplace" placeholder="Заменить на" type="text"/>
+<button class="btn mini" id="findReplaceOne" type="button">Заменить</button>
+<button class="btn mini ghost" id="findReplaceAll" type="button">Всё</button>
+<label class="find-case" title="Учитывать регистр"><input id="findCase" type="checkbox"/><span>Аа</span></label>
+</div>
+<div class="find-row">
+<input aria-label="Номер строки" autocomplete="off" id="goLine" inputmode="numeric" min="1" placeholder="Строка №" type="number"/>
+<button class="btn mini ghost" id="goLineBtn" type="button">Перейти</button>
+</div>
+</div>
 <div class="panel editor-wrap" id="editorWrap">
 <div class="gutter"><div class="gutter-inner" data-n="29" id="gutterInner" style="transform: translateY(0px);">1
 2
@@ -7366,6 +7440,307 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
   document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => setTimeout(schedule, 60)));
   window.addEventListener('load', schedule);
   setTimeout(schedule, 100);
+})();
+</script>
+
+<script id="mrrcode-editor-autopair">
+(function(){
+  const input = document.getElementById('codeInput');
+  if (!input) return;
+
+  const PAIRS = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'" };
+  const CLOSERS = { ')': '(', ']': '[', '}': '{', '"': '"', "'": "'" };
+  const WORD = /[0-9A-Za-z\u0400-\u04FF_]/;
+
+  function sync(){
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function text(){
+    return input.value;
+  }
+
+  function insertChar(ch){
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    if (start == null || end == null) return false;
+
+    if (CLOSERS[ch] && start === end && text().charAt(end) === ch) {
+      input.setSelectionRange(end + 1, end + 1);
+      return true;
+    }
+
+    const close = PAIRS[ch];
+    if (!close) return false;
+
+    const before = start > 0 ? text().charAt(start - 1) : '';
+    const after = end < text().length ? text().charAt(end) : '';
+
+    if ((ch === '"' || ch === "'") && (WORD.test(before) || before === '\\')) return false;
+
+    if (start !== end) {
+      const selected = text().slice(start, end);
+      input.setRangeText(ch + selected + close, start, end, 'end');
+      input.setSelectionRange(start + 1, start + 1 + selected.length);
+      sync();
+      return true;
+    }
+
+    if (after && WORD.test(after) && ch !== '{') return false;
+
+    input.setRangeText(ch + close, start, end, 'end');
+    input.setSelectionRange(start + 1, start + 1);
+    sync();
+    return true;
+  }
+
+  function deletePair(){
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    if (start !== end || !start) return false;
+    const prev = text().charAt(start - 1);
+    const next = text().charAt(start);
+    if (PAIRS[prev] !== next) return false;
+    input.setRangeText('', start - 1, start + 1, 'end');
+    input.setSelectionRange(start - 1, start - 1);
+    sync();
+    return true;
+  }
+
+  input.addEventListener('beforeinput', event => {
+    if (event.isComposing || event.cancelable === false) return;
+    if (event.inputType === 'insertText' && typeof event.data === 'string' && event.data.length === 1) {
+      if (insertChar(event.data)) event.preventDefault();
+      return;
+    }
+    if (event.inputType === 'deleteContentBackward' && deletePair()) event.preventDefault();
+  }, true);
+
+  const palette = document.getElementById('touchPalette');
+  if (palette) {
+    palette.addEventListener('click', event => {
+      const btn = event.target && event.target.closest ? event.target.closest('.pal-btn') : null;
+      if (!btn) return;
+      const ch = (btn.textContent || '').trim();
+      if (ch.length !== 1) return;
+      if (!PAIRS[ch] && !CLOSERS[ch]) return;
+      if (!insertChar(ch)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      try { input.focus({ preventScroll: true }); } catch (_) { input.focus(); }
+    }, true);
+  }
+})();
+</script>
+
+<script id="mrrcode-find-replace">
+(function(){
+  const input = document.getElementById('codeInput');
+  const bar = document.getElementById('findBar');
+  const query = document.getElementById('findQuery');
+  const replaceInput = document.getElementById('findReplace');
+  const countEl = document.getElementById('findCount');
+  const caseBox = document.getElementById('findCase');
+  const goLine = document.getElementById('goLine');
+  const openBtn = document.getElementById('btnFind');
+  const LINE = 26;
+
+  if (!input || !bar || !query || !countEl) return;
+
+  let hits = [];
+  let current = -1;
+
+  function sync(){
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function isOpen(){
+    return !bar.classList.contains('hidden');
+  }
+
+  function paint(){
+    if (!isOpen()) return;
+    if (!hits.length) {
+      countEl.textContent = '0/0';
+      return;
+    }
+    countEl.textContent = ((current < 0 ? 0 : current) + 1) + '/' + hits.length;
+  }
+
+  function find(){
+    const needle = query.value;
+    const text = input.value;
+    hits = [];
+    current = -1;
+    if (!needle) {
+      paint();
+      return hits;
+    }
+    const sensitive = !!(caseBox && caseBox.checked);
+    const src = sensitive ? text : text.toLowerCase();
+    const target = sensitive ? needle : needle.toLowerCase();
+    let from = 0;
+    while (from <= src.length - target.length) {
+      const at = src.indexOf(target, from);
+      if (at < 0) break;
+      hits.push({ start: at, end: at + needle.length });
+      from = at + Math.max(1, target.length);
+    }
+    paint();
+    return hits;
+  }
+
+  function reveal(hit){
+    try { input.focus({ preventScroll: true }); } catch (_) { input.focus(); }
+    input.setSelectionRange(hit.start, hit.end);
+    const line = input.value.slice(0, hit.start).split('\n').length - 1;
+    input.scrollTop = Math.max(0, line * LINE - input.clientHeight / 2 + LINE);
+    input.dispatchEvent(new Event('scroll'));
+  }
+
+  function step(delta){
+    if (!isOpen()) return;
+    if (!hits.length) find();
+    if (!hits.length) return;
+    if (current < 0) current = delta > 0 ? 0 : hits.length - 1;
+    else current = (current + delta + hits.length) % hits.length;
+    reveal(hits[current]);
+    paint();
+  }
+
+  function replaceOne(){
+    if (!hits.length) find();
+    if (!hits.length) return;
+    if (current < 0) current = 0;
+    const hit = hits[current];
+    const value = replaceInput ? replaceInput.value : '';
+    input.setRangeText(value, hit.start, hit.end, 'end');
+    input.setSelectionRange(hit.start + value.length, hit.start + value.length);
+    sync();
+    const keep = current;
+    find();
+    if (hits.length) {
+      current = Math.min(keep, hits.length - 1);
+      reveal(hits[current]);
+    } else if (typeof setNote === 'function') {
+      setNote('Больше совпадений нет.');
+    }
+    paint();
+  }
+
+  function replaceAll(){
+    if (!query.value) return;
+    find();
+    if (!hits.length) return;
+    const value = replaceInput ? replaceInput.value : '';
+    const text = input.value;
+    const parts = [];
+    let last = 0;
+    hits.forEach(hit => {
+      parts.push(text.slice(last, hit.start), value);
+      last = hit.end;
+    });
+    parts.push(text.slice(last));
+    const total = hits.length;
+    input.setRangeText(parts.join(''), 0, text.length, 'end');
+    input.setSelectionRange(0, input.value.length);
+    sync();
+    find();
+    if (typeof setNote === 'function') setNote('Заменено: ' + total + '.');
+  }
+
+  function jumpToLine(){
+    if (!goLine) return;
+    const n = parseInt(String(goLine.value).replace(/[^\d]/g, ''), 10);
+    if (!n || n < 1) return;
+    const lines = input.value.split('\n');
+    const index = Math.min(n, lines.length) - 1;
+    let pos = 0;
+    for (let i = 0; i < index; i++) pos += lines[i].length + 1;
+    try { input.focus({ preventScroll: true }); } catch (_) { input.focus(); }
+    input.setSelectionRange(pos, pos);
+    input.scrollTop = Math.max(0, index * LINE - input.clientHeight / 2 + LINE);
+    input.dispatchEvent(new Event('scroll'));
+  }
+
+  function show(withReplace){
+    bar.classList.remove('hidden');
+    if (input.selectionStart !== input.selectionEnd) {
+      const selected = input.value.slice(input.selectionStart, input.selectionEnd);
+      if (selected && selected.length <= 80 && selected.indexOf('\n') < 0) query.value = selected;
+    }
+    if (find().length) {
+      current = 0;
+      reveal(hits[0]);
+      paint();
+    }
+    const target = withReplace && replaceInput ? replaceInput : query;
+    try { target.focus({ preventScroll: true }); } catch (_) { target.focus(); }
+  }
+
+  function hide(){
+    bar.classList.add('hidden');
+    try { input.focus({ preventScroll: true }); } catch (_) { input.focus(); }
+  }
+
+  if (openBtn) openBtn.addEventListener('click', () => { if (isOpen()) hide(); else show(false); });
+  const closeBtn = document.getElementById('findClose');
+  if (closeBtn) closeBtn.addEventListener('click', hide);
+  const prevBtn = document.getElementById('findPrev');
+  const nextBtn = document.getElementById('findNext');
+  if (prevBtn) prevBtn.addEventListener('click', () => step(-1));
+  if (nextBtn) nextBtn.addEventListener('click', () => step(1));
+  const oneBtn = document.getElementById('findReplaceOne');
+  const allBtn = document.getElementById('findReplaceAll');
+  if (oneBtn) oneBtn.addEventListener('click', replaceOne);
+  if (allBtn) allBtn.addEventListener('click', replaceAll);
+  const lineBtn = document.getElementById('goLineBtn');
+  if (lineBtn) lineBtn.addEventListener('click', jumpToLine);
+
+  if (goLine) goLine.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      jumpToLine();
+    }
+  });
+  if (caseBox) caseBox.addEventListener('change', () => find());
+  if (replaceInput) replaceInput.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      replaceOne();
+    }
+  });
+  query.addEventListener('input', () => find());
+  query.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      step(event.shiftKey ? -1 : 1);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      hide();
+    }
+  });
+  input.addEventListener('input', () => {
+    if (isOpen() && query.value) find();
+  });
+
+  document.addEventListener('keydown', event => {
+    if (!(event.ctrlKey || event.metaKey)) return;
+    const key = String(event.key || '').toLowerCase();
+    if (key === 'f') {
+      event.preventDefault();
+      show(false);
+    } else if (key === 'h') {
+      event.preventDefault();
+      show(true);
+    } else if (key === 'g') {
+      event.preventDefault();
+      if (!isOpen()) show(false);
+      if (goLine) {
+        try { goLine.focus({ preventScroll: true }); } catch (_) { goLine.focus(); }
+      }
+    }
+  }, true);
 })();
 </script>
 
