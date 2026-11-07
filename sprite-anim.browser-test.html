@@ -1,0 +1,44 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Проверка спрайтов</title><style>body{background:#091b1c;color:#e8eeeb;font:16px system-ui;padding:16px}canvas{max-width:100%;border:1px solid #476263;image-rendering:pixelated}#result{white-space:pre-wrap}</style><h1>Проверка спрайтов</h1><p id="result">Проверка…</p><canvas id="output" width="400" height="180"></canvas><script>
+(async()=>{
+ const result=document.getElementById('result');
+ try{
+  const source=await(await fetch('./index.html')).text();
+  const take=re=>{const m=source.match(re);if(!m)throw Error('Не найден исходник '+re);return m[0];};
+  const helper=take(/function drawSpriteFrame\([\s\S]*?\n\}/);
+  const lookup=take(/function spriteByName\(name\)\{[\s\S]*?\n\}/);
+  const registration=take(/  N\('spriteAnim',\(a\)=>\{[^\n]+\}\);/);
+  const spriteRegistration=take(/  N\('sprite',\(a\)=>\{[\s\S]*?\n  \}\);/);
+  const sheet=document.createElement('canvas');sheet.width=64;sheet.height=32;
+  const sc=sheet.getContext('2d');
+  const colors=['#ff0000','#00ff00','#0000ff','#ffff00'];
+  for(let frame=0;frame<2;frame++)for(let i=0;i<4;i++){sc.fillStyle=colors[(i+frame)%4];sc.fillRect(frame*32+(i%2)*16,Math.floor(i/2)*16,16,16);}
+  const img=new Image();img.src=sheet.toDataURL();await img.decode();
+  const gctx=document.getElementById('output').getContext('2d');
+  const Engine={camera:{x:10,y:20},startTime:1000};let now=1000;const methods={};
+  new Function('state','Engine','performance','gctx','numArg','drawPlaceholder','N',helper+'\n'+lookup+'\n'+spriteRegistration+'\n'+registration)(
+   {sprites:[{name:'имя',img}]},Engine,{now:()=>now},gctx,(v,d=0)=>v==null?d:Number(v),()=>{throw Error('Показана заглушка');},(name,fn)=>methods[name]=fn);
+  const exported=new Function('ctx','images','cameraOffset','performance','startTime',helper+'\n'+take(/function spriteImage\(name\)\{[^\n]+\}/)+'\n'+take(/function sprite\(name[^\n]+\}/)+'\n'+take(/function spriteAnim\(name[^\n]+\}/)+'\nreturn {sprite,spriteAnim};')(gctx,{'имя':img},Engine.camera,{now:()=>now},1000);
+  const rgb=[[255,0,0],[0,255,0],[0,0,255],[255,255,0]];
+  const assert=(ok,msg)=>{if(!ok)throw Error(msg);};
+  let checks=0;
+  for(const runtime of ['studio','export'])for(const animated of [false,true])for(const fx of [false,true])for(const fy of [false,true])for(const elapsed of [0,125,250]){
+   now=1000+elapsed;gctx.clearRect(0,0,400,180);
+   const args=animated?['имя.png',30,40,64,32,32,32,8,fx,fy]:['имя.png',30,40,64,32,fx,fy];
+   const name=animated?'spriteAnim':'sprite';if(runtime==='studio')methods[name](args);else exported[name](...args);
+   for(let y=0;y<2;y++)for(let x=0;x<2;x++){
+    const sourceX=fx?1-x:x,sourceY=fy?1-y:y;
+    // Static sprite draws the entire sheet; animation draws one 32x32 frame.
+    const expected=animated?(sourceY*2+sourceX+Math.floor(elapsed/125)%2)%4:(sourceY*2+(fx?1:0))%4;
+    const pixel=gctx.getImageData(20+x*32+4,20+y*16+4,1,1).data;
+    // For static sprite, sample source x=4 or 36 after mirroring.
+    let color=expected;
+    if(!animated){const sx=fx?63-(x*32+4):x*32+4;const sy=fy?31-(y*16+4):y*16+4;color=(Math.floor(sy/16)*2+Math.floor((sx%32)/16)+Math.floor(sx/32))%4;}
+    assert(rgb[color].every((v,i)=>v===pixel[i]),`${runtime} ${name} flipX=${fx} flipY=${fy} t=${elapsed}: неверный пиксель`);checks++;
+   }
+   assert(gctx.getImageData(19,20,1,1).data[3]===0,'Отражение сместило якорь');
+   gctx.fillStyle='#ffffff';gctx.fillRect(2,2,1,1);assert(gctx.getImageData(2,2,1,1).data[0]===255,'Трансформация не восстановлена');
+  }
+  result.textContent='Проверено: '+checks+' пиксельных проверок; sprite и spriteAnim, FlipX/FlipY и обе оси, камера, кадры 0 → 1 → 0, студия и HTML-экспорт.';
+ }catch(error){result.textContent='Ошибка: '+error.message;throw error;}
+})();
+</script></html>
