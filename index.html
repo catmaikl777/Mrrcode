@@ -2979,7 +2979,7 @@ body.mrr-light .ac-kind,body.mrr-light .si-kind{filter:saturate(.8) brightness(.
   #mrrCmdBtn{min-width:44px;width:44px;padding:0;font-size:13px}
   #mrrCmdBtn .mrr-cmd-keys{display:none}
   #mrrCmdBtn .mrr-cmd-icon{display:block}
-  #mrrThemeBtn{display:none}
+  #mrrThemeBtn{display:grid;place-items:center;min-width:44px;width:44px;padding:0}
   #mrrKeysBtn{font-size:16px;min-width:44px;padding:0!important}
   .mrr-keys-grid{grid-template-columns:1fr;padding:14px}
   .mrr-keys-panel{max-height:92vh;border-radius:14px}
@@ -3064,6 +3064,148 @@ body.mrr-light .ac-kind,body.mrr-light .si-kind{filter:saturate(.8) brightness(.
 body.mrr-light #mrrRailBrand{color:#fff8f1;box-shadow:0 6px 18px -10px rgba(120,70,30,.8)}
 body.mrr-light .mrr-side-file.active{background:var(--accent-soft);border-color:var(--accent);color:#8a4413}
 body.mrr-light .mrr-side-file .sf-badge{background:var(--accent-soft);border-color:var(--accent);color:#8a4413}
+
+/* ===== дополнительные темы ===== */
+body.mrr-midnight{
+  color-scheme:dark;
+  --bg:#070c18;--bg-deep:#040710;--panel:#0f1930;--panel2:#0b1427;
+  --surface:#162441;--surface-2:#1b2c4e;--surface-3:#243a63;
+  --border:#263b60;--border-soft:#1d2d4b;--border-strong:#3a5885;
+  --text:#dbe7ff;--text-strong:#f3f8ff;--muted:#9aafd1;--muted-2:#7086a8;
+  --accent:#78aaff;--accent-hi:#a8c9ff;--accent-ink:#041225;
+  --accent-soft:rgba(120,170,255,.15);--accent-softer:rgba(120,170,255,.07);
+  --sage:#83d9c0;--sage-ink:#05201a;--cyan:#76d8ff;--amber:#ffd07a;
+  --green:#77d6a4;--red:#ff8797;--orange:#ffad7a;--yellow:#ffd07a;--blue:#8ebcff;
+  --focus-ring:0 0 0 3px rgba(120,170,255,.24);
+  --mrr-ring:0 0 0 3px rgba(120,170,255,.24);
+  --mrr-soft-shadow:0 18px 44px -36px rgba(0,0,0,.92);
+  background:#070c18;color:var(--text)
+}
+body.mrr-midnight::before{
+  background:
+    radial-gradient(1100px 640px at 82% -12%,rgba(120,170,255,.17),transparent 60%),
+    radial-gradient(900px 720px at -6% 108%,rgba(118,216,255,.08),transparent 62%),
+    linear-gradient(158deg,#0a1426 0%,#070c18 46%,#040710 100%)
+}
+body.mrr-midnight::after{
+  background-image:
+    linear-gradient(rgba(219,231,255,.032) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(219,231,255,.032) 1px,transparent 1px)
+}
+body.mrr-midnight header{
+  background:linear-gradient(180deg,rgba(12,22,42,.97),rgba(7,14,28,.94));
+  box-shadow:0 10px 30px rgba(0,0,0,.32)
+}
+body.mrr-midnight header::after{background:linear-gradient(90deg,transparent 4%,rgba(120,170,255,.48) 42%,rgba(118,216,255,.28) 62%,transparent 96%)}
+body.mrr-midnight .logo-mark{background:linear-gradient(150deg,#a9ccff,#4d7fc9 72%);color:#041225;box-shadow:inset 0 1px rgba(255,255,255,.4),0 4px 12px rgba(77,127,201,.35)}
+body.mrr-midnight ::selection{background:rgba(120,170,255,.32);color:#f3f8ff}
+body.mrr-midnight .file-row{background:rgba(15,25,48,.72);border-color:var(--border)}
+body.mrr-midnight .file-row:hover{background:var(--surface);border-color:var(--border-strong)}
+body.mrr-midnight .file-row.active{background:linear-gradient(90deg,var(--accent-soft),var(--accent-softer));border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+body.mrr-midnight .fr-thumb{background:var(--panel2);border-color:var(--border)}
+body.mrr-midnight .obj-row{background:var(--panel2);border-color:var(--border)}
+body.mrr-midnight .obj-row:hover{background:var(--surface)}
+body.mrr-midnight .obj-row.selected,body.mrr-midnight .obj-row.active{background:var(--accent-soft);border-color:var(--accent)}
+body.mrr-midnight .file-tabs{background:var(--panel2);border-color:var(--border)}
+body.mrr-midnight .file-tab.active{background:var(--panel);color:var(--text);border-color:var(--border)}
+body.mrr-midnight .editor-wrap{background:var(--panel2);border-color:var(--border);box-shadow:inset 0 1px rgba(255,255,255,.025)}
+body.mrr-midnight .editor-area{background:#0b1427}
+body.mrr-midnight .gutter{background:#0b1427;border-right-color:var(--border)}
+body.mrr-midnight .gutter-inner{color:#6f86a8}
+body.mrr-midnight #editorMinimap{background:#0b1427;border-left-color:var(--border)}
+body.mrr-midnight #codeMinimap{filter:brightness(.9) saturate(.9)}
+body.mrr-midnight .active-line{background:rgba(120,170,255,.08)}
+body.mrr-midnight #codeInput{caret-color:var(--accent)}
+body.mrr-midnight .c-com{color:#6f86a8;font-style:italic}
+body.mrr-midnight .c-str{color:#8fd6b0}
+body.mrr-midnight .c-num{color:#ffb27a}
+body.mrr-midnight .c-kw{color:#9fc4ff;font-weight:700}
+body.mrr-midnight .c-lit{color:#ffcf8a}
+body.mrr-midnight .c-bi{color:#76d8ff}
+body.mrr-midnight .c-ev{color:#ffad7a}
+body.mrr-midnight .c-fn{color:#ffd07a}
+body.mrr-midnight .c-id{color:#dbe7ff}
+body.mrr-midnight .c-op{color:#a9bde0}
+body.mrr-midnight .c-punc{color:#8096b8}
+body.mrr-midnight .canvas-wrap{background:var(--panel2)}
+body.mrr-midnight #gameCanvas,body.mrr-midnight #sceneCanvas{background:#0b1427;outline-color:var(--border)}
+body.mrr-midnight #tab-scene #sceneCanvas{background:#0b1427;outline-color:var(--border)}
+body.mrr-light #tab-scene #sceneCanvas{background:#fffdf9;outline-color:var(--border)}
+body.mrr-light.mrr-mist #tab-scene #sceneCanvas{background:#ffffff;outline-color:var(--border)}
+
+body.mrr-light.mrr-mist{
+  color-scheme:light;
+  --bg:#eaf2f1;--panel:#ffffff;--panel2:#eef6f5;--surface:#dfecea;
+  --surface-2:#d4e5e2;--surface-3:#c7dcd8;
+  --border:#c2d7d4;--border-soft:#d2e3e0;--border-strong:#a9c6c1;
+  --text:#17302d;--text-strong:#0f2421;--muted:#5c7773;--muted-2:#7f9995;
+  --accent:#2f8f7a;--accent-hi:#37a88f;--accent-ink:#eafff9;
+  --accent-soft:rgba(47,143,122,.13);--accent-softer:rgba(47,143,122,.06);
+  --sage:#2f8f7a;--sage-ink:#eafff9;--cyan:#177f8f;--amber:#a9781a;
+  --green:#1f9d57;--red:#c93a45;--yellow:#a9781a;--orange:#c2611f;--blue:#2c6fbb;
+  --focus-ring:0 0 0 3px rgba(47,143,122,.2);
+  --mrr-ring:0 0 0 3px rgba(47,143,122,.22);
+  --mrr-soft-shadow:0 18px 44px -36px rgba(31,80,70,.35);
+  background:#eaf2f1;color:var(--text);
+  background-image:radial-gradient(900px 520px at 84% -20%,rgba(126,196,181,.28),transparent 62%),radial-gradient(700px 520px at -8% 104%,rgba(47,143,122,.08),transparent 60%)
+}
+body.mrr-light.mrr-mist header{background:rgba(255,255,255,.94);border-bottom-color:var(--border);box-shadow:0 12px 32px rgba(23,48,45,.08)}
+body.mrr-light.mrr-mist .logo-mark{background:linear-gradient(150deg,#5cc0a8,#2f8f7a 72%);color:#f2fffb;border-color:#9fd8ca;box-shadow:inset 0 1px rgba(255,255,255,.45),0 4px 12px rgba(47,143,122,.22)}
+body.mrr-light.mrr-mist .panel-head{background:linear-gradient(180deg,#ffffff,#f3faf8)}
+body.mrr-light.mrr-mist .file-tabs{background:#e8f1ef;border-color:var(--border)}
+body.mrr-light.mrr-mist .file-tab.active{background:#ffffff;color:var(--text);border-color:var(--border)}
+body.mrr-light.mrr-mist .editor-area,body.mrr-light.mrr-mist .editor-wrap{background:#ffffff}
+body.mrr-light.mrr-mist .gutter{background:#edf6f4;border-right-color:var(--border)}
+body.mrr-light.mrr-mist .gutter-inner{color:#8aa39e}
+body.mrr-light.mrr-mist .btn:hover:not(:disabled){background:#dcebe8;border-color:var(--border-strong)}
+body.mrr-light.mrr-mist .btn:active:not(:disabled){background:#cfe2de}
+body.mrr-light.mrr-mist .ruler{background:#e8f1ef;border-color:var(--border)}
+body.mrr-light.mrr-mist #consoleOut{background:#f5fbfa}
+body.mrr-light.mrr-mist #editorMinimap{background:#f4fbfa;border-left-color:var(--border)}
+body.mrr-light.mrr-mist #codeMinimap{filter:brightness(.82) saturate(1.15)}
+body.mrr-light.mrr-mist #mrrRailBrand{color:#f2fffb;box-shadow:0 6px 18px -10px rgba(47,143,122,.72)}
+body.mrr-light.mrr-mist .mrr-side-file.active{background:var(--accent-soft);border-color:var(--accent);color:#1f6b5c}
+body.mrr-light.mrr-mist .mrr-side-file .sf-badge{background:var(--accent-soft);border-color:var(--accent);color:#1f6b5c}
+
+/* ===== меню выбора темы ===== */
+.mrr-theme-menu{
+  position:fixed;top:calc(var(--mrr-header-h,64px) + 8px);right:16px;z-index:420;
+  width:min(322px,calc(100vw - 24px));padding:10px;border:1px solid var(--border-strong);
+  border-radius:16px;background:var(--panel);color:var(--text);box-shadow:var(--shadow-lg);
+  display:none
+}
+.mrr-theme-menu.open{display:block;animation:mrrThemeIn .16s ease-out}
+@keyframes mrrThemeIn{from{opacity:0;transform:translateY(-5px) scale(.985)}to{opacity:1;transform:none}}
+.mrr-theme-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:3px 5px 9px}
+.mrr-theme-head b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mrr-theme-head small{font-size:10.5px;color:var(--muted-2)}
+.mrr-theme-list{display:flex;flex-direction:column;gap:3px}
+.mrr-theme-option{
+  display:grid;grid-template-columns:34px minmax(0,1fr) 18px;align-items:center;gap:10px;
+  width:100%;padding:8px;border:1px solid transparent;border-radius:11px;background:transparent;
+  color:var(--text);text-align:left;cursor:pointer;transition:background .14s,border-color .14s
+}
+.mrr-theme-option:hover,.mrr-theme-option:focus-visible{background:var(--surface);border-color:var(--border)}
+.mrr-theme-option[aria-checked="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.mrr-theme-swatch{
+  width:34px;height:34px;border-radius:10px;border:1px solid rgba(0,0,0,.25);
+  background:linear-gradient(135deg,var(--sw1) 0 33%,var(--sw2) 33% 66%,var(--sw3) 66%);
+  box-shadow:inset 0 1px rgba(255,255,255,.25)
+}
+.mrr-theme-copy{min-width:0}
+.mrr-theme-copy b{display:block;font:700 13px/1.25 var(--font-ui);color:var(--text-strong)}
+.mrr-theme-copy small{display:block;margin-top:2px;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrr-theme-check{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font:800 11px/1 var(--font-ui);opacity:0;transform:scale(.8);transition:opacity .14s,transform .14s}
+.mrr-theme-option[aria-checked="true"] .mrr-theme-check{opacity:1;transform:none}
+@media(max-width:640px){
+  .mrr-theme-menu{right:12px;top:calc(var(--mrr-header-h,64px) + 6px);padding:8px;border-radius:14px}
+  .mrr-theme-head{padding:3px 4px 8px}
+  .mrr-theme-option{padding:9px 8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .mrr-theme-menu.open{animation:none}
+  .mrr-theme-option,.mrr-theme-check{transition:none}
+}
 </style>
 </head>
 <body>
@@ -8279,8 +8421,14 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
     ctx.clearRect(0, 0, w, h);
 
     const { lines, lh, pad } = metrics();
-    const codeColor = 'rgba(143,195,164,.6)';
-    const commentColor = 'rgba(123,141,132,.55)';
+    const theme = document.body.dataset.theme || 'night';
+    const palette = theme === 'midnight'
+      ? { code: 'rgba(143,183,255,.62)', comment: 'rgba(111,134,168,.55)', viewFill: 'rgba(120,170,255,.12)', viewStroke: 'rgba(120,170,255,.55)' }
+      : theme === 'paper'
+        ? { code: 'rgba(47,122,65,.55)', comment: 'rgba(138,128,114,.5)', viewFill: 'rgba(178,97,44,.1)', viewStroke: 'rgba(178,97,44,.45)' }
+        : theme === 'mist'
+          ? { code: 'rgba(47,143,122,.55)', comment: 'rgba(92,119,115,.5)', viewFill: 'rgba(47,143,122,.1)', viewStroke: 'rgba(47,143,122,.45)' }
+          : { code: 'rgba(143,195,164,.6)', comment: 'rgba(123,141,132,.55)', viewFill: 'rgba(240,178,138,.12)', viewStroke: 'rgba(240,178,138,.55)' };
 
     for (let i = 0; i < lines.length; i++) {
       const raw = lines[i];
@@ -8290,7 +8438,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
       const x = 5 + Math.min(indent, 36) * 0.5;
       const width = Math.min(w - x - 4, 4 + text.length * 1.1);
       if (width <= 0) continue;
-      ctx.fillStyle = text.indexOf('//') === 0 ? commentColor : codeColor;
+      ctx.fillStyle = text.indexOf('//') === 0 ? palette.comment : palette.code;
       ctx.fillRect(x, pad + i * lh, width, Math.max(0.8, lh - 0.4));
     }
 
@@ -8298,9 +8446,9 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
     const viewH = Math.max(3, (area.clientHeight / LINE) * lh);
     const y = Math.max(pad, Math.min(viewTop, h - pad - 2));
     const vh = Math.max(2, Math.min(viewH, h - pad - y));
-    ctx.fillStyle = 'rgba(240,178,138,.12)';
+    ctx.fillStyle = palette.viewFill;
     ctx.fillRect(0, y, w, vh);
-    ctx.strokeStyle = 'rgba(240,178,138,.55)';
+    ctx.strokeStyle = palette.viewStroke;
     ctx.lineWidth = 1;
     ctx.strokeRect(0.5, y + 0.5, w - 1, Math.max(1, vh - 1));
   }
@@ -8330,6 +8478,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 
   ['input','keyup','click','select','focus'].forEach(name => input.addEventListener(name, schedule));
   input.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('mrrcode-themechange', schedule);
   document.addEventListener('selectionchange', () => {
     if (document.activeElement === input) schedule();
   });
@@ -11638,7 +11787,7 @@ function buildCommandList(){
   add('🌐 Импорт из URL / Gist','',importFromUrl);
   add('🤖 Открыть ИИ-агент','',()=>{if(typeof openAiSheet==='function')openAiSheet();});
   add('↶ Отменить последнее изменение ИИ','',aiUndoLast);
-  add('🌓 Сменить тему (светлая/тёмная)','',toggleTheme);
+  add('🌓 Выбрать тему оформления','Ночь · Бумага · Полночь · Мята',()=>{ if (typeof window.mrrOpenThemePicker === 'function') window.mrrOpenThemePicker(); else toggleTheme(); });
   add('📖 Шпаргалка по языку','',()=>{if(typeof openSheet==='function')openSheet();});
 
   Object.keys(state.files).forEach(name=>{
@@ -11754,29 +11903,155 @@ window.mrrOpenCommandPalette=openCommandPalette;
   const write = (key, value) => { try { localStorage.setItem(key, value); } catch (_) {} };
   const toast = (text, kind) => { if (typeof window.showToast === 'function') window.showToast(text, kind || 'ok', 2400); };
   const isTyping = el => !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
-  const isLight = () => document.body.classList.contains('mrr-light');
+  const THEME_KEY = 'mrrcode-theme';
+  const THEMES = [
+    { id: 'night', label: 'Ночь', note: 'Тёплый тёмный · по умолчанию', dark: true, meta: '#071517', sw: ['#061a19', '#12292a', '#cf7f57'] },
+    { id: 'paper', label: 'Бумага', note: 'Тёплый светлый', dark: false, meta: '#f4efe6', sw: ['#f4efe6', '#fffdf9', '#cf7f57'] },
+    { id: 'midnight', label: 'Полночь', note: 'Холодный синий', dark: true, meta: '#070c18', sw: ['#070c18', '#0f1930', '#78aaff'] },
+    { id: 'mist', label: 'Мята', note: 'Прохладный светлый', dark: false, meta: '#eaf2f1', sw: ['#eaf2f1', '#ffffff', '#2f8f7a'] }
+  ];
+  const themeById = id => THEMES.find(theme => theme.id === id) || THEMES[0];
+  const normalizeTheme = value => value === 'light' ? 'paper' : value === 'dark' ? 'night' : (THEMES.some(theme => theme.id === value) ? value : 'night');
+  const currentTheme = () => themeById(normalizeTheme(document.body.dataset.theme || read(THEME_KEY, 'night')));
   const mqDesktop = window.matchMedia('(min-width: 641px)');
+  let themeMenuOpenedAt = 0;
+  const themeIcon = dark => dark
+    ? '<svg class="mrr-theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"></path></svg>'
+    : '<svg class="mrr-theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>';
 
   function syncThemeButton() {
     const btn = $('mrrThemeBtn');
     if (!btn) return;
-    const light = isLight();
-    btn.innerHTML = light
-      ? '<svg class="mrr-theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"></path></svg>'
-      : '<svg class="mrr-theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>';
-    btn.title = light ? 'Тёмная тема' : 'Светлая тема';
-    btn.setAttribute('aria-label', light ? 'Включить тёмную тему' : 'Включить светлую тему');
-    btn.setAttribute('aria-pressed', String(light));
+    const theme = currentTheme();
+    btn.innerHTML = themeIcon(theme.dark);
+    btn.title = 'Тема: ' + theme.label;
+    btn.setAttribute('aria-label', 'Тема оформления: ' + theme.label + '. Открыть выбор темы');
+    btn.setAttribute('aria-haspopup', 'menu');
+    btn.setAttribute('aria-controls', 'mrrThemeMenu');
+    btn.setAttribute('aria-expanded', String(!!$('mrrThemeMenu') && $('mrrThemeMenu').classList.contains('open')));
+    btn.removeAttribute('aria-pressed');
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', light ? '#f4efe6' : '#071517');
+    if (meta) meta.setAttribute('content', theme.meta);
+  }
+
+  function syncThemeMenu() {
+    const menu = $('mrrThemeMenu');
+    if (!menu) return;
+    const active = currentTheme().id;
+    menu.querySelectorAll('.mrr-theme-option').forEach(option => {
+      const checked = option.dataset.theme === active;
+      option.setAttribute('aria-checked', String(checked));
+      option.tabIndex = checked ? 0 : -1;
+    });
+  }
+
+  function applyTheme(id, opts) {
+    const theme = themeById(normalizeTheme(id));
+    document.body.classList.remove('mrr-light', 'mrr-midnight', 'mrr-mist');
+    if (!theme.dark) document.body.classList.add('mrr-light');
+    if (theme.id === 'midnight') document.body.classList.add('mrr-midnight');
+    if (theme.id === 'mist') document.body.classList.add('mrr-mist');
+    document.body.dataset.theme = theme.id;
+    document.documentElement.style.colorScheme = theme.dark ? 'dark' : 'light';
+    write(THEME_KEY, theme.id);
+    syncThemeButton();
+    syncThemeMenu();
+    window.dispatchEvent(new CustomEvent('mrrcode-themechange', { detail: { theme: theme.id } }));
+    if (opts && opts.announce) toast('Тема: ' + theme.label, 'ok');
+  }
+
+  function openThemeMenu() {
+    const menu = $('mrrThemeMenu');
+    const btn = $('mrrThemeBtn');
+    if (!menu || !btn) return;
+    menu.classList.add('open');
+    themeMenuOpenedAt = performance.now();
+    btn.setAttribute('aria-expanded', 'true');
+    syncThemeMenu();
+    const active = menu.querySelector('.mrr-theme-option[aria-checked="true"]') || menu.querySelector('.mrr-theme-option');
+    if (active) requestAnimationFrame(() => active.focus({ preventScroll: true }));
+  }
+
+  function closeThemeMenu(restoreFocus) {
+    const menu = $('mrrThemeMenu');
+    const btn = $('mrrThemeBtn');
+    if (!menu) return;
+    menu.classList.remove('open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    if (restoreFocus && btn) btn.focus({ preventScroll: true });
+  }
+
+  function toggleThemeMenu() {
+    const menu = $('mrrThemeMenu');
+    if (menu && menu.classList.contains('open')) closeThemeMenu(false);
+    else openThemeMenu();
+  }
+
+  function buildThemeMenu() {
+    if ($('mrrThemeMenu')) return;
+    const menu = document.createElement('div');
+    menu.id = 'mrrThemeMenu';
+    menu.className = 'mrr-theme-menu';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', 'Тема оформления');
+
+    const head = document.createElement('div');
+    head.className = 'mrr-theme-head';
+    head.innerHTML = '<b>Тема оформления</b><small>сохраняется</small>';
+    const list = document.createElement('div');
+    list.className = 'mrr-theme-list';
+
+    THEMES.forEach(theme => {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'mrr-theme-option';
+      option.dataset.theme = theme.id;
+      option.setAttribute('role', 'menuitemradio');
+      option.setAttribute('aria-checked', 'false');
+      option.tabIndex = -1;
+      option.innerHTML =
+        '<span class="mrr-theme-swatch" style="--sw1:' + theme.sw[0] + ';--sw2:' + theme.sw[1] + ';--sw3:' + theme.sw[2] + '" aria-hidden="true"></span>' +
+        '<span class="mrr-theme-copy"><b>' + theme.label + '</b><small>' + theme.note + '</small></span>' +
+        '<span class="mrr-theme-check" aria-hidden="true">✓</span>';
+      on(option, 'click', () => {
+        applyTheme(theme.id, { announce: true });
+        closeThemeMenu(true);
+      });
+      list.appendChild(option);
+    });
+
+    menu.append(head, list);
+    document.body.appendChild(menu);
+
+    on(menu, 'keydown', event => {
+      const options = Array.from(menu.querySelectorAll('.mrr-theme-option'));
+      const index = options.indexOf(document.activeElement);
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const step = event.key === 'ArrowDown' ? 1 : -1;
+        const next = options[(index + step + options.length) % options.length];
+        if (next) next.focus();
+      } else if (event.key === 'Home' || event.key === 'End') {
+        event.preventDefault();
+        const next = event.key === 'Home' ? options[0] : options[options.length - 1];
+        if (next) next.focus();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        closeThemeMenu(true);
+      }
+    });
+
+    on(document, 'click', event => {
+      if (!menu.classList.contains('open')) return;
+      if (performance.now() - themeMenuOpenedAt < 120) return;
+      const btn = $('mrrThemeBtn');
+      if (menu.contains(event.target) || (btn && btn.contains(event.target))) return;
+      closeThemeMenu(false);
+    });
   }
 
   function toggleTheme() {
-    const light = !isLight();
-    document.body.classList.toggle('mrr-light', light);
-    write('mrrcode-theme', light ? 'light' : 'dark');
-    syncThemeButton();
-    toast(light ? '☀ Светлая тема' : '☾ Тёмная тема', 'ok');
+    openThemeMenu();
   }
 
   const runControls = document.querySelector('.run-controls');
@@ -11786,7 +12061,7 @@ window.mrrOpenCommandPalette=openCommandPalette;
     themeBtn.type = 'button';
     themeBtn.className = 'btn mrr-icon-btn';
     themeBtn.textContent = '☀';
-    on(themeBtn, 'click', toggleTheme);
+    on(themeBtn, 'click', toggleThemeMenu);
     runControls.insertBefore(themeBtn, $('btnAI') || runControls.firstChild);
 
     const cmdBtn = document.createElement('button');
@@ -11802,10 +12077,15 @@ window.mrrOpenCommandPalette=openCommandPalette;
     });
     runControls.insertBefore(cmdBtn, themeBtn);
   }
+  buildThemeMenu();
+  window.mrrOpenThemePicker = openThemeMenu;
+  window.mrrApplyTheme = applyTheme;
+  window.toggleTheme = toggleTheme;
+  applyTheme(normalizeTheme(read(THEME_KEY, 'night')), { announce: false });
   new MutationObserver(() => {
     syncThemeButton();
     if (typeof window.renderScenePreview === 'function') window.renderScenePreview();
-  }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  }).observe(document.body, { attributes: true, attributeFilter: ['class', 'data-theme'] });
   syncThemeButton();
 
   const cmdPanel = document.querySelector('.cmd-panel');
