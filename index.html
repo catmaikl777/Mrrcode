@@ -923,10 +923,10 @@ main{max-width:1240px}
   --yellow:#e8c07d;
   --blue:#8fb7d8;
 
-  --r-sm:9px;
-  --r:12px;
+  --r-sm:10px;
+  --r:var(--r-sm);
   --r-lg:16px;
-  --r-xl:20px;
+  --r-xl:var(--r-lg);
 
   --shadow-sm:0 1px 2px rgba(0,0,0,.28);
   --shadow:0 12px 30px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.035);
@@ -1328,7 +1328,8 @@ main{
   padding:12px 16px;
   background:#071b1a;
   color:#d9cbb4;
-  font:12.5px/1.7 var(--font-code);
+  font:12.5px/1.75 var(--font-code);
+  font-variant-numeric:tabular-nums;
   -webkit-overflow-scrolling:touch;
 }
 #consoleOut .ts{
@@ -1478,7 +1479,7 @@ select.sel:focus{border-color:var(--accent);box-shadow:var(--focus-ring);outline
   top:0;left:0;right:0;
   padding:14px 8px 40px 0;
   text-align:right;
-  font:13px/26px var(--font-code);
+  font:13px/28px var(--font-code);
   color:#5d766f;
   white-space:pre;
   will-change:transform;
@@ -1487,7 +1488,8 @@ select.sel:focus{border-color:var(--accent);box-shadow:var(--focus-ring);outline
 }
 .editor-area{position:relative;flex:1;min-width:0;background:#0b2321}
 .hl,#codeInput{
-  font:16px/26px var(--font-code);
+  font:16px/28px var(--font-code);
+  font-variant-numeric:tabular-nums;
   padding:14px 16px 48px;
   white-space:pre;
   tab-size:4;
@@ -1512,7 +1514,7 @@ select.sel:focus{border-color:var(--accent);box-shadow:var(--focus-ring);outline
   left:0;
   right:0;
   top:0;
-  height:26px;
+  height:28px;
   z-index:0;
   pointer-events:none;
   opacity:0;
@@ -2184,7 +2186,7 @@ main *{scrollbar-color:#3b5a57 #0a201f}
   .code-toolbar .btn{height:34px;padding:0 10px}
   .editor-wrap{height:clamp(260px,44vh,520px);border-radius:12px}
   .gutter{flex-basis:40px;width:40px}
-  .gutter-inner{font:12px/26px var(--font-code);padding:14px 6px 40px 0}
+  .gutter-inner{font:12px/28px var(--font-code);padding:14px 6px 40px 0}
   .hl,#codeInput{padding:14px 12px 44px}
   .minimap{flex-basis:44px;width:44px}
   .palette{padding:6px;gap:5px;border-radius:12px;margin-bottom:10px}
@@ -2477,7 +2479,7 @@ body.tour-open{overflow:hidden}
 @media (max-width:640px){
   .minimap{display:none}
   .gutter{flex-basis:34px;width:34px}
-  .gutter-inner{font:11px/26px var(--font-code);padding:14px 4px 40px 0}
+  .gutter-inner{font:11px/28px var(--font-code);padding:14px 4px 40px 0}
   .hl,#codeInput{padding:14px 10px 44px}
   .code-status{flex-wrap:nowrap;align-items:flex-start;gap:7px;padding:8px 10px}
   #caretPos{flex:none;font-size:11px}
@@ -2574,7 +2576,7 @@ body.tour-open{overflow:hidden}
 
 /* ===== диагностика ===== */
 #diagLayer{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
-.diag-line{position:absolute;left:0;right:0;height:26px;pointer-events:none}
+.diag-line{position:absolute;left:0;right:0;height:28px;pointer-events:none}
 .diag-line.error{background:rgba(255,95,109,.10);box-shadow:inset 0 -2px 0 rgba(255,95,109,.62)}
 .diag-line.warn{background:rgba(255,209,102,.07);box-shadow:inset 0 -2px 0 rgba(255,209,102,.55)}
 #gutterMarks{position:absolute;inset:0;overflow:hidden;pointer-events:none}
@@ -3009,11 +3011,8 @@ body.mrr-light .ac-kind,body.mrr-light .si-kind{filter:saturate(.8) brightness(.
   .logo small{display:none}
 }
 @media(min-width:921px) and (max-width:1250px){
-  #btnAI,#btnRun,#btnStop{font-size:0;min-width:44px;width:44px;padding:0}
-  #btnAI::before{content:"🤖";font-size:16px}
-  #btnRun{min-width:46px}
-  #btnRun::before{content:"▶";font-size:16px}
-  #btnStop::before{content:"■";font-size:14px}
+  #btnAI,#btnRun,#btnStop{min-width:44px;width:44px;padding:0}
+  #btnAI .btn-label,#btnRun .btn-label,#btnStop .btn-label{display:none}
   #runStatus{display:none}
 }
 @media(min-width:641px) and (max-width:920px){
@@ -3087,13 +3086,8 @@ body.mrr-light .ac-kind,body.mrr-light .si-kind{filter:saturate(.8) brightness(.
   .tabs{position:fixed;left:0;top:0;bottom:0;width:76px;max-width:none;flex:none;flex-direction:column;align-items:stretch;gap:6px;padding:70px 8px 14px;overflow-y:auto;overflow-x:hidden;border-radius:0;border:0;border-right:1px solid var(--border);background:var(--panel2);z-index:190}
   .tabs::-webkit-scrollbar{display:none}
   .tab-btn{width:100%;height:58px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:7px 4px;font-size:11px;line-height:1.1;text-align:center;white-space:normal;border-radius:10px}
-  .tab-btn::before{font-size:18px;line-height:1;opacity:.9}
-  .tab-btn[data-tab="game"]::before{content:"▶"}
-  .tab-btn[data-tab="code"]::before{content:"</>"}
-  .tab-btn[data-tab="scene"]::before{content:"▦"}
-  .tab-btn[data-tab="files"]::before{content:"📁"}
-  .tab-btn[data-tab="help"]::before{content:"?"}
-  .tab-btn.active::before{opacity:1}
+  .tab-btn::before{content:none}
+  .tab-btn .mrr-ic{width:20px;height:20px}
   #tab-code.active{display:grid;grid-template-columns:236px minmax(0,1fr);gap:14px;align-items:stretch}
   #mrrCodeSidebar{display:flex;grid-column:1;align-self:stretch;position:relative;width:100%;min-height:0;max-height:none;overflow:visible}
   #mrrCodeSidebar .mrr-side-actions{margin-top:0}
@@ -3916,24 +3910,219 @@ body.mrr-light .sheet,body.mrr-light .toast,body.mrr-light #acPopup{
 @media(prefers-reduced-motion:reduce){
   #tab-code .editor-wrap,#consoleOut>div,#consoleOut>p{transition:none}
 }
+
+/* ==========================================================================
+   Финальная полировка оформления: шкалы, контраст, иконки, шапка, фон, фокус
+   Только визуальные правила. Разметка рабочих экранов и id/class не меняются.
+   ========================================================================== */
+
+:root{
+  /* типографическая шкала */
+  --fs-h1:24px;
+  --fs-h2:17px;
+  --fs-body:14px;
+  --fs-small:12px;
+  --fs-mono:13px;
+
+  /* шкала радиусов: 10 для элементов, 16 для панелей */
+  --r-sm:10px;
+  --r-lg:16px;
+  --r:var(--r-sm);
+  --r-xl:var(--r-lg);
+
+  /* палитра: тёплая, контраст акцента и вторичного текста ≥ AA */
+  --bg:#061a19;
+  --bg-deep:#03100f;
+  --panel:#12292a;
+  --panel2:#0e2223;
+  --surface:#163032;
+  --surface-2:#1a3738;
+  --surface-3:#224443;
+  --border:#2c4847;
+  --border-soft:#223c3b;
+  --border-strong:#3b5a57;
+  --text:#f2e4cb;
+  --text-strong:#fbf2df;
+  --muted:#c3b29a;
+  --muted-2:#a3947f;
+  --accent:#e8a47d;
+  --accent-hi:#ffc9a5;
+  --accent-ink:#25110a;
+  --accent-soft:rgba(232,164,125,.15);
+  --accent-softer:rgba(232,164,125,.075);
+  --focus-ring:0 0 0 3px rgba(255,201,165,.24);
+  --font-ui:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-code:'JetBrains Mono',ui-monospace,'Cascadia Code',monospace;
+  --mrr-dot:rgba(242,228,203,.62);
+  --bg-glow:rgba(232,164,125,.10);
+  --bg-glow-2:rgba(124,201,194,.06);
+  --bg-top:#08201f;
+  --bg-mid:#061a19;
+  --bg-bottom:#041312;
+}
+
+body.mrr-midnight{--mrr-dot:rgba(219,231,255,.58)}
+body.mrr-light{--mrr-dot:rgba(42,37,30,.5)}
+
+/* ---------- типографика ---------- */
+
+body{font-size:var(--fs-body);line-height:1.6}
+.tab-btn{font-size:13px}
+.btn{font-size:var(--fs-body)}
+.btn.mini{font-size:var(--fs-small)}
+.panel-head{font-size:var(--fs-body)}
+.panel-head span{font-size:var(--fs-small)}
+.file-chip,.chip{font-size:var(--fs-small)}
+select.sel{font-size:var(--fs-body)}
+.code-status{font-size:var(--fs-small)}
+#caretPos{font-size:var(--fs-small)}
+.doc-section h2{font-size:var(--fs-h2)}
+.doc-section p,.doc-section li{font-size:var(--fs-body)}
+.doc-code{font:var(--fs-mono)/1.75 var(--font-code)}
+.mrr-keys-head h3{font-size:var(--fs-h2)}
+.mrr-idle-card h3{font-size:var(--fs-h1)}
+#consoleOut{line-height:1.75;font-variant-numeric:tabular-nums}
+.hl,#codeInput,#caretPos,.gutter-inner{font-variant-numeric:tabular-nums}
+
+/* ---------- радиусы ---------- */
+
+.panel,.editor-wrap,.sheet,.cmd-panel,.diff-panel,.px-panel,.toast,
+.mrr-keys-panel,.tour-card,.help-nav,.mrr-theme-menu,.doc-section,.ex-btn,.ac-popup{
+  border-radius:var(--r-lg);
+}
+.sheet{border-radius:var(--r-lg) var(--r-lg) 0 0}
+.btn,.btn.mini,.tab-btn,.pal-btn,.file-chip,.file-row,.obj-row,.file-tab,
+.doc-toggle,.pf input,.ai-settings input,.ai-input textarea,.find-row input,
+.find-case,.code-status,.palette,.sheet-item,.cmd-foot,.mrr-theme-option,
+#acClose,#sheetSearch,#helpSearch,.props-empty,.empty-note,.note,.api-group,
+.find-bar,.mrr-pwa-banner,.tour-spot,select.sel{
+  border-radius:var(--r-sm);
+}
+.file-tab,.file-tabs{border-radius:var(--r-sm) var(--r-sm) 0 0}
+.tabs{border-radius:var(--r-sm)}
+.ai-msg{border-radius:var(--r-lg)}
+
+/* ---------- фон: спокойный градиент и сетка точек 24×24 ---------- */
+
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(1200px 760px at 78% -18%,var(--bg-glow),transparent 62%),
+    radial-gradient(900px 620px at -8% 104%,var(--bg-glow-2),transparent 64%),
+    linear-gradient(162deg,var(--bg-top) 0%,var(--bg-mid) 48%,var(--bg-bottom) 100%);
+  background-attachment:fixed;
+}
+body::before{
+  display:block;
+  z-index:-1;
+  opacity:.25;
+  background-image:radial-gradient(circle at 1px 1px,var(--mrr-dot) 1px,transparent 1.6px);
+  background-size:24px 24px;
+  background-position:0 0;
+  -webkit-mask-image:none;
+  mask-image:none;
+}
+body::after{display:none}
+body.mrr-midnight::before{
+  background-image:radial-gradient(circle at 1px 1px,var(--mrr-dot) 1px,transparent 1.6px);
+  background-size:24px 24px;
+}
+
+/* ---------- иконки ---------- */
+
+.mrr-ic{
+  width:20px;
+  height:20px;
+  flex:none;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  vertical-align:-.15em;
+}
+.btn .mrr-ic{width:20px;height:20px}
+.tab-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.tab-btn::before{content:none!important}
+.tab-btn .tab-label{white-space:nowrap}
+.tab-btn.active .mrr-ic,.tab-btn:hover .mrr-ic{opacity:1}
+.tab-btn .mrr-ic{opacity:.88}
+
+/* ---------- шапка: одна строка на десктопе, две на телефоне ---------- */
+
+header{flex-wrap:nowrap;gap:10px}
+.logo{flex:0 0 auto}
+.tabs{flex:0 1 auto;min-width:0}
+.run-controls{
+  flex:0 0 auto;
+  flex-wrap:nowrap;
+  width:auto;
+  margin-left:auto;
+  gap:7px;
+}
+.run-controls .btn{flex:0 0 auto}
+
+/* ---------- фокус: одно кольцо для кнопок, полей и табов ---------- */
+
+:focus-visible{
+  outline:2px solid var(--accent-hi)!important;
+  outline-offset:2px!important;
+}
+
+/* ---------- адаптив шапки ---------- */
+
+@media(max-width:1250px){
+  #btnAI .btn-label,#btnRun .btn-label,#btnStop .btn-label{display:none}
+  #btnAI,#btnRun,#btnStop{min-width:44px;padding:0 12px}
+}
+
+@media(max-width:920px){
+  header{flex-wrap:wrap;row-gap:8px}
+  .logo{order:1;flex:1 1 auto;min-width:0}
+  .run-controls{order:2;flex:0 0 auto;margin-left:auto}
+  .tabs{
+    order:3;
+    flex:1 1 100%;
+    width:100%;
+    max-width:100%;
+    flex-wrap:nowrap;
+    justify-content:flex-start;
+    overflow-x:auto;
+    padding:3px;
+  }
+  .tab-btn{flex:0 0 auto}
+}
+
+@media(max-width:640px){
+  .run-controls{gap:6px}
+  #btnAI,#btnRun,#btnStop{min-width:44px;width:44px;min-height:44px;height:44px;padding:0}
+}
+
+@media(min-width:1180px){
+  .tab-btn{flex-direction:column;gap:5px}
+  .tab-btn .mrr-ic{width:20px;height:20px}
+}
+
+/* нижний «M» в потоке мешал: бренд остаётся только в шапке */
+#mrrRailBrand{display:none!important}
 </style>
 </head>
 <body>
 <header>
 <div class="logo"><span class="logo-mark" aria-hidden="true">M</span>MrrCode <small>Studio · v0.2.0 · сенсор + ИИ<span class="mrr-cat">ฅ^•ﻌ•^ฅ</span></small></div>
 <nav class="tabs">
-<button class="tab-btn" data-tab="game">▶ Игра</button>
-<button class="tab-btn" data-tab="code">⌘ Код</button>
-<button class="tab-btn" data-tab="scene">▦ Сцена</button>
-<button class="tab-btn active" data-tab="files">📁 Файлы</button>
-<button class="tab-btn" data-tab="help">? Справка</button>
+<button class="tab-btn" data-tab="game" aria-label="Игра"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M6.8 4.6v10.8L15.4 10 6.8 4.6Z"/></svg><span class="tab-label">Игра</span></button>
+<button class="tab-btn" data-tab="code" aria-label="Код"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M8.2 6 4.4 10l3.8 4M11.8 6l3.8 4-3.8 4"/></svg><span class="tab-label">Код</span></button>
+<button class="tab-btn" data-tab="scene" aria-label="Сцена"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><rect x="3.4" y="3.4" width="13.2" height="13.2" rx="2"/><path d="M3.4 9.6h13.2M9.6 3.4v13.2"/></svg><span class="tab-label">Сцена</span></button>
+<button class="tab-btn active" data-tab="files" aria-label="Файлы"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3.4 6.4a2 2 0 0 1 2-2h2.5l1.4 2h5.3a2 2 0 0 1 2 2v5.2a2 2 0 0 1-2 2H5.4a2 2 0 0 1-2-2Z"/></svg><span class="tab-label">Файлы</span></button>
+<button class="tab-btn" data-tab="help" aria-label="Справка"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6.9"/><path d="M8.1 7.6a2 2 0 1 1 2.6 1.9c-.55.2-.8.6-.8 1.2v.35"/><circle cx="10" cy="13.8" r=".85" fill="currentColor" stroke="none"/></svg><span class="tab-label">Справка</span></button>
 </nav>
 <div class="run-controls">
 <span aria-live="polite" class="save-status saved" id="saveStatus" title="Проект сохранён в браузере"><i aria-hidden="true"></i><span class="save-text">Сохранено</span></span>
-<button class="btn ai" id="btnAI" title="ИИ-агент: открыть панель">🤖 ИИ</button>
-<button class="btn primary" id="btnRun" title="Запуск main.mrr на весь экран">▶ Запуск</button>
-<button class="btn stop" disabled="" id="btnStop">■ Стоп</button>
-<button class="btn" id="btnReplay" title="Запустить игру снова">↻ Повторить</button>
+<button class="btn ai" id="btnAI" title="ИИ-агент: открыть панель" aria-label="ИИ-агент"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M10 3.4l1.35 3.25L14.6 8l-3.25 1.35L10 12.6 8.65 9.35 5.4 8l3.25-1.35L10 3.4Z"/><path d="M15.1 12.3l.62 1.48 1.48.62-1.48.62-.62 1.48-.62-1.48-1.48-.62 1.48-.62.62-1.48Z"/></svg><span class="btn-label">ИИ-агент</span></button>
+<button class="btn primary" id="btnRun" title="Запуск main.mrr на весь экран" aria-label="Запуск"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M6.9 4.6v10.8L15.5 10 6.9 4.6Z"/></svg><span class="btn-label">Запуск</span></button>
+<button class="btn stop" disabled="" id="btnStop" aria-label="Стоп"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><rect x="5.5" y="5.5" width="9" height="9" rx="1.6"/></svg><span class="btn-label">Стоп</span></button>
+<button class="btn" id="btnReplay" title="Запустить игру снова" aria-label="Повторить"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M15.6 8.2A6.2 6.2 0 1 0 16 11.4"/><path d="M15.8 4.4v3.9h-3.9"/></svg><span class="btn-label">Повторить</span></button>
 <span class="" id="runStatus">Остановлено</span>
 </div>
 </header>
@@ -10975,9 +11164,6 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
     btnImportPxl: '⬆',
     btnDebug: '🐞',
     btnColorPicker: '🎨',
-    btnAI: '🤖',
-    btnRun: '▶',
-    btnStop: '■',
     btnRunThis: '▶',
     btnCheckOnly: '✓',
     btnFindProject: '🔎',
