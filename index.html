@@ -3906,6 +3906,13 @@ body.mrr-light .sheet,body.mrr-light .toast,body.mrr-light #acPopup{
 /* пустые списки тоже мяукают */
 .mrr-side-empty::before{content:"🐾 ";opacity:.6}
 
+/* ---------- производительность: изолируем прокручиваемые списки ---------- */
+
+#consoleOut,.mrr-side-list,#objList,#spriteList,#pfResults{
+  contain:content;
+  overscroll-behavior:contain;
+}
+
 @media(prefers-reduced-motion:reduce){
   #tab-code .editor-wrap,#consoleOut>div,#consoleOut>p{transition:none}
 }
@@ -6759,6 +6766,20 @@ function drawSpriteFrame(ctx,img,sx,sy,sw,sh,x,y,w,h,flipX=false,flipY=false){
 }
 
 function buildGlobalEnv(){
+  /* кэш шрифтов и ширин текста: строки собираются один раз на размер, measureText не дёргается каждый кадр */
+  const mrrFontCache=new Map(),mrrMeasureCache=new Map();
+  function gfont(size){
+    let s=Number(size);if(!isFinite(s)||s<=0)s=16;if(s<1)s=1;
+    let f=mrrFontCache.get(s);
+    if(!f){f='600 '+s+'px "JetBrains Mono",monospace';mrrFontCache.set(s,f);if(mrrFontCache.size>64)mrrFontCache.clear();}
+    return f;
+  }
+  function gmeasure(text,size){
+    const key=size+'|'+text;
+    let w=mrrMeasureCache.get(key);
+    if(w===undefined){gctx.font=gfont(size);w=gctx.measureText(text).width;mrrMeasureCache.set(key,w);if(mrrMeasureCache.size>600)mrrMeasureCache.clear();}
+    return w;
+  }
   const env=createEnv(null);
   const N=(name,fn)=>env.vars.set(name,{__pf:'native',f:fn});
   // Детерминированный ГПСЧ: включается randomSeed(seed), иначе используется Math.random().
@@ -6826,7 +6847,7 @@ function buildGlobalEnv(){
   N('line',(a)=>{gctx.strokeStyle=typeof a[4]==='string'?a[4]:'#ffffff';gctx.lineWidth=numArg(a[5],2);gctx.beginPath();gctx.moveTo(numArg(a[0])-camX(),numArg(a[1])-camY());gctx.lineTo(numArg(a[2])-camX(),numArg(a[3])-camY());gctx.stroke();return null;});
   N('text',(a)=>{
     gctx.fillStyle=typeof a[3]==='string'?a[3]:'#ffffff';
-    gctx.font='600 '+numArg(a[4],16)+'px "JetBrains Mono",monospace';
+    gctx.font=gfont(numArg(a[4],16));
     gctx.textBaseline='top';
     gctx.fillText(fmtValue(a[0]),numArg(a[1])-camX(),numArg(a[2])-camY());
     return null;
@@ -6900,8 +6921,8 @@ function buildGlobalEnv(){
   N('padLeft',(a)=>{const t=fmtValue(a[0]),len=Math.max(0,Math.floor(numArg(a[1],0))),ch=(String(a[2]==null?' ':a[2]).slice(0,1)||' ');let s=t;while(s.length<len)s=ch+s;return s;});
   N('repeat',(a)=>{const t=fmtValue(a[0]),n=Math.max(0,Math.min(10000,Math.floor(numArg(a[1],0))));return t.repeat(n);});
   /* --- Текст и фигуры --- */
-  N('textWidth',(a)=>{const t=fmtValue(a[0]),size=Math.max(1,numArg(a[1],16)),old=gctx.font;gctx.font='600 '+size+'px "JetBrains Mono",monospace';const w=gctx.measureText(t).width;gctx.font=old;return w;});
-  N('textCentered',(a)=>{const t=fmtValue(a[0]),x=numArg(a[1]),y=numArg(a[2]);gctx.fillStyle=typeof a[3]==='string'?a[3]:'#ffffff';gctx.font='600 '+Math.max(1,numArg(a[4],16))+'px "JetBrains Mono",monospace';gctx.textBaseline='top';gctx.fillText(t,x-gctx.measureText(t).width/2-camX(),y-camY());return null;});
+  N('textWidth',(a)=>{const t=fmtValue(a[0]),size=Math.max(1,numArg(a[1],16)),old=gctx.font;const w=gmeasure(t,size);gctx.font=old;return w;});
+  N('textCentered',(a)=>{const t=fmtValue(a[0]),x=numArg(a[1]),y=numArg(a[2]);gctx.fillStyle=typeof a[3]==='string'?a[3]:'#ffffff';const size=Math.max(1,numArg(a[4],16));gctx.font=gfont(size);gctx.textBaseline='top';gctx.fillText(t,x-gmeasure(t,size)/2-camX(),y-camY());return null;});
   N('roundedRect',(a)=>{const x=numArg(a[0])-camX(),y=numArg(a[1])-camY(),w=numArg(a[2]),h=numArg(a[3]),r=Math.max(0,Math.min(numArg(a[4],0),Math.min(w,h)/2));gctx.fillStyle=typeof a[5]==='string'?a[5]:'#70d6ff';gctx.beginPath();gctx.moveTo(x+r,y);gctx.lineTo(x+w-r,y);gctx.quadraticCurveTo(x+w,y,x+w,y+r);gctx.lineTo(x+w,y+h-r);gctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);gctx.lineTo(x+r,y+h);gctx.quadraticCurveTo(x,y+h,x,y+h-r);gctx.lineTo(x,y+r);gctx.quadraticCurveTo(x,y,x+r,y);gctx.closePath();gctx.fill();return null;});
   N('spriteAnimFrame',(a)=>{const nm=String(a[0]==null?'':a[0]),sp=spriteByName(nm),x=numArg(a[1])-camX(),y=numArg(a[2])-camY(),w=numArg(a[3],32),h=numArg(a[4],32),req=Math.floor(numArg(a[5],0));if(!sp||!sp.img.complete||!sp.img.naturalWidth){drawPlaceholder(x,y,w,h,nm);return null;}const fr=sp.frames||{cols:1,rows:1},cols=Math.max(1,fr.cols),rows=Math.max(1,fr.rows),fw=Math.max(1,Math.floor(sp.img.naturalWidth/cols)),fh=Math.max(1,Math.floor(sp.img.naturalHeight/rows)),count=cols*rows;let i=req%count;if(i<0)i+=count;drawSpriteFrame(gctx,sp.img,(i%cols)*fw,Math.floor(i/cols)*fh,fw,fh,x,y,w,h,a[6],a[7]);return null;});
   /* --- Слоты сохранений --- */
@@ -6960,7 +6981,7 @@ function buildGlobalEnv(){
   N('circleCircle',(a)=>{const dx=numArg(a[2])-numArg(a[0]),dy=numArg(a[3])-numArg(a[1]),r=numArg(a[4],0)+numArg(a[5],0);return dx*dx+dy*dy<=r*r;});
   N('pointInCircle',(a)=>{const dx=numArg(a[0])-numArg(a[1]),dy=numArg(a[2])-numArg(a[3]),r=Math.max(0,numArg(a[4],0));return dx*dx+dy*dy<=r*r;});
   N('bar',(a)=>{const x=numArg(a[0]),y=numArg(a[1]),w=numArg(a[2]),h=numArg(a[3]),v=Math.max(0,Math.min(1,numArg(a[4],0))),col=typeof a[5]==='string'?a[5]:'#5eead4',bg=typeof a[6]==='string'?a[6]:'rgba(255,255,255,0.15)';const cx=x-camX(),cy=y-camY();gctx.fillStyle=bg;gctx.fillRect(cx,cy,w,h);gctx.fillStyle=col;gctx.fillRect(cx,cy,w*v,h);return null;});
-  N('textRight',(a)=>{const t=fmtValue(a[0]),x=numArg(a[1]),y=numArg(a[2]);gctx.fillStyle=typeof a[3]==='string'?a[3]:'#ffffff';gctx.font='600 '+Math.max(1,numArg(a[4],16))+'px "JetBrains Mono",monospace';gctx.textBaseline='top';gctx.fillText(t,x-gctx.measureText(t).width-camX(),y-camY());return null;});
+  N('textRight',(a)=>{const t=fmtValue(a[0]),x=numArg(a[1]),y=numArg(a[2]);gctx.fillStyle=typeof a[3]==='string'?a[3]:'#ffffff';const size=Math.max(1,numArg(a[4],16));gctx.font=gfont(size);gctx.textBaseline='top';gctx.fillText(t,x-gmeasure(t,size)-camX(),y-camY());return null;});
   /* --- камера, матрицы и прозрачность --- */
   // Когда пользователь включает ручную матрицу, camera() уже применена в translate().
   // shake добавляется только к рисованию и не меняет camera() для worldX/worldY.
@@ -7144,7 +7165,7 @@ function buildGlobalEnv(){
   N('textWrap',(a)=>{
     const src=fmtValue(a[0]),x=numArg(a[1]),y=numArg(a[2]),maxW=Math.max(1,numArg(a[3],200));
     const color=typeof a[4]==='string'?a[4]:'#ffffff',size=Math.max(1,numArg(a[5],16));
-    gctx.fillStyle=color;gctx.font='600 '+size+'px "JetBrains Mono",monospace';gctx.textBaseline='top';
+    gctx.fillStyle=color;gctx.font=gfont(size);gctx.textBaseline='top';
     const words=String(src).split(/\s+/);let lineText='',ly=y,lines=0;
     for(const w0 of words){
       const test=lineText?lineText+' '+w0:w0;
@@ -7397,9 +7418,13 @@ function moduleExports(source){
   while((m=reVar.exec(code)))out.push({name:m[1],kind:'var',sig:m[1]+' из '+fn,doc:'Переменная из файла '+fn+'.'});
   return out;
 }
+let impCacheCode=null,impCacheSig='',impCacheVal=null;
 function getImportedNames(){
-  const map=new Map();
-  const code=codeInput.value;let m;
+  const code=codeInput.value;
+  let sig=state.activeFile+'|'+Object.keys(state.files).length;
+  for(const k in state.files)sig+='|'+k+':'+state.files[k].length;
+  if(code===impCacheCode&&sig===impCacheSig)return impCacheVal;
+  const map=new Map();let m;
   const re=/\bfrom\s+["']?([\wА-Яа-яЁё$.-]+)["']?\s+import\s+([^\n;]+)/g;
   while((m=re.exec(code))){
     const file=m[1],specs=m[2];
@@ -7412,17 +7437,20 @@ function getImportedNames(){
       });
     }
   }
+  impCacheCode=code;impCacheSig=sig;impCacheVal=map;
   return map;
 }
 
 /* ---------------- консоль ---------------- */
+const consoleTimeFmt=new Intl.DateTimeFormat('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+let consoleScrollRaf=0;
 function logConsole(text,type){
   const out=document.getElementById('consoleOut');
   const div=document.createElement('div');
   const kind=(type==='err')?'error':(type||'log');
   div.className='line-'+kind;
   const ts=document.createElement('span');ts.className='ts';
-  ts.textContent=new Date().toLocaleTimeString('ru-RU',{hour12:false});
+  ts.textContent=consoleTimeFmt.format(new Date());
   div.appendChild(ts);
   div.appendChild(document.createTextNode(text));
   // Кликабельная ссылка на строку: «[main.mrr] Ошибка в строке 12: …» → кнопка «→ 12».
@@ -7442,7 +7470,13 @@ function logConsole(text,type){
   }
   out.appendChild(div);
   while(out.children.length>400)out.removeChild(out.firstChild);
-  out.scrollTop=out.scrollHeight;
+  /* прокрутку обновляем один раз за кадр: print() в цикле не заставляет браузер считать layout на каждой строке */
+  if(!consoleScrollRaf){
+    consoleScrollRaf=requestAnimationFrame(()=>{
+      consoleScrollRaf=0;
+      if(out.clientHeight>0)out.scrollTop=out.scrollHeight;
+    });
+  }
 }
 function setRunStatus(text,cls){
   const el=document.getElementById('runStatus');
@@ -7607,7 +7641,8 @@ function drawParticles(){
   if(!ps||!ps.length)return;
   const cx=Engine.manualTransform?0:Engine.camera.x+(Engine.shakeX||0);
   const cy=Engine.manualTransform?0:Engine.camera.y+(Engine.shakeY||0);
-  for(const p of ps){
+  for(let i=0;i<ps.length;i++){
+    const p=ps[i];
     const a=Math.max(0,Math.min(1,p.life/p.maxLife));
     gctx.globalAlpha=a;
     gctx.fillStyle=p.color;
@@ -7625,7 +7660,8 @@ function frameLoop(ts){
   dt=Math.min(dt,0.05);
   Engine.curDt=dt;Engine.frames++;
   if(Engine.frames%20===0){
-    document.getElementById('fpsLabel').textContent=Math.round(1/Math.max(dt,0.0001))+' к/с · кадр '+Engine.frames;
+    if(!Engine.fpsEl)Engine.fpsEl=document.getElementById('fpsLabel');
+    if(Engine.fpsEl)Engine.fpsEl.textContent=Math.round(1/Math.max(dt,0.0001))+' к/с · кадр '+Engine.frames;
   }
   /* фикс наложения: каждый кадр начинается с чистой поверхности и нейтральных эффектов */
   gctx.setTransform(1,0,0,1,0,0);
@@ -7639,7 +7675,8 @@ function frameLoop(ts){
   if(zoom!==1)gctx.setTransform(zoom,0,0,zoom,400*(1-zoom),225*(1-zoom));
   try{
     if(Engine.handlers.update)callFunc(Engine.handlers.update,[dt],newCtx(LIMIT_FRAME));
-    for(const o of Engine.runtimeScene)drawSceneObj(gctx,o);
+    const scene=Engine.runtimeScene;
+    for(let i=0;i<scene.length;i++)drawSceneObj(gctx,scene[i]);
     gctx.setTransform(zoom,0,0,zoom,400*(1-zoom),225*(1-zoom));
     drawParticles();
   }catch(err){
@@ -7784,7 +7821,9 @@ const HL_RULES=[
   {re:/[+\-*/%!=<>&|?]+/y,cls:'c-op'},
   {re:/[\s\S]/y,cls:null}
 ];
+let hlLastSrc=null,hlLastOut='';
 function highlight(src){
+  if(src===hlLastSrc)return hlLastOut;
   let out='',i=0;
   while(i<src.length){
     let matched=false;
@@ -7805,7 +7844,13 @@ function highlight(src){
     }
     if(!matched){out+=escapeHtml(src[i]);i++;}
   }
+  hlLastSrc=src;hlLastOut=out;
   return out;
+}
+let editorRefreshRaf=0;
+function scheduleRefreshEditor(){
+  if(editorRefreshRaf)return;
+  editorRefreshRaf=requestAnimationFrame(()=>{editorRefreshRaf=0;refreshEditor();});
 }
 function refreshEditor(){
   hlCode.innerHTML=highlight(codeInput.value)+'\n';
@@ -7826,10 +7871,14 @@ function syncScroll(){
   gutterInner.style.transform='translateY('+(-codeInput.scrollTop)+'px)';
 }
 function updateCaretPos(){
-  const upto=codeInput.value.slice(0,codeInput.selectionStart);
-  const lines=upto.split('\n');
-  document.getElementById('caretPos').textContent='Строка '+lines.length+', столбец '+(lines[lines.length-1].length+1);
+  const v=codeInput.value;
+  const pos=Math.min(codeInput.selectionStart||0,v.length);
+  let line=1,lineStart=0,i=-1;
+  while((i=v.indexOf('\n',i+1))!==-1&&i<pos){line++;lineStart=i+1;}
+  if(!caretPosEl)caretPosEl=document.getElementById('caretPos');
+  caretPosEl.textContent='Строка '+line+', столбец '+(pos-lineStart+1);
 }
+let caretPosEl=null;
 function saveCode(){state.files[state.activeFile]=codeInput.value;}
 let editUndo=[],editRedo=[],editTimer=0,restoringEdit=false;
 function pushEditSnapshot(){if(restoringEdit)return;const v=codeInput.value;if(editUndo.length&&editUndo[editUndo.length-1]===v)return;editUndo.push(v);if(editUndo.length>80)editUndo.shift();editRedo=[];}
@@ -7839,11 +7888,19 @@ function redoEdit(){if(!editRedo.length)return;const v=editRedo.pop();editUndo.p
 function projectData(){syncCodeToFile();return {app:'MrrCode',format:'mrrcode-project',version:9,entryFile:ENTRY_FILE,activeFile:state.activeFile,files:state.files,sprites:state.sprites.map(s=>({name:s.name,dataUrl:s.dataUrl})),scene:state.scene.map(o=>{const c=Object.assign({},o);delete c.id;return c;})};}
 function saveProjectLocal(){try{localStorage.setItem('mrrcode-project-v2',JSON.stringify(projectData()));setNote('Проект сохранён в браузере.');logConsole('[MrrCode] Автосохранение выполнено.','sys');}catch(err){setNote('Не удалось сохранить проект: '+err.message);}}
 function restoreProjectLocal(){if(window.__MRRCODE_STANDALONE__)return false;try{const raw=localStorage.getItem('mrrcode-project-v2');if(!raw)return false;const data=JSON.parse(raw);if(!data||!data.files)return false;state.files={};for(const k of Object.keys(data.files))state.files[k]=String(data.files[k]);restoreEntryFile(data);state.activeFile=Object.prototype.hasOwnProperty.call(state.files,data.activeFile)?data.activeFile:ENTRY_FILE;state.sprites=(data.sprites||[]).map(s=>{const img=new Image();img.src=s.dataUrl;return {name:String(s.name),dataUrl:s.dataUrl,img,sizeKb:Math.max(1,Math.round((s.dataUrl||'').length*.75/1024))};});state.scene=sanitizeScene(data.scene||[]);codeInput.value=state.files[state.activeFile];document.getElementById('codeFileName').textContent=state.activeFile;renderObjList();renderProps();renderScenePreview();renderFiles();return true;}catch(_){return false;}}
-setInterval(()=>{try{localStorage.setItem('mrrcode-project-v2',JSON.stringify(projectData()));if(window.mrrNoteAutosave)window.mrrNoteAutosave();}catch(_){}},15000);
+/* автосейв только при реальных изменениях: не сериализуем PNG-проект каждые 15 секунд вхолостую */
+function projectSignature(){
+  let bytes=0,files=0;
+  for(const name in state.files){bytes+=state.files[name].length;files++;}
+  return bytes+'|'+files+'|'+state.sprites.length+'|'+state.scene.length+'|'+state.activeFile;
+}
+let lastAutoSig='';
+setInterval(()=>{try{const sig=projectSignature();if(sig===lastAutoSig)return;localStorage.setItem('mrrcode-project-v2',JSON.stringify(projectData()));lastAutoSig=sig;if(window.mrrNoteAutosave)window.mrrNoteAutosave();}catch(_){}},15000);
 function saveProjectVersion(label){try{const key='mrrcode-history-v1';const list=JSON.parse(localStorage.getItem(key)||'[]');const snap=projectData();snap.savedAt=new Date().toISOString();snap.label=label||'Автосохранение';list.unshift(snap);localStorage.setItem(key,JSON.stringify(list.slice(0,12)));return true;}catch(err){setNote('Не удалось сохранить версию: '+err.message);return false;}}
 function showProjectHistory(){try{const list=JSON.parse(localStorage.getItem('mrrcode-history-v1')||'[]');if(!list.length){setNote('История пуста. Сохрани версию через «🕘 Версии».');return;}const choice=prompt('История версий (введи номер для восстановления; отмена — выход):\n'+list.map((v,i)=>(i+1)+'. '+(v.label||'Версия')+' — '+(v.savedAt||'дата неизвестна')+'; файлов '+Object.keys(v.files||{}).length).join('\n'));if(choice===null)return;const idx=Number(choice)-1;if(!Number.isInteger(idx)||idx<0||idx>=list.length){setNote('Номер версии не распознан.');return;}if(!confirm('Восстановить версию? Текущее состояние сначала сохранится в истории.'))return;saveProjectVersion('Перед восстановлением');const d=list[idx];state.files={};Object.keys(d.files||{}).forEach(k=>state.files[k]=String(d.files[k]));restoreEntryFile(d);state.activeFile=Object.prototype.hasOwnProperty.call(state.files,d.activeFile)?d.activeFile:ENTRY_FILE;state.sprites=(d.sprites||[]).map(sp=>{const img=new Image();img.src=sp.dataUrl;return {name:String(sp.name),dataUrl:sp.dataUrl,img,sizeKb:Math.max(1,Math.round((sp.dataUrl||'').length*.75/1024))};});state.scene=sanitizeScene(d.scene||[]);state.selectedId=null;codeInput.value=state.files[state.activeFile];document.getElementById('codeFileName').textContent=state.activeFile;refreshEditor();renderFiles();renderObjList();renderProps();renderScenePreview();setNote('Версия восстановлена: '+(d.savedAt||''));}catch(err){setNote('История недоступна: '+err.message);}}
 document.getElementById('btnProjectHistory').addEventListener('click',()=>{saveProjectVersion('Снимок вручную');showProjectHistory();});
-setInterval(()=>{try{saveProjectVersion('Автоснимок');}catch(_){}},300000);
+let lastVersionSig='';
+setInterval(()=>{try{const sig=projectSignature();if(sig===lastVersionSig)return;lastVersionSig=sig;saveProjectVersion('Автоснимок');}catch(_){}},300000);
 document.getElementById('btnCheckResources').addEventListener('click',()=>{syncCodeToFile();const missing=[];for(const file of Object.keys(state.files)){const re=/\b(?:sprite|spriteAnim)\(\s*[\"']([^\"']+)[\"']/g;let m;while((m=re.exec(state.files[file])))if(!spriteByName(m[1]))missing.push(file+': sprite(\"'+m[1]+'\")');}const objNames=new Set(state.scene.map(o=>o.name));for(const file of Object.keys(state.files)){const re=/\bobject\(\s*[\"']([^\"']+)[\"']/g;let m;while((m=re.exec(state.files[file])))if(!objNames.has(m[1]))missing.push(file+': object(\"'+m[1]+'\")');}if(missing.length){logConsole('[Ресурсы] Не найдены: '+missing.join(' | '),'warn');setNote('Проверка ресурсов: найдено '+missing.length+' ссылок без ресурса. См. консоль.');}else{logConsole('[Ресурсы] Проверка завершена: ссылки на спрайты и объекты сцены найдены.','sys');setNote('Проверка ресурсов пройдена.');}});
 function getHexAtCaret(){
   const v=codeInput.value, pos=codeInput.selectionStart;
@@ -7903,16 +7960,23 @@ codeInput.addEventListener('dblclick',()=>{
 });
 
 /* ---------------- редактор: подсказки ---------------- */
+let ufCacheKey=null,ufCacheVal=null,uvCacheKey=null,uvCacheVal=null;
 function userFuncNames(){
+  const src=codeInput.value;
+  if(src===ufCacheKey)return ufCacheVal;
   const set=new Set();let m;
   const re=/\bfunction\s+([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)/g;
-  while((m=re.exec(codeInput.value)))set.add(m[1]);
+  while((m=re.exec(src)))set.add(m[1]);
+  ufCacheKey=src;ufCacheVal=set;
   return set;
 }
 function userVarNames(){
+  const src=codeInput.value;
+  if(src===uvCacheKey)return uvCacheVal;
   const set=new Set();let m;
   const re=/\b(?:let|const)\s+([A-Za-z_А-Яа-яЁё$][\wА-Яа-яЁё$]*)/g;
-  while((m=re.exec(codeInput.value)))set.add(m[1]);
+  while((m=re.exec(src)))set.add(m[1]);
+  uvCacheKey=src;uvCacheVal=set;
   return set;
 }
 function updateHint(){
@@ -8476,12 +8540,16 @@ function setAiSendState(busy){
 }
 
 function buildCanonicalApiList(){
+  if(buildCanonicalApiList._cache!==undefined)return buildCanonicalApiList._cache;
   const r=window.MRRCODE_API_REGISTRY||{entries:[]};
-  return r.entries.filter(e=>e.kind==='fn').slice().sort((a,b)=>a.name.localeCompare(b.name)).map(e=>e.signature).join('\n');
+  buildCanonicalApiList._cache=r.entries.filter(e=>e.kind==='fn').slice().sort((a,b)=>a.name.localeCompare(b.name)).map(e=>e.signature).join('\n');
+  return buildCanonicalApiList._cache;
 }
 function canonicalApiCount(){
+  if(canonicalApiCount._cache!==undefined)return canonicalApiCount._cache;
   const r=window.MRRCODE_API_REGISTRY||{entries:[]};
-  return r.entries.filter(e=>e.kind==='fn').length;
+  canonicalApiCount._cache=r.entries.filter(e=>e.kind==='fn').length;
+  return canonicalApiCount._cache;
 }
 function buildApiAliasNotes(){
   return [
@@ -8829,13 +8897,13 @@ codeInput.addEventListener('keydown',e=>{
     const indent=(line.match(/^[ \t]*/)||[''])[0];
     const extra=/\{\s*$/.test(line)?'    ':'';
     codeInput.setRangeText('\n'+indent+extra,pos,codeInput.selectionEnd,'end');
-    refreshEditor();saveCode();updateHint();
+    scheduleRefreshEditor();saveCode();updateHint();
   }
 });
 codeInput.addEventListener('input',()=>{
   // Refresh suggestions first, so a highlighting/status hiccup cannot prevent autocomplete.
   updateAC(false);
-  refreshEditor();saveCode();scheduleEditSnapshot();updateHint();
+  scheduleRefreshEditor();saveCode();scheduleEditSnapshot();updateHint();
 });
 codeInput.addEventListener('scroll',()=>{syncScroll();if(AC.open)positionAC();});
 window.addEventListener('resize',()=>{if(AC.open)positionAC();});
@@ -10010,14 +10078,18 @@ ghEl('ghPublishGo').addEventListener('click',publishGithubGame);
 (function init(){
   codeInput.value=state.files[state.activeFile];
   document.getElementById('codeFileName').textContent=state.activeFile;
-  buildPalette();
   refreshEditor();
-  renderObjList();renderProps();renderScenePreview();
-  renderFiles();
-  buildExamplesUI();
-  updateHint();
   logConsole('[MrrCode] Готов. Нажми «Запуск» — игра откроется на весь экран устройства.','sys');
   logConsole('v0.1.0 · только сенсор · 🤖 ИИ-агент (кнопка «ИИ»): подключи Base URL, API-ключ и модель — ИИ напишет код, создаст файлы и сцену.','sys');
+  /* палитра, списки и превью не нужны для первого кадра — строим их после отрисовки окна */
+  const later=window.requestIdleCallback||function(fn){return setTimeout(fn,0);};
+  later(()=>{
+    buildPalette();
+    renderObjList();renderProps();renderScenePreview();
+    renderFiles();
+    buildExamplesUI();
+    updateHint();
+  },{timeout:600});
 })();
 </script>
 <script id="mrrcode-quality-of-life">
@@ -10428,6 +10500,15 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
   const PAD = 14;
   let frame = 0;
   let dragging = false;
+  let linesKey = null, linesVal = null;
+  const mapCanvas = document.createElement('canvas');
+  let mapCacheKey = '', mapCacheValue = null;
+
+  function getLines(){
+    const v = input.value;
+    if (v !== linesKey) { linesKey = v; linesVal = v.split('\n'); }
+    return linesVal;
+  }
 
   function caretLine(){
     const pos = input.selectionStart || 0;
@@ -10446,7 +10527,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
   }
 
   function metrics(){
-    const lines = input.value.split('\n');
+    const lines = getLines();
     const h = mmWrap.clientHeight;
     const lh = Math.max(0.7, Math.min(3, (h - 8) / Math.max(lines.length, 1)));
     return { lines, h, lh, pad: 4 };
@@ -10474,17 +10555,28 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
           ? { code: 'rgba(47,143,122,.55)', comment: 'rgba(92,119,115,.5)', viewFill: 'rgba(47,143,122,.1)', viewStroke: 'rgba(47,143,122,.45)' }
           : { code: 'rgba(143,195,164,.6)', comment: 'rgba(123,141,132,.55)', viewFill: 'rgba(240,178,138,.12)', viewStroke: 'rgba(240,178,138,.55)' };
 
-    for (let i = 0; i < lines.length; i++) {
-      const raw = lines[i];
-      const text = raw.trim();
-      if (!text) continue;
-      const indent = raw.length - raw.replace(/^\s+/, '').length;
-      const x = 5 + Math.min(indent, 36) * 0.5;
-      const width = Math.min(w - x - 4, 4 + text.length * 1.1);
-      if (width <= 0) continue;
-      ctx.fillStyle = text.indexOf('//') === 0 ? palette.comment : palette.code;
-      ctx.fillRect(x, pad + i * lh, width, Math.max(0.8, lh - 0.4));
+    /* карту кода перерисовываем только при смене текста/размера/темы; прокрутка лишь двигает рамку */
+    const cacheKey = pw + '|' + ph + '|' + theme + '|' + lh.toFixed(3);
+    if (cacheKey !== mapCacheKey || input.value !== mapCacheValue) {
+      mapCacheKey = cacheKey;
+      mapCacheValue = input.value;
+      if (mapCanvas.width !== pw || mapCanvas.height !== ph) { mapCanvas.width = pw; mapCanvas.height = ph; }
+      const mc = mapCanvas.getContext('2d');
+      mc.setTransform(dpr, 0, 0, dpr, 0, 0);
+      mc.clearRect(0, 0, w, h);
+      for (let i = 0; i < lines.length; i++) {
+        const raw = lines[i];
+        const text = raw.trim();
+        if (!text) continue;
+        const indent = raw.length - raw.replace(/^\s+/, '').length;
+        const x = 5 + Math.min(indent, 36) * 0.5;
+        const width = Math.min(w - x - 4, 4 + text.length * 1.1);
+        if (width <= 0) continue;
+        mc.fillStyle = text.indexOf('//') === 0 ? palette.comment : palette.code;
+        mc.fillRect(x, pad + i * lh, width, Math.max(0.8, lh - 0.4));
+      }
     }
+    ctx.drawImage(mapCanvas, 0, 0, pw, ph, 0, 0, w, h);
 
     const viewTop = pad + (input.scrollTop / LINE) * lh;
     const viewH = Math.max(3, (area.clientHeight / LINE) * lh);
