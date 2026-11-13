@@ -4106,6 +4106,603 @@ header{flex-wrap:nowrap;gap:10px}
 /* нижний «M» в потоке мешал: бренд остаётся только в шапке */
 #mrrRailBrand{display:none!important}
 </style>
+
+<style id="mrrcode-blocks-style">
+/* ==========================================================================
+   MrrCode: визуальный режим блоков
+   ========================================================================== */
+
+#mrrBlocksPanel{
+  --mrb-dot:rgba(242,228,203,.16);
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  height:clamp(420px,calc(100dvh - 345px),860px);
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+body.mrr-light #mrrBlocksPanel{--mrb-dot:rgba(42,37,30,.16);--bg-deep:var(--surface)}
+body.mrr-midnight #mrrBlocksPanel{--mrb-dot:rgba(219,231,255,.16)}
+
+#tab-code.mrr-blocks-on #editorWrap,
+#tab-code.mrr-blocks-on #touchPalette,
+#tab-code.mrr-blocks-on #hintBar,
+#tab-code.mrr-blocks-on #caretPos,
+#tab-code.mrr-blocks-on #btnWrapToggle{display:none!important}
+
+.mrb-toggle[aria-pressed="true"]{
+  border-color:var(--accent);
+  background:var(--accent-soft);
+  color:var(--accent-hi);
+}
+
+.mrb-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  padding:8px 12px;
+  border-bottom:1px solid var(--border-soft);
+  background:linear-gradient(180deg,rgba(255,255,255,.035),transparent);
+}
+.mrb-brand{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font:700 13px var(--font-ui);
+  color:var(--text-strong);
+}
+.mrb-brand svg,.mrb-toggle svg{
+  width:20px;height:20px;flex:none;fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;
+}
+.mrb-file{
+  font:11.5px var(--font-code);
+  color:var(--muted);
+  padding:3px 8px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:var(--panel2);
+  max-width:220px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.mrb-head .spacer,.mrb-status .spacer{flex:1}
+.mrb-head .btn{height:32px;padding:0 10px;font-size:12px}
+
+.mrb-banner{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:8px 12px;
+  border-bottom:1px solid var(--border-soft);
+  background:var(--accent-soft);
+  color:var(--text);
+  font-size:12px;
+  line-height:1.45;
+}
+.mrb-banner[hidden]{display:none}
+.mrb-banner b{color:var(--accent-hi)}
+.mrb-banner .btn{height:28px;padding:0 9px;font-size:11.5px}
+
+.mrb-shell{
+  display:grid;
+  grid-template-columns:300px minmax(0,1fr);
+  flex:1;
+  min-height:0;
+}
+.mrb-palette{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  border-right:1px solid var(--border-soft);
+  background:linear-gradient(180deg,rgba(0,0,0,.08),transparent 60%);
+}
+.mrb-search{
+  position:sticky;
+  top:0;
+  z-index:2;
+  padding:8px;
+  background:var(--panel);
+  border-bottom:1px solid var(--border-soft);
+}
+.mrb-search input{
+  width:100%;
+  height:36px;
+  padding:0 10px;
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  background:var(--bg);
+  color:var(--text);
+  font:13px var(--font-ui);
+  outline:none;
+}
+.mrb-search input:focus{border-color:var(--accent);box-shadow:var(--focus-ring)}
+.mrb-pal-list{overflow:auto;padding:7px 8px 18px;overscroll-behavior:contain}
+
+.mrb-group{
+  border:1px solid transparent;
+  border-radius:9px;
+  margin-bottom:3px;
+  padding:0 2px;
+}
+.mrb-group[open]{background:rgba(255,255,255,.018);border-color:var(--border-soft)}
+.mrb-group>summary{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 6px;
+  list-style:none;
+  cursor:pointer;
+  color:var(--muted);
+  font:700 10.5px var(--font-ui);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  user-select:none;
+}
+.mrb-group>summary::-webkit-details-marker{display:none}
+.mrb-group>summary::after{
+  content:"›";
+  margin-left:auto;
+  font-size:15px;
+  line-height:1;
+  transform:rotate(90deg);
+  transition:transform .14s ease;
+  color:var(--muted-2);
+}
+.mrb-group:not([open])>summary::after{transform:none}
+.mrb-cat-dot{
+  width:8px;height:8px;flex:none;border-radius:50%;
+  background:var(--mrb-c,#7cc9c2);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--mrb-c,#7cc9c2) 18%,transparent);
+}
+
+.mrb-pal-item{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  width:100%;
+  padding:6px 7px;
+  border:1px solid transparent;
+  border-radius:7px;
+  background:transparent;
+  color:var(--text);
+  text-align:left;
+  cursor:grab;
+  font:600 12.5px var(--font-ui);
+  line-height:1.3;
+}
+.mrb-pal-item:hover{background:var(--accent-soft);border-color:var(--border)}
+.mrb-pal-item:active{cursor:grabbing}
+.mrb-pal-item .mrb-dot{
+  width:7px;height:7px;margin-top:5px;flex:none;border-radius:50%;
+  background:var(--mrb-c,#7cc9c2);
+}
+.mrb-pal-item .mrb-pal-copy{min-width:0;flex:1}
+.mrb-pal-item .mrb-sig{
+  display:block;
+  margin-top:1px;
+  font:10.5px var(--font-code);
+  color:var(--muted);
+  font-weight:400;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.mrb-pal-empty{padding:12px 8px;color:var(--muted);font-size:12px;line-height:1.5}
+
+.mrb-stage{
+  position:relative;
+  min-height:0;
+  overflow:auto;
+  padding:14px 14px 30px;
+  background-color:var(--bg-deep);
+  background-image:radial-gradient(circle at 1px 1px,var(--mrb-dot) 1px,transparent 1.6px);
+  background-size:24px 24px;
+  overscroll-behavior:contain;
+}
+.mrb-target{
+  max-width:760px;
+  margin:0 auto 10px;
+  color:var(--muted);
+  font-size:11.5px;
+  line-height:1.4;
+}
+.mrb-target b{color:var(--accent-hi);font-family:var(--font-code);font-weight:600}
+.mrb-scripts{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  max-width:760px;
+  margin:0 auto;
+}
+.mrb-empty{
+  max-width:520px;
+  margin:26px auto;
+  padding:22px;
+  border:1px dashed var(--border);
+  border-radius:14px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.6;
+  text-align:center;
+}
+.mrb-empty b{color:var(--text-strong)}
+
+.mrb-script{position:relative}
+.mrb-hat{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+  padding:9px 11px;
+  border:1px solid var(--mrb-c,#e8c07d);
+  border-radius:14px 14px 9px 9px;
+  background:var(--mrb-bg,rgba(232,192,125,.16));
+  color:var(--text-strong);
+  font:700 12.5px var(--font-ui);
+  box-shadow:inset 0 1px rgba(255,255,255,.06);
+}
+.mrb-hat-event{--mrb-c:#e8c07d;--mrb-bg:rgba(232,192,125,.16)}
+.mrb-hat-func{--mrb-c:#8fb7d8;--mrb-bg:rgba(143,183,216,.15)}
+.mrb-hat-title{white-space:nowrap}
+.mrb-hat .mrb-pat{
+  padding:2px 7px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:var(--panel2);
+  color:var(--muted);
+  font:10.5px var(--font-code);
+}
+.mrb-hat input.mrb-in{max-width:170px}
+
+.mrb-block{
+  position:relative;
+  margin:0 0 6px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--mrb-bg,rgba(124,201,194,.1));
+  box-shadow:0 1px 0 rgba(0,0,0,.18);
+}
+.mrb-block::before{
+  content:"";
+  position:absolute;
+  left:-1px;top:7px;bottom:7px;
+  width:4px;
+  border-radius:4px;
+  background:var(--mrb-c,#7cc9c2);
+}
+.mrb-block.mrb-dragging{opacity:.45}
+.mrb-bhead{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  flex-wrap:wrap;
+  padding:7px 8px 7px 11px;
+  font:600 12.5px var(--font-ui);
+  line-height:1.35;
+  cursor:grab;
+}
+.mrb-bhead:active{cursor:grabbing}
+.mrb-fn{color:var(--text-strong);font-family:var(--font-code);font-size:12.5px;font-weight:700}
+.mrb-arg{display:inline-flex;align-items:center;gap:3px;min-width:0}
+.mrb-lbl{
+  color:var(--muted);
+  font:9.5px var(--font-ui);
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.mrb-in{
+  height:26px;
+  min-width:44px;
+  max-width:100%;
+  padding:0 6px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--panel);
+  color:var(--text);
+  font:11.5px var(--font-code);
+  outline:none;
+}
+.mrb-in::placeholder{color:var(--muted-2);font-size:10.5px}
+.mrb-in:focus{border-color:var(--accent);box-shadow:var(--focus-ring)}
+.mrb-in.mrb-opt{border-style:dashed}
+.mrb-sel{
+  height:26px;
+  padding:0 4px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--panel);
+  color:var(--text);
+  font:11.5px var(--font-code);
+  outline:none;
+}
+.mrb-sel:focus{border-color:var(--accent);box-shadow:var(--focus-ring)}
+.mrb-fx{
+  width:23px;height:23px;flex:none;
+  display:grid;place-items:center;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--panel2);
+  color:var(--accent-hi);
+  font:700 11px var(--font-code);
+  cursor:pointer;
+}
+.mrb-fx:hover{border-color:var(--accent);background:var(--accent-soft)}
+.mrb-tools{margin-left:auto;display:flex;gap:1px;opacity:0;transition:opacity .12s ease}
+.mrb-block:hover>.mrb-bhead .mrb-tools,
+.mrb-block:focus-within>.mrb-bhead .mrb-tools,
+.mrb-script:hover>.mrb-hat .mrb-tools,
+.mrb-script:focus-within>.mrb-hat .mrb-tools{opacity:1}
+.mrb-tool{
+  width:22px;height:22px;
+  display:grid;place-items:center;
+  border:0;border-radius:5px;
+  background:transparent;
+  color:var(--muted);
+  font:12px var(--font-ui);
+  cursor:pointer;
+  line-height:1;
+}
+.mrb-tool:hover{background:var(--surface);color:var(--text)}
+.mrb-tool[data-act="del"]:hover{background:rgba(224,138,118,.18);color:var(--red)}
+
+.mrb-cbody{
+  margin:0 0 5px 12px;
+  padding:6px 7px 7px 13px;
+  border-left:3px solid var(--mrb-c,#7cc9c2);
+  border-radius:0 0 9px 9px;
+  background:rgba(0,0,0,.12);
+  min-height:32px;
+}
+body.mrr-light .mrb-cbody{background:rgba(0,0,0,.035)}
+body.mrr-light .mrb-block{box-shadow:0 1px 0 rgba(0,0,0,.05)}
+body.mrr-light .mrb-hat{box-shadow:inset 0 1px rgba(255,255,255,.55)}
+.mrb-cbody.mrb-selected{outline:2px dashed var(--accent);outline-offset:2px}
+.mrb-else{
+  margin:2px 0 5px 12px;
+  padding:0 7px 7px 13px;
+  border-left:3px dashed var(--mrb-c,#7cc9c2);
+  border-radius:0 0 9px 9px;
+  background:rgba(0,0,0,.07);
+}
+.mrb-else-label{
+  padding:2px 0 3px;
+  color:var(--muted);
+  font:9.5px var(--font-ui);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.mrb-else .mrb-cbody{margin-left:0;border-left:0;padding-left:0;background:transparent}
+
+.mrb-drop{
+  min-height:28px;
+  margin-top:3px;
+  padding:3px 8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px dashed var(--border);
+  border-radius:7px;
+  background:rgba(255,255,255,.012);
+  color:var(--muted-2);
+  font-size:10.5px;
+  line-height:1.3;
+  cursor:pointer;
+}
+.mrb-drop:hover,.mrb-drop.mrb-over{
+  border-color:var(--accent);
+  color:var(--accent-hi);
+  background:var(--accent-soft);
+}
+.mrb-drop.mrb-selected{border-color:var(--accent);color:var(--accent-hi)}
+.mrb-drop-root{
+  max-width:760px;
+  margin:14px auto 0;
+  min-height:40px;
+  font-size:11.5px;
+}
+.mrb-stage.mrb-over .mrb-drop-root{border-color:var(--accent);color:var(--accent-hi);background:var(--accent-soft)}
+
+.mrb-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:7px 12px;
+  border-top:1px solid var(--border-soft);
+  background:var(--panel2);
+  color:var(--muted);
+  font:11.5px var(--font-code);
+}
+.mrb-status .ok{color:var(--sage)}
+.mrb-status .err{color:var(--red)}
+.mrb-status .mrb-msg{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:62%}
+
+/* цвета категорий: только акцентная полоса и лёгкая подложка */
+.mrb-cat-event{--mrb-c:#e8c07d;--mrb-bg:rgba(232,192,125,.13)}
+.mrb-cat-func{--mrb-c:#8fb7d8;--mrb-bg:rgba(143,183,216,.12)}
+.mrb-cat-control{--mrb-c:#e0a06a;--mrb-bg:rgba(224,160,106,.12)}
+.mrb-cat-var{--mrb-c:#b49ae0;--mrb-bg:rgba(180,154,224,.12)}
+.mrb-cat-drawing{--mrb-c:#59c7b4;--mrb-bg:rgba(89,199,180,.12)}
+.mrb-cat-input{--mrb-c:#63b3ed;--mrb-bg:rgba(99,179,237,.12)}
+.mrb-cat-math-and-random{--mrb-c:#8b9cff;--mrb-bg:rgba(139,156,255,.12)}
+.mrb-cat-strings-and-conversion{--mrb-c:#7fce8a;--mrb-bg:rgba(127,206,138,.12)}
+.mrb-cat-arrays{--mrb-c:#c6a15b;--mrb-bg:rgba(198,161,91,.12)}
+.mrb-cat-time{--mrb-c:#d99a6c;--mrb-bg:rgba(217,154,108,.12)}
+.mrb-cat-persistence{--mrb-c:#b08be0;--mrb-bg:rgba(176,139,224,.12)}
+.mrb-cat-audio{--mrb-c:#e083b0;--mrb-bg:rgba(224,131,176,.12)}
+.mrb-cat-scene{--mrb-c:#e28b6b;--mrb-bg:rgba(226,139,107,.12)}
+.mrb-cat-screen-and-sensors{--mrb-c:#6fc3d8;--mrb-bg:rgba(111,195,216,.12)}
+.mrb-cat-physics-and-collision{--mrb-c:#e07a7a;--mrb-bg:rgba(224,122,122,.12)}
+.mrb-cat-utility{--mrb-c:#9aa7b8;--mrb-bg:rgba(154,167,184,.1)}
+.mrb-cat-console{--mrb-c:#b6c2d1;--mrb-bg:rgba(182,194,209,.1)}
+
+/* редактор формул */
+.mrb-modal{
+  position:fixed;
+  inset:0;
+  z-index:960;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background:rgba(2,10,9,.72);
+  -webkit-backdrop-filter:blur(5px);
+  backdrop-filter:blur(5px);
+}
+.mrb-modal[hidden]{display:none}
+.mrb-dialog{
+  width:min(820px,100%);
+  max-height:90dvh;
+  display:flex;
+  flex-direction:column;
+  background:var(--panel);
+  border:1px solid var(--border-strong);
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-lg);
+  overflow:hidden;
+}
+.mrb-dialog-head{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:11px 14px;
+  border-bottom:1px solid var(--border-soft);
+}
+.mrb-dialog-head b{font-size:14px;color:var(--text-strong)}
+.mrb-dialog-head .mrb-file{font-size:11px}
+.mrb-dialog-head .btn{margin-left:auto;height:30px;padding:0 10px;font-size:12px}
+.mrb-fx-input-wrap{padding:12px 14px 8px}
+.mrb-fx-input{
+  width:100%;
+  min-height:84px;
+  max-height:180px;
+  resize:vertical;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--bg);
+  color:var(--text);
+  font:13px/1.6 var(--font-code);
+  outline:none;
+}
+.mrb-fx-input:focus{border-color:var(--accent);box-shadow:var(--focus-ring)}
+.mrb-fx-ops{display:flex;flex-wrap:wrap;gap:4px;padding:0 14px 8px}
+.mrb-op{
+  height:28px;
+  min-width:30px;
+  padding:0 7px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--panel2);
+  color:var(--text);
+  font:12px var(--font-code);
+  cursor:pointer;
+}
+.mrb-op:hover{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-hi)}
+.mrb-fx-tabs{display:flex;gap:4px;padding:0 14px;border-bottom:1px solid var(--border-soft)}
+.mrb-fx-tab{
+  height:32px;
+  padding:0 10px;
+  border:0;
+  border-bottom:2px solid transparent;
+  background:transparent;
+  color:var(--muted);
+  font:600 12px var(--font-ui);
+  cursor:pointer;
+}
+.mrb-fx-tab.active{color:var(--accent-hi);border-bottom-color:var(--accent)}
+.mrb-fx-body{padding:8px 14px 10px;min-height:120px;display:flex;flex-direction:column;min-height:0}
+.mrb-fx-search{height:32px;margin-bottom:7px;padding:0 9px;border:1px solid var(--border);border-radius:7px;background:var(--panel2);color:var(--text);font:12px var(--font-ui);outline:none}
+.mrb-fx-search:focus{border-color:var(--accent)}
+.mrb-fx-list{
+  flex:1;
+  min-height:100px;
+  max-height:240px;
+  overflow:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  gap:4px;
+  align-content:start;
+}
+.mrb-fx-item{
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+  padding:7px 8px;
+  border:1px solid transparent;
+  border-radius:7px;
+  background:transparent;
+  color:var(--text);
+  text-align:left;
+  cursor:pointer;
+}
+.mrb-fx-item:hover{background:var(--accent-soft);border-color:var(--border)}
+.mrb-fx-item b{font:600 12px var(--font-code)}
+.mrb-fx-item small{font:10px var(--font-code);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrb-fx-item span{font:10px var(--font-ui);color:var(--muted-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrb-fx-preview{
+  margin:0 14px 10px;
+  padding:8px 10px;
+  border:1px solid var(--border-soft);
+  border-radius:8px;
+  background:var(--panel2);
+  color:var(--muted);
+  font:11.5px/1.5 var(--font-code);
+  min-height:34px;
+  max-height:70px;
+  overflow:auto;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+.mrb-fx-preview.ok{color:var(--sage);border-color:rgba(143,195,164,.35)}
+.mrb-fx-preview.err{color:var(--red);border-color:rgba(224,138,118,.35)}
+.mrb-dialog-foot{display:flex;justify-content:flex-end;gap:8px;padding:10px 14px;border-top:1px solid var(--border-soft)}
+.mrb-dialog-foot .btn{min-width:100px}
+
+@media(prefers-reduced-motion:reduce){
+  .mrb-group>summary::after,.mrb-tools{transition:none}
+}
+
+@media(max-width:760px){
+  #mrrBlocksPanel{height:calc(100dvh - 330px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:320px}
+  .mrb-shell{grid-template-columns:1fr;grid-template-rows:minmax(110px,22dvh) minmax(0,1fr)}
+  .mrb-head{padding:6px 8px;gap:6px;flex-wrap:nowrap}
+  .mrb-brand{font-size:12px;gap:6px}
+  .mrb-brand svg{width:17px;height:17px}
+  #mrbFileLabel{display:none}
+  .mrb-head .btn{height:30px;padding:0 8px;font-size:11.5px;min-width:0}
+  #mrbRestore{font-size:0;width:32px;padding:0}
+  #mrbRestore::before{content:"↩";font-size:14px}
+  #mrbApply{padding:0 9px}
+  .mrb-banner{padding:5px 8px;font-size:10.5px;line-height:1.35}
+  .mrb-palette{border-right:0;border-bottom:1px solid var(--border-soft)}
+  .mrb-pal-list{padding:6px 7px 10px}
+  .mrb-stage{padding:8px 8px 20px}
+  .mrb-scripts{gap:12px}
+  .mrb-bhead{padding:7px 7px 7px 10px}
+  .mrb-in{height:25px;font-size:11px}
+  .mrb-lbl{font-size:9px}
+  .mrb-tools{opacity:1}
+  .mrb-dialog{max-height:94dvh}
+  .mrb-fx-list{grid-template-columns:1fr;max-height:200px}
+  .mrb-status{padding:5px 8px;font-size:10.5px}
+  .mrb-status .mrb-msg{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+
+#mrrBlocksPanel[hidden],#mrbRestore[hidden]{display:none!important}
+
+.mrb-pal-item[hidden],.mrb-group[hidden]{display:none!important}
+
+</style>
 </head>
 <body>
 <header>
@@ -9910,7 +10507,9 @@ body{
   white-space:pre-wrap;
   display:none
 }
-</style></head><body><canvas id="game" width="800" height="450" aria-label="Игра"></canvas><div id="error" role="alert"></div><script>
+</style>
+
+</head><body><canvas id="game" width="800" height="450" aria-label="Игра"></canvas><div id="error" role="alert"></div><script>
 (()=>{'use strict';
 const project=${encoded};
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),errorBox=document.getElementById('error');
@@ -15040,5 +15639,532 @@ window.mrrOpenCommandPalette=openCommandPalette;
   syncHeader();
   setTimeout(renderSidebar, 400);
 })();
+</script>
+
+<script id="mrrcode-blocks-script">
+(function(){
+'use strict';
+if(window.__mrrBlocksInit)return;
+window.__mrrBlocksInit=true;
+const $=id=>document.getElementById(id);
+const R=window.MRRCODE_API_REGISTRY;
+if(!R||!Array.isArray(R.entries))return;
+const LS='mrrcode-blocks-v1';
+const EV={start:{label:'когда игра запускается',params:[]},update:{label:'каждый кадр',params:['dt']},pointerDown:{label:'при касании',params:['x','y']},pointerMove:{label:'при движении пальца',params:['x','y']},pointerUp:{label:'когда палец отпущен',params:['x','y']}};
+const CAT={drawing:['Рисование','#59c7b4'],input:['Ввод и касания','#63b3ed'],'math-and-random':['Математика','#8b9cff'],'strings-and-conversion':['Строки','#7fce8a'],arrays:['Массивы и объекты','#c6a15b'],time:['Время и таймеры','#d99a6c'],persistence:['Сохранения','#b08be0'],audio:['Звук','#e083b0'],scene:['Сцена','#e28b6b'],'screen-and-sensors':['Экран и датчики','#6fc3d8'],'physics-and-collision':['Физика','#e07a7a'],utility:['Утилиты','#9aa7b8'],console:['Консоль','#b6c2d1']};
+const CAT_ORDER=['drawing','input','math-and-random','strings-and-conversion','arrays','time','physics-and-collision','scene','screen-and-sensors','audio','persistence','utility','console'];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>'b'+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
+function splitTop(s){const out=[];let cur='',d=0,q='';for(let i=0;i<s.length;i++){const ch=s[i];if(q){cur+=ch;if(ch===q&&s[i-1]!=='\\')q='';continue;}if(ch==='"'||ch==="'"){q=ch;cur+=ch;continue;}if('([{'.includes(ch))d++;else if(')]}'.includes(ch))d--;if(ch===','&&d===0){out.push(cur);cur='';}else cur+=ch;}if(cur.trim())out.push(cur);return out.map(x=>x.trim()).filter(Boolean);}
+function parseSig(sig){const s=String(sig||'').trim();const a=s.indexOf('('),b=s.lastIndexOf(')');if(a<0||b<a)return [];return splitTop(s.slice(a+1,b)).map(p=>{let v=false,o=false;if(p.startsWith('...')){v=true;p=p.slice(3).trim();}if(p.endsWith('?')){o=true;p=p.slice(0,-1).trim();}let def='';const e=p.indexOf('=');if(e>=0){def=p.slice(e+1).trim();p=p.slice(0,e).trim();}return{name:p||'value',optional:o,variadic:v,def};});}
+function defExpr(p){if(p&&p.def)return p.def;const n=String(p&&p.name||'').toLowerCase();if(/^(color|bg|colour|c1|c2|fill|stroke)$/.test(n))return '"#70d6ff"';if(/^(flipx|flipy|loop|vertical|desc|centered|visible|active)$/.test(n))return 'false';if(n==='points')return '[0, 0, 80, 0, 40, 60]';if(/^(options|props|config)$/.test(n))return '{}';if(n==='args')return '[]';if(/^(array|values|items|list)$/.test(n))return '[]';if(/^(name|text|value|key|template|separator|prefix|suffix|from|to|char|channel|tag|property|type|easing|callback|fn|code|file|message|slot|label|word)$/.test(n))return '""';if(/^(w|h|width|height|framew|frameh)$/.test(n))return '32';if(n==='size')return '16';if(n==='fps')return '8';if(n==='r')return '20';if(n==='volume'||n==='t')return '0.5';if(n==='alpha')return '1';if(n==='seconds'||n==='duration')return '1';if(n==='count')return '10';if(n==='blur')return '8';return '0';}
+const API={},API_LIST=[];
+R.entries.filter(e=>e.kind==='fn').forEach(e=>{const x={name:e.name,sig:e.signature||e.name+'()',desc:e.description||'',cat:e.category||'utility',params:parseSig(e.signature)};API[e.name]=x;API_LIST.push(x);});
+const store={models:{},backups:{},last:{}};
+try{const p=JSON.parse(localStorage.getItem(LS)||'{}');if(p&&typeof p==='object'){store.models=p.models||{};store.backups=p.backups||{};store.last=p.last||{};}}catch(e){}
+const persist=()=>{if(model&&file&&hasModel)store.models[file]=model;try{localStorage.setItem(LS,JSON.stringify(store));}catch(e){}};
+let active=false,model=null,file='main.mrr',selected=null,hasModel=false,undo=[],valTimer=0,syncTimer=0,panel=null,btn=null;
+const input=()=>$('codeInput');
+const curFile=()=>{try{return state&&state.activeFile||'main.mrr'}catch(e){return 'main.mrr'}};
+const apiCat=n=>(API[n]&&API[n].cat)||'utility';
+const evScript=n=>({id:uid(),type:'event',event:n,body:[]});
+function defaultModel(){return{scripts:[evScript('start'),evScript('update')]};}
+function validModel(m){return m&&Array.isArray(m.scripts)&&m.scripts.every(s=>s&&s.id&&(s.type==='event'||s.type==='function')&&Array.isArray(s.body));}
+function nameOf(v,fb){const s=String(v||'').trim();return /^[A-Za-z_$][\w$]*$/.test(s)?s:fb;}
+function findBlock(id,list){for(const b of (list||[])){if(!b||!b.id)continue;if(b.id===id)return b;const r=findBlock(id,b.body||[])||findBlock(id,b.elseBody||[]);if(r)return r;}return null;}
+function rootBlocks(){return model&&model.scripts?model.scripts.reduce((a,s)=>a.concat(s.body||[]),[]):[];}
+function findLoc(id,list,pid,slot){for(let i=0;i<(list||[]).length;i++){const b=list[i];if(b.id===id)return{list,index:i,parentId:pid,slot};const r=findLoc(id,b.body||[],b.id,'body')||findLoc(id,b.elseBody||[],b.id,'elseBody');if(r)return r;}return null;}
+function findBlockLoc(id){for(const s of (model&&model.scripts)||[]){const r=findLoc(id,s.body||[],s.id,'body');if(r)return r;}return null;}
+function container(pid,slot){if(pid==='root')return null;const s=(model&&model.scripts||[]).find(x=>x.id===pid);if(s)return{list:s.body,parentId:s.id,slot:'body'};const b=findBlock(pid,rootBlocks());if(!b)return null;const list=slot==='elseBody'?b.elseBody:b.body;return list?{list,parentId:pid,slot:slot==='elseBody'?'elseBody':'body'}:null;}
+function resolveSel(){const c=selected?container(selected.parentId,selected.slot):null;if(c)return c;const s=model&&(model.scripts.find(x=>x.type==='event')||model.scripts[0]);return s?{list:s.body,parentId:s.id,slot:'body'}:null;}
+function buildArgs(b){const info=API[b.name];if(!info)return (b.args||[]).join(', ');const ps=info.params,vals=b.args||[];const raw=ps.map((p,i)=>{const v=String(vals[i]==null?'':vals[i]).trim();if(p.variadic)return v||null;if(!v&&p.optional)return null;return v||defExpr(p);});let end=raw.length-1;while(end>=0&&(raw[end]===null||raw[end]===''))end--;if(end<0)return '';const out=[];for(let i=0;i<=end;i++)out.push(raw[i]===null?defExpr(ps[i]):raw[i]);return out.join(', ');}
+function ind(n){return '    '.repeat(n);}
+function genList(list,l){return (list||[]).map(b=>genBlock(b,l)).join('');}
+function genBlock(b,l){if(!b)return '';const p=ind(l);switch(b.type){
+case'api':return p+b.name+'('+buildArgs(b)+');\n';
+case'let':return p+(b.kind==='const'?'const':'let')+' '+nameOf(b.name,'value')+' = '+(String(b.value||'0').trim()||'0')+';\n';
+case'assign':return p+nameOf(b.name,'value')+' '+(b.op||'=')+' '+(String(b.value||'0').trim()||'0')+';\n';
+case'inc':return p+nameOf(b.name,'value')+(b.op||'++')+';\n';
+case'if':{let o=p+'if ('+(String(b.cond||'true').trim()||'true')+') {\n'+genList(b.body,l+1)+p+'}';if(b.elseBody&&b.elseBody.length)o+=' else {\n'+genList(b.elseBody,l+1)+p+'}';return o+'\n';}
+case'while':return p+'while ('+(String(b.cond||'false').trim()||'false')+') {\n'+genList(b.body,l+1)+p+'}\n';
+case'repeat':return p+'for (let i = 0; i < '+(String(b.count||'0').trim()||'0')+'; i++) {\n'+genList(b.body,l+1)+p+'}\n';
+case'forof':return p+'for (let '+nameOf(b.varName,'item')+' of '+(String(b.array||'[]').trim()||'[]')+') {\n'+genList(b.body,l+1)+p+'}\n';
+case'forin':return p+'for (let '+nameOf(b.varName,'key')+' in '+(String(b.object||'{}').trim()||'{}')+') {\n'+genList(b.body,l+1)+p+'}\n';
+case'break':return p+'break;\n';
+case'continue':return p+'continue;\n';
+case'return':return p+'return'+(String(b.value||'').trim()?' '+b.value:'')+';\n';
+case'call':return p+nameOf(b.name,'myFunction')+'('+(b.args||'')+');\n';
+case'import':return p+'from "'+String(b.file||'').replace(/"/g,'\\"')+'" import '+(b.names||'')+';\n';
+case'comment':return p+'// '+String(b.text||'').replace(/\n/g,' ')+'\n';
+}
+return '';}
+function generate(){if(!model)return '';const parts=[];for(const s of model.scripts){if(s.type==='event'){const ev=EV[s.event];if(!ev)continue;parts.push('function '+s.event+'('+ev.params.join(', ')+') {\n'+genList(s.body,1)+'}');}else if(s.type==='function'){const nm=nameOf(s.name,'myFunction');const ps=String(s.params||'').trim();parts.push('function '+nm+'('+ps+') {\n'+genList(s.body,1)+'}');}}return parts.join('\n\n')+(parts.length?'\n':'');}
+/* ---------- палитра ---------- */
+const LANG_GROUPS=[
+ {id:'events',label:'События',color:'#e8c07d',items:[
+  {kind:'event',event:'start',label:'когда игра запускается',sig:'function start()'},
+  {kind:'event',event:'update',label:'каждый кадр',sig:'function update(dt)'},
+  {kind:'event',event:'pointerDown',label:'при касании',sig:'function pointerDown(x, y)'},
+  {kind:'event',event:'pointerMove',label:'при движении пальца',sig:'function pointerMove(x, y)'},
+  {kind:'event',event:'pointerUp',label:'когда палец отпущен',sig:'function pointerUp(x, y)'}
+ ]},
+ {id:'control',label:'Управление',color:'#e0a06a',items:[
+  {lang:'if',label:'если … то',sig:'if (условие) { … } else { … }'},
+  {lang:'while',label:'пока … повторять',sig:'while (условие) { … }'},
+  {lang:'repeat',label:'повторить N раз',sig:'for (let i = 0; i < N; i++)'},
+  {lang:'forof',label:'для каждого из массива',sig:'for (let item of array)'},
+  {lang:'forin',label:'для ключа в объекте',sig:'for (let key in object)'},
+  {lang:'break',label:'прервать цикл',sig:'break;'},
+  {lang:'continue',label:'продолжить цикл',sig:'continue;'},
+  {lang:'return',label:'вернуть значение',sig:'return value;'}
+ ]},
+ {id:'vars',label:'Переменные',color:'#b49ae0',items:[
+  {lang:'let',label:'объявить переменную',sig:'let name = value;'},
+  {lang:'const',label:'объявить константу',sig:'const name = value;'},
+  {lang:'assign',label:'присвоить',sig:'name = value;'},
+  {lang:'inc',label:'увеличить / уменьшить',sig:'name++;'},
+  {lang:'array',label:'массив',sig:'let items = [1, 2, 3];'},
+  {lang:'object',label:'объект',sig:'let body = {x: 0, y: 0};'}
+ ]},
+ {id:'funcs',label:'Функции',color:'#8fb7d8',items:[
+  {kind:'func',label:'новая функция',sig:'function name(a, b) { … }'},
+  {lang:'call',label:'вызвать функцию',sig:'name(args);'},
+  {lang:'import',label:'импорт из файла',sig:'from "file" import name;'},
+  {lang:'comment',label:'комментарий',sig:'// текст'}
+ ]}
+];
+const palMap={};
+let palGroups=[];
+function buildPalette(){
+ palGroups=[];
+ LANG_GROUPS.forEach(g=>{
+  const items=g.items.map(x=>{const pid='p'+Object.keys(palMap).length;const p=Object.assign({kind:'lang'},x);palMap[pid]=p;return{pid,label:x.label,sig:x.sig||'',desc:x.desc||'',color:g.color};});
+  palGroups.push({id:'lang-'+g.id,label:g.label,color:g.color,items});
+ });
+ CAT_ORDER.forEach(cat=>{
+  const items=API_LIST.filter(x=>x.cat===cat).map(x=>{const pid='p'+Object.keys(palMap).length;palMap[pid]={kind:'api',name:x.name};return{pid,label:x.name,sig:x.sig,desc:x.desc,color:CAT[cat][1]};});
+  if(items.length)palGroups.push({id:'cat-'+cat,label:CAT[cat][0],color:CAT[cat][1],items});
+ });
+ renderPalette();
+}
+function renderPalette(){
+ const h=$('mrbPalList');if(!h)return;
+ h.innerHTML=palGroups.map((g,gi)=>'<details class="mrb-group" data-g="'+g.id+'"'+(gi<2?' open':'')+'><summary><span class="mrb-cat-dot" style="--mrb-c:'+g.color+'"></span>'+esc(g.label)+'</summary>'+g.items.map(it=>'<button type="button" class="mrb-pal-item" draggable="true" data-pid="'+it.pid+'" data-search="'+esc((it.label+' '+it.sig+' '+it.desc).toLowerCase())+'" title="'+esc(it.desc)+'"><span class="mrb-dot" style="--mrb-c:'+it.color+'"></span><span class="mrb-pal-copy">'+esc(it.label)+'<span class="mrb-sig">'+esc(it.sig)+'</span></span></button>').join('')+'</details>').join('')+'<div class="mrb-pal-empty" id="mrbPalEmpty" hidden>Ничего не найдено</div>';
+}
+function filterPalette(){
+ const q=($('mrbSearch').value||'').trim().toLowerCase();let any=false;
+ document.querySelectorAll('#mrbPalList .mrb-group').forEach(g=>{
+  let hit=false;
+  g.querySelectorAll('.mrb-pal-item').forEach(it=>{const ok=!q||it.dataset.search.includes(q);it.hidden=!ok;if(ok)hit=true;});
+  g.hidden=!hit;if(hit)any=true;if(q&&hit)g.open=true;
+ });
+ const e=$('mrbPalEmpty');if(e)e.hidden=any;
+}
+
+/* ---------- отрисовка ---------- */
+function selCls(pid,slot){return selected&&selected.parentId===pid&&selected.slot===slot?' mrb-selected':'';}
+function dropHtml(pid,slot){return '<div class="mrb-drop'+selCls(pid,slot)+'" data-parent="'+pid+'" data-slot="'+slot+'" role="button" tabindex="0">＋ сюда</div>';}
+function field(b,f,label,val,w,ph,noFx){
+ const v=String(val==null?'':val);const width=w||Math.max(48,Math.min(150,12+v.length*7));
+ return '<span class="mrb-arg"><span class="mrb-lbl">'+esc(label)+'</span><input class="mrb-in" data-bid="'+b.id+'" data-field="'+f+'" value="'+esc(v)+'" placeholder="'+esc(ph||label)+'" style="width:'+Math.round(width)+'px" aria-label="'+esc(label)+'">'+(noFx?'':'<button type="button" class="mrb-fx" data-fx="1" data-bid="'+b.id+'" data-field="'+f+'" title="Редактор формулы" aria-label="Формула: '+esc(label)+'">ƒ</button>')+'</span>';
+}
+function selField(b,f,label,val,opts){return '<span class="mrb-arg"><span class="mrb-lbl">'+esc(label)+'</span><select class="mrb-sel" data-bid="'+b.id+'" data-field="'+f+'" aria-label="'+esc(label)+'">'+opts.map(o=>'<option value="'+esc(o[0])+'"'+(o[0]===val?' selected':'')+'>'+esc(o[1])+'</option>').join('')+'</select></span>';}
+function tools(b){return '<span class="mrb-tools"><button type="button" class="mrb-tool" data-act="up" data-bid="'+b.id+'" title="Выше" aria-label="Выше">↑</button><button type="button" class="mrb-tool" data-act="down" data-bid="'+b.id+'" title="Ниже" aria-label="Ниже">↓</button><button type="button" class="mrb-tool" data-act="dup" data-bid="'+b.id+'" title="Дублировать" aria-label="Дублировать">⧉</button><button type="button" class="mrb-tool" data-act="del" data-bid="'+b.id+'" title="Удалить" aria-label="Удалить">✕</button></span>';}
+function argField(b,p,i){
+ const v=String((b.args||[])[i]||'');const width=Math.max(46,Math.min(160,16+v.length*7));
+ return '<span class="mrb-arg"><span class="mrb-lbl">'+esc(p.name)+(p.optional?'?':'')+(p.variadic?'…':'')+'</span><input class="mrb-in'+(p.optional?' mrb-opt':'')+'" data-bid="'+b.id+'" data-field="arg" data-arg="'+i+'" value="'+esc(v)+'" placeholder="'+esc(p.optional?'необязательно':p.name)+'" style="width:'+Math.round(width)+'px" aria-label="'+esc(p.name)+'"><button type="button" class="mrb-fx" data-fx="1" data-bid="'+b.id+'" data-arg="'+i+'" title="Редактор формулы" aria-label="Формула: '+esc(p.name)+'">ƒ</button></span>';
+}
+function blockBody(b,pid,slot,list){return '<div class="mrb-cbody'+selCls(pid,slot)+'" data-parent="'+pid+'" data-slot="'+slot+'">'+(list||[]).map(blockHtml).join('')+dropHtml(pid,slot)+'</div>';}
+function blockHtml(b){
+ if(!b||!b.id)return '';
+ const cat=b.type==='api'?apiCat(b.name):(b.type==='let'||b.type==='assign'||b.type==='inc'?'var':(b.type==='call'||b.type==='import'||b.type==='comment'?'func':'control'));
+ const cls='mrb-cat-'+cat;const t=tools(b);
+ switch(b.type){
+  case'api':{const info=API[b.name]||{params:[]};return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span class="mrb-fn">'+esc(b.name)+'</span>'+info.params.map((p,i)=>argField(b,p,i)).join('')+t+'</div></div>';}
+  case'if':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span>если</span>'+field(b,'cond','условие',b.cond,170,'pointerDownNow()')+'<span>то</span>'+t+'</div>'+blockBody(b,b.id,'body',b.body)+'<div class="mrb-else"><div class="mrb-else-label">иначе</div>'+blockBody(b,b.id,'elseBody',b.elseBody)+'</div></div>';
+  case'while':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span>пока</span>'+field(b,'cond','условие',b.cond,170,'pointerDownNow()')+'<span>повторять</span>'+t+'</div>'+blockBody(b,b.id,'body',b.body)+'</div>';
+  case'repeat':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span>повторить</span>'+field(b,'count','раз',b.count,64,'10')+t+'</div>'+blockBody(b,b.id,'body',b.body)+'</div>';
+  case'forof':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span>для</span>'+field(b,'varName','элемент',b.varName,88,'item',true)+'<span>из</span>'+field(b,'array','массив',b.array,120,'[]')+t+'</div>'+blockBody(b,b.id,'body',b.body)+'</div>';
+  case'forin':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span>для ключа</span>'+field(b,'varName','ключ',b.varName,88,'key',true)+'<span>в</span>'+field(b,'object','объект',b.object,120,'{}')+t+'</div>'+blockBody(b,b.id,'body',b.body)+'</div>';
+  case'let':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1">'+selField(b,'kind','объявление',b.kind,[['let','let'],['const','const']])+field(b,'name','имя',b.name,90,'score',true)+'<span>=</span>'+field(b,'value','значение',b.value,120,'0')+t+'</div></div>';
+  case'assign':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1">'+field(b,'name','переменная',b.name,90,'score',true)+selField(b,'op','операция',b.op,[['=','='],['+=','+='],['-=','-='],['*=','*='],['/=','/='],['%=','%='],['**=','**=']])+field(b,'value','значение',b.value,120,'0')+t+'</div></div>';
+  case'inc':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1">'+field(b,'name','переменная',b.name,90,'score',true)+selField(b,'op','операция',b.op,[['++','++'],['--','--']])+t+'</div></div>';
+  case'return':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span>вернуть</span>'+field(b,'value','значение',b.value,130,'0')+t+'</div></div>';
+  case'call':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span>вызвать</span>'+field(b,'name','функция',b.name,110,'myFunction',true)+'<span>(</span>'+field(b,'args','аргументы',b.args,150,'1, 2',true)+'<span>)</span>'+t+'</div></div>';
+  case'import':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span>из</span>'+field(b,'file','файл',b.file,100,'player',true)+'<span>импортировать</span>'+field(b,'names','имена',b.names,140,'start',true)+t+'</div></div>';
+  case'comment':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span>//</span>'+field(b,'text','комментарий',b.text,220,'текст',true)+t+'</div></div>';
+  case'break':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span>прервать цикл</span>'+t+'</div></div>';
+  case'continue':return '<div class="mrb-block '+cls+'" data-id="'+b.id+'"><div class="mrb-bhead" draggable="true" data-drag="1"><span>продолжить цикл</span>'+t+'</div></div>';
+ }
+ return '';
+}
+function scriptTools(s){return '<span class="mrb-tools"><button type="button" class="mrb-tool" data-sact="up" data-sid="'+s.id+'" title="Выше" aria-label="Выше">↑</button><button type="button" class="mrb-tool" data-sact="down" data-sid="'+s.id+'" title="Ниже" aria-label="Ниже">↓</button>'+(s.type==='function'?'<button type="button" class="mrb-tool" data-sact="dup" data-sid="'+s.id+'" title="Дублировать" aria-label="Дублировать">⧉</button>':'')+'<button type="button" class="mrb-tool" data-sact="del" data-sid="'+s.id+'" title="Удалить" aria-label="Удалить">✕</button></span>';}
+function scriptHtml(s){
+ const isEv=s.type==='event';const ev=isEv?EV[s.event]||{label:s.event,params:[]}:null;
+ const hat=isEv
+  ?'<div class="mrb-hat mrb-hat-event"><span class="mrb-hat-title">'+esc(ev.label)+'</span>'+ev.params.map(p=>'<span class="mrb-pat">'+esc(p)+'</span>').join('')+scriptTools(s)+'</div>'
+  :'<div class="mrb-hat mrb-hat-func"><span class="mrb-hat-title">функция</span><input class="mrb-in" data-sid="'+s.id+'" data-sfield="name" value="'+esc(s.name||'myFunction')+'" style="width:120px" aria-label="Имя функции"><span>(</span><input class="mrb-in" data-sid="'+s.id+'" data-sfield="params" value="'+esc(s.params||'')+'" style="width:110px" placeholder="a, b" aria-label="Параметры"><span>)</span>'+scriptTools(s)+'</div>';
+ return '<div class="mrb-script">'+hat+'<div class="mrb-cbody'+selCls(s.id,'body')+'" data-parent="'+s.id+'" data-slot="body">'+(s.body||[]).map(blockHtml).join('')+dropHtml(s.id,'body')+'</div></div>';
+}
+function renderScripts(){const h=$('mrbScripts');if(!h)return;h.innerHTML=(model&&model.scripts.length)?model.scripts.map(scriptHtml).join(''):'<div class="mrb-empty"><b>Пусто.</b> Добавьте событие «когда игра запускается» и блоки из палитры.</div>';updateTarget();}
+function updateTarget(){const el=$('mrbTarget');if(!el)return;const c=resolveSel();let s='не выбрано';if(c){if(c.parentId==='root')s='начало';else{const sc=model.scripts.find(x=>x.id===c.parentId);if(sc)s=sc.type==='event'?'событие «'+(EV[sc.event]?EV[sc.event].label:sc.event)+'»':'функция '+(sc.name||'');else s='вложенный блок';}}el.innerHTML='Куда добавлять: <b>'+esc(s)+'</b> · нажмите на область блока, чтобы выбрать её';}
+/* ---------- выбор контейнера, создание, действия ---------- */
+function selectContainer(pid,slot){
+ const c=container(pid,slot);if(!c)return;
+ selected={parentId:pid,slot};
+ document.querySelectorAll('.mrb-selected').forEach(el=>el.classList.remove('mrb-selected'));
+ document.querySelectorAll('.mrb-cbody[data-parent="'+pid+'"][data-slot="'+slot+'"],.mrb-drop[data-parent="'+pid+'"][data-slot="'+slot+'"]').forEach(el=>el.classList.add('mrb-selected'));
+ updateTarget();
+}
+function makeApi(name){const info=API[name]||{params:[]};return{id:uid(),type:'api',name,args:info.params.map(p=>p.variadic?'':(p.optional?'':defExpr(p)))};}
+function makeLang(t){
+ if(t==='if')return{id:uid(),type:'if',cond:'',body:[],elseBody:[]};
+ if(t==='while')return{id:uid(),type:'while',cond:'',body:[]};
+ if(t==='repeat')return{id:uid(),type:'repeat',count:'10',body:[]};
+ if(t==='forof')return{id:uid(),type:'forof',varName:'item',array:'[]',body:[]};
+ if(t==='forin')return{id:uid(),type:'forin',varName:'key',object:'{}',body:[]};
+ if(t==='let'||t==='const')return{id:uid(),type:'let',kind:t,name:'score',value:'0'};
+ if(t==='array')return{id:uid(),type:'let',kind:'let',name:'items',value:'[1, 2, 3]'};
+ if(t==='object')return{id:uid(),type:'let',kind:'let',name:'body',value:'{x: 0, y: 0}'};
+ if(t==='assign')return{id:uid(),type:'assign',name:'score',op:'=',value:'0'};
+ if(t==='inc')return{id:uid(),type:'inc',name:'score',op:'++'};
+ if(t==='return')return{id:uid(),type:'return',value:''};
+ if(t==='call')return{id:uid(),type:'call',name:'myFunction',args:''};
+ if(t==='import')return{id:uid(),type:'import',file:'player',names:'start'};
+ if(t==='comment')return{id:uid(),type:'comment',text:'комментарий'};
+ return{id:uid(),type:t};
+}
+function addPayload(p){
+ if(!model)return;
+ if(p.kind==='event'){
+  let s=model.scripts.find(x=>x.type==='event'&&x.event===p.event);
+  if(!s){s=evScript(p.event);model.scripts.push(s);}
+  selected={parentId:s.id,slot:'body'};afterStructural();return;
+ }
+ if(p.kind==='func'){
+  const s={id:uid(),type:'function',name:'myFunction',params:'',body:[]};
+  let n=2;while(model.scripts.some(x=>x.type==='function'&&x.name===s.name))s.name='myFunction'+n++;
+  model.scripts.push(s);selected={parentId:s.id,slot:'body'};afterStructural();return;
+ }
+ const b=p.kind==='api'?makeApi(p.name):makeLang(p.lang);
+ let c=resolveSel();
+ if(!c){const s=evScript('start');model.scripts.push(s);c={list:s.body,parentId:s.id,slot:'body'};}
+ c.list.push(b);selected={parentId:c.parentId,slot:c.slot};afterStructural();
+}
+function afterStructural(){if(!model)return;undo.push(JSON.stringify(model));if(undo.length>50)undo.shift();persist();renderScripts();applyNow();}
+function afterInput(){persist();clearTimeout(syncTimer);syncTimer=setTimeout(()=>applyNow(),500);}
+function cloneB(b){const c=JSON.parse(JSON.stringify(b));reid(c);return c;}
+function reid(b){b.id=uid();(b.body||[]).forEach(reid);(b.elseBody||[]).forEach(reid);}
+function moveBlock(id,dir){const loc=findBlockLoc(id);if(!loc)return;const arr=loc.list,i=loc.index,j=i+dir;if(j<0||j>=arr.length)return;const t=arr[i];arr[i]=arr[j];arr[j]=t;afterStructural();}
+function delBlock(id){const loc=findBlockLoc(id);if(!loc)return;loc.list.splice(loc.index,1);if(selected&&selected.parentId===id)selected=null;afterStructural();}
+function dupBlock(id){const loc=findBlockLoc(id);if(!loc)return;loc.list.splice(loc.index+1,0,cloneB(loc.list[loc.index]));afterStructural();}
+function moveScript(id,dir){const i=model.scripts.findIndex(s=>s.id===id),j=i+dir;if(i<0||j<0||j>=model.scripts.length)return;const t=model.scripts[i];model.scripts[i]=model.scripts[j];model.scripts[j]=t;afterStructural();}
+function delScript(id){const i=model.scripts.findIndex(s=>s.id===id);if(i<0)return;model.scripts.splice(i,1);if(selected&&selected.parentId===id)selected=null;afterStructural();}
+function onPanelClick(e){
+ const st=e.target.closest('[data-sact]');
+ if(st){const id=st.dataset.sid;const a=st.dataset.sact;if(a==='up')moveScript(id,-1);else if(a==='down')moveScript(id,1);else if(a==='del')delScript(id);else if(a==='dup'){const s=model.scripts.find(x=>x.id===id);if(s&&s.type==='function'){const c=cloneB(s);c.id=uid();c.name=(s.name||'fn')+'Copy';model.scripts.push(c);afterStructural();}}return;}
+ const t=e.target.closest('[data-act]');
+ if(t){const id=t.dataset.bid;const a=t.dataset.act;if(a==='up')moveBlock(id,-1);else if(a==='down')moveBlock(id,1);else if(a==='del')delBlock(id);else if(a==='dup')dupBlock(id);return;}
+ const f=e.target.closest('[data-fx]');if(f){openFx(f);return;}
+ const z=e.target.closest('[data-slot]');
+ if(z&&(!e.target.closest('.mrb-block')||e.target.closest('.mrb-drop')))selectContainer(z.dataset.parent,z.dataset.slot);
+}
+function onPanelInput(e){
+ const s=e.target.closest('[data-sid]');
+ if(s){const sc=model.scripts.find(x=>x.id===s.dataset.sid);if(sc){sc[s.dataset.sfield]=s.value;afterInput();}return;}
+ const i=e.target.closest('[data-bid]');if(!i)return;
+ const b=findBlock(i.dataset.bid,rootBlocks());if(!b)return;
+ if(i.dataset.arg!==undefined&&i.dataset.arg!==''){b.args=b.args||[];b.args[+i.dataset.arg]=i.value;}
+ else if(i.dataset.field){b[i.dataset.field]=i.value;}
+ afterInput();
+}
+function onPanelChange(e){const s=e.target.closest('[data-bid]');if(!s||!s.dataset.field)return;const b=findBlock(s.dataset.bid,rootBlocks());if(b){b[s.dataset.field]=s.value;afterInput();}}
+function onPalClick(e){const it=e.target.closest('[data-pid]');if(!it)return;const p=palMap[it.dataset.pid];if(p)addPayload(p);}
+
+/* ---------- drag & drop ---------- */
+let drag=null;
+function onDragStart(e){
+ const pal=e.target.closest('[data-pid]');
+ if(pal){drag={kind:'palette',payload:palMap[pal.dataset.pid]};e.dataTransfer.effectAllowed='copy';e.dataTransfer.setData('text/plain','mrb');return;}
+ if(e.target.closest('input,select,button'))return;
+ const head=e.target.closest('.mrb-bhead[data-drag]');
+ if(head){const b=head.closest('.mrb-block');if(!b)return;drag={kind:'block',id:b.dataset.id};e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','mrb');b.classList.add('mrb-dragging');}
+}
+function onDragOver(e){
+ const z=e.target.closest('[data-slot]');const root=e.target.closest('.mrb-drop-root');
+ if(!z&&!root)return;
+ e.preventDefault();
+ document.querySelectorAll('.mrb-over').forEach(x=>x.classList.remove('mrb-over'));
+ (z||root).classList.add('mrb-over');
+}
+function dropIndex(zone,y){const kids=[].slice.call(zone.children).filter(el=>el.classList.contains('mrb-block'));let i=kids.length;for(let k=0;k<kids.length;k++){const r=kids[k].getBoundingClientRect();if(y<r.top+r.height/2){i=k;break;}}return i;}
+function onDrop(e){
+ const z=e.target.closest('[data-slot]');const root=e.target.closest('.mrb-drop-root');
+ if(!z&&!root)return;
+ e.preventDefault();
+ document.querySelectorAll('.mrb-over').forEach(x=>x.classList.remove('mrb-over'));
+ const d=drag;drag=null;if(!d)return;
+ if(d.kind==='palette'){
+  const p=d.payload;if(!p)return;
+  if(p.kind==='event'||p.kind==='func'){addPayload(p);return;}
+  const target=z?container(z.dataset.parent,z.dataset.slot):resolveSel();
+  if(!target)return;
+  const b=p.kind==='api'?makeApi(p.name):makeLang(p.lang);
+  let idx=z?dropIndex(z,e.clientY):target.list.length;
+  target.list.splice(idx,0,b);selected={parentId:target.parentId,slot:target.slot};afterStructural();return;
+ }
+ if(d.kind==='block'){
+  const loc=findLoc(d.id,rootBlocks());if(!loc)return;
+  const b=loc.list[loc.index];
+  const target=z?container(z.dataset.parent,z.dataset.slot):resolveSel();if(!target)return;
+  if(target.parentId&&findBlock(target.parentId,[b]))return;
+  let idx=z?dropIndex(z,e.clientY):target.list.length;
+  loc.list.splice(loc.index,1);
+  if(target.list===loc.list&&idx>loc.index)idx--;
+  target.list.splice(idx,0,b);
+  selected={parentId:target.parentId,slot:target.slot};afterStructural();
+ }
+}
+/* ---------- редактор формул ---------- */
+let fx=null,fxTab='fn',fxSearch='',fxTimer=0;
+function openFx(el){
+ const b=findBlock(el.dataset.bid,rootBlocks());if(!b)return;
+ let where='',get,set;
+ if(el.dataset.arg!==undefined&&el.dataset.arg!==''){
+  const i=+el.dataset.arg;const info=API[b.name]||{params:[]};const p=info.params[i]||{name:'значение'};
+  where=(b.name||'')+' · '+p.name;
+  get=()=>String((b.args||[])[i]||'');
+  set=v=>{b.args=b.args||[];b.args[i]=v;const inp=document.querySelector('.mrb-in[data-bid="'+b.id+'"][data-arg="'+i+'"]');if(inp)inp.value=v;afterInput();};
+ }else{
+  const f=el.dataset.field;where=(b.type==='api'?b.name:b.type)+' · '+f;
+  get=()=>String(b[f]||'');
+  set=v=>{b[f]=v;const inp=document.querySelector('.mrb-in[data-bid="'+b.id+'"][data-field="'+f+'"]');if(inp)inp.value=v;afterInput();};
+ }
+ fx={get,set,where};
+ $('mrbFxWhere').textContent=where;
+ $('mrbFxInput').value=get();
+ $('mrbFormula').hidden=false;
+ fxTab='fn';fxSearch='';$('mrbFxSearch').value='';
+ renderFxTabs();renderFxList();updateFxPreview();
+ setTimeout(()=>{const t=$('mrbFxInput');t.focus();t.setSelectionRange(t.value.length,t.value.length);},30);
+}
+function closeFx(){$('mrbFormula').hidden=true;fx=null;}
+function renderFxTabs(){const m=$('mrbFormula');if(!m)return;m.querySelectorAll('[data-fxtab]').forEach(b=>b.classList.toggle('active',b.dataset.fxtab===fxTab));}
+function renderFxList(){
+ const list=$('mrbFxList');if(!list||!fx)return;
+ if(fxTab==='fn'){
+  const q=fxSearch.toLowerCase();
+  const items=API_LIST.filter(x=>!q||(x.name+' '+x.sig+' '+x.desc).toLowerCase().includes(q));
+  list.innerHTML=items.slice(0,220).map(x=>'<button type="button" class="mrb-fx-item" data-fn="'+x.name+'"><b>'+esc(x.name)+'</b><small>'+esc(x.sig)+'</small><span>'+esc((x.desc||'').slice(0,90))+'</span></button>').join('')||'<div class="mrb-pal-empty">Ничего не найдено</div>';
+ }else if(fxTab==='vars'){
+  const vars=collectVars();
+  list.innerHTML=vars.map(v=>'<button type="button" class="mrb-fx-item" data-ins="'+esc(v)+'"><b>'+esc(v)+'</b><span>переменная или параметр</span></button>').join('')||'<div class="mrb-pal-empty">Переменных пока нет</div>';
+ }else{
+  const sn=[['true','истина'],['false','ложь'],['null','пусто'],['0','ноль'],['1','единица'],['"текст"','строка'],['[]','массив'],['{}','объект'],['pointerX()','X касания'],['pointerY()','Y касания'],['pointerDownNow()','палец нажат'],['time()','время игры']];
+  list.innerHTML=sn.map(s=>'<button type="button" class="mrb-fx-item" data-ins="'+esc(s[0])+'"><b>'+esc(s[0])+'</b><span>'+esc(s[1])+'</span></button>').join('');
+ }
+}
+function insertFx(text){const ta=$('mrbFxInput');if(!ta)return;const s=ta.selectionStart,e=ta.selectionEnd;ta.setRangeText(text,s,e,'end');ta.focus();updateFxPreview();}
+function updateFxPreview(){
+ const ta=$('mrbFxInput'),p=$('mrbFxPreview');if(!ta||!p)return;
+ const v=ta.value.trim().replace(/;+\s*$/,'');p.className='mrb-fx-preview';
+ if(!v){p.textContent='Введите выражение';const okb=$('mrbFxOk');if(okb)okb.disabled=true;return;}
+ clearTimeout(fxTimer);
+ fxTimer=setTimeout(()=>{const r=checkExpr(v);p.textContent=(r.ok?'✓ ':'⚠ ')+r.msg;p.classList.add(r.ok?'ok':'err');const okb=$('mrbFxOk');if(okb)okb.disabled=!r.ok;},220);
+}
+function collectVars(){
+ const set=new Set(['dt','x','y','i','item','key']);
+ let src='';try{src=(state.files&&state.files[curFile()])||'';}catch(e){}
+ src+='\n'+generate();
+ let m;const re=/\b(?:let|const)\s+([A-Za-z_$][\w$]*)/g;
+ while((m=re.exec(src)))set.add(m[1]);
+ for(const s of model.scripts){if(s.type==='function'){set.add(s.name);splitTop(s.params||'').forEach(p=>set.add(p.replace(/=.*/,'').trim()));}}
+ for(const b of rootBlocks()){if(b.type==='forof'||b.type==='forin')set.add(nameOf(b.varName,b.type==='forof'?'item':'key'));}
+ return Array.from(set).filter(Boolean).sort();
+}
+function checkExpr(v){
+ const code=String(v||'').trim().replace(/;+\s*$/,'');
+ if(!code)return{ok:false,msg:'Формула пустая'};
+ let base='';try{base=(state.files&&state.files[curFile()])||'';}catch(e){}
+ const probe=base+'\nfunction __mrbProbe(dt, x, y, i, item, key) { let __mrbExpr = ('+code+'); }';
+ try{
+  if(typeof window.MrrCodeValidate==='function'){
+   const files=Object.assign({},(typeof state!=='undefined'?state.files:{}),{[curFile()]:probe});
+   window.MrrCodeValidate(probe,{projectFiles:files,currentFile:curFile()});
+  }
+  return{ok:true,msg:'Формула корректна'};
+ }catch(e){return{ok:false,msg:String(e&&e.message||e)};}
+}
+
+/* ---------- синхронизация с редактором ---------- */
+function setEditor(code){
+ const ta=input();if(!ta)return;
+ ta.value=code;
+ try{if(typeof saveCode==='function')saveCode();else if(typeof state!=='undefined'&&state.files)state.files[file]=code;}catch(e){}
+ try{if(typeof scheduleRefreshEditor==='function')scheduleRefreshEditor();}catch(e){}
+ try{if(typeof scheduleDiagnostics==='function')scheduleDiagnostics();}catch(e){}
+ try{if(typeof window.mrrMarkDirty==='function')window.mrrMarkDirty();}catch(e){}
+}
+function applyNow(){
+ if(!model)return;
+ const code=generate();const ta=input();const cur=ta?ta.value:'';
+ if(cur&&cur!==code&&!store.backups[file])store.backups[file]=cur;
+ setEditor(code);hasModel=true;store.last[file]=code;persist();
+ updateBanner();updateRestore();validateSoon();setStatus('Код обновлён из блоков','ok');
+}
+function validateSoon(){
+ clearTimeout(valTimer);
+ valTimer=setTimeout(()=>{
+  const code=generate();
+  if(!code.trim()){setStatus('Пока нет блоков','');return;}
+  let ok=true,msg='';
+  try{if(typeof window.MrrCodeValidate==='function'){const files=Object.assign({},(typeof state!=='undefined'?state.files:{}),{[file]:code});window.MrrCodeValidate(code,{projectFiles:files,currentFile:file});}}catch(e){ok=false;msg=String(e&&e.message||e);}
+  setStatus(ok?'Код корректен':'Ошибка: '+msg,ok?'ok':'err');
+ },350);
+}
+function setStatus(t,c){const el=$('mrbStatus');if(!el)return;el.textContent=t;el.className='mrb-msg'+(c?' '+c:'');el.title=t;}
+function updateBanner(){
+ const b=$('mrbBanner');if(!b)return;
+ const cur=input()?input().value:'';
+ if(!hasModel){b.hidden=false;b.innerHTML='<span>Первый запуск блоков для файла. Код обновится после первого блока; исходный код сохранён.</span>';return;}
+ if(cur.trim()&&cur!==generate()&&store.last[file]!==cur){b.hidden=false;b.innerHTML='<b>Код в файле отличается от блоков.</b><span>Нажмите «Применить», чтобы синхронизировать.</span>';return;}
+ b.hidden=true;
+}
+function updateRestore(){const r=$('mrbRestore');if(r)r.hidden=!store.backups[file];}
+/* ---------- загрузка, режимы, восстановление ---------- */
+function loadModel(){
+ clearTimeout(syncTimer);undo=[];
+ file=curFile();
+ const ta=input(),cur=ta?ta.value:'';
+ let m=store.models[file];
+ if(m&&!validModel(m))m=null;
+ if(m){model=m;hasModel=true;}
+ else{model=defaultModel();hasModel=false;if(cur.trim()&&!store.backups[file])store.backups[file]=cur;}
+ selected={parentId:model.scripts[0]&&model.scripts[0].id,slot:'body'};
+ renderScripts();updateBanner();updateRestore();
+ const lbl=$('mrbFileLabel');if(lbl)lbl.textContent=file;
+ if(hasModel){
+  const gen=generate();
+  if(!cur.trim()||cur===store.last[file]||cur===gen||cur===store.backups[file])applyNow();
+  else setStatus('Код в файле отличается от блоков','err');
+ }else setStatus('Добавьте первый блок — код обновится','');
+ persist();
+}
+function setActive(on){
+ active=on;
+ const tab=$('tab-code');if(tab)tab.classList.toggle('mrr-blocks-on',on);
+ if(panel)panel.hidden=!on;
+ if(btn)btn.setAttribute('aria-pressed',String(on));
+ if(on)loadModel();
+ else{
+  if(model)applyNow();
+  persist();
+  try{if(typeof scheduleRefreshEditor==='function')scheduleRefreshEditor();}catch(e){}
+ }
+}
+function restoreCode(){
+ const b=store.backups[file];
+ if(!b){setStatus('Сохранённого кода нет','err');return;}
+ setEditor(b);
+ delete store.models[file];delete store.backups[file];delete store.last[file];persist();
+ model=null;hasModel=false;
+ setActive(false);toast('Исходный код восстановлен');
+}
+function toast(t){try{if(typeof showToast==='function')showToast(t,'ok',4000);else if(typeof setNote==='function')setNote(t);}catch(e){}}
+
+/* ---------- разметка режима ---------- */
+const ICON='<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></svg>';
+btn=document.createElement('button');
+btn.type='button';btn.id='btnBlocksMode';btn.className='btn mrb-toggle';
+btn.title='Визуальный режим блоков';btn.setAttribute('aria-pressed','false');
+btn.innerHTML=ICON+'<span class="btn-label">Блоки</span>';
+panel=document.createElement('section');
+panel.id='mrrBlocksPanel';panel.className='mrb';panel.hidden=true;panel.setAttribute('aria-label','Визуальный редактор блоков');
+panel.innerHTML='<div class="mrb-head"><span class="mrb-brand">'+ICON+'<span>Блоки</span></span><span class="mrb-file" id="mrbFileLabel">main.mrr</span><span class="spacer"></span><button type="button" class="btn ghost" id="mrbRestore" hidden>Вернуть код</button><button type="button" class="btn ghost" id="mrbShowCode">Код</button><button type="button" class="btn primary" id="mrbApply">Применить</button></div><div class="mrb-banner" id="mrbBanner" hidden></div><div class="mrb-shell"><aside class="mrb-palette"><div class="mrb-search"><input id="mrbSearch" type="search" placeholder="Найти блок или функцию…" autocomplete="off"></div><div class="mrb-pal-list" id="mrbPalList"></div></aside><div class="mrb-stage" id="mrbStage"><div class="mrb-target" id="mrbTarget"></div><div class="mrb-scripts" id="mrbScripts"></div><div class="mrb-drop mrb-drop-root" id="mrbRootDrop">Перетащите событие или блок сюда</div></div></div><div class="mrb-status"><span class="mrb-msg" id="mrbStatus">Готово</span><span class="spacer"></span><button type="button" class="btn mini ghost" id="mrbUndo">↶ Отменить</button></div>';
+const modal=document.createElement('div');
+modal.className='mrb-modal';modal.id='mrbFormula';modal.hidden=true;
+modal.innerHTML='<div class="mrb-dialog" role="dialog" aria-modal="true" aria-labelledby="mrbFxTitle"><div class="mrb-dialog-head"><b id="mrbFxTitle">Редактор формулы</b><span class="mrb-file" id="mrbFxWhere"></span><button type="button" class="btn ghost" id="mrbFxClose">✕</button></div><div class="mrb-fx-input-wrap"><textarea class="mrb-fx-input" id="mrbFxInput" spellcheck="false" placeholder="например: pointerX() > 100 && pointerY() < 300"></textarea></div><div class="mrb-fx-ops" id="mrbFxOps"></div><div class="mrb-fx-tabs"><button type="button" class="mrb-fx-tab active" data-fxtab="fn">Функции</button><button type="button" class="mrb-fx-tab" data-fxtab="vars">Переменные</button><button type="button" class="mrb-fx-tab" data-fxtab="snips">Значения</button></div><div class="mrb-fx-body"><input class="mrb-fx-search" id="mrbFxSearch" placeholder="Поиск функции…" autocomplete="off"><div class="mrb-fx-list" id="mrbFxList"></div></div><div class="mrb-fx-preview" id="mrbFxPreview">Введите выражение</div><div class="mrb-dialog-foot"><button type="button" class="btn ghost" id="mrbFxCancel">Отмена</button><button type="button" class="btn primary" id="mrbFxOk">Вставить</button></div></div>';
+const toolbar=document.querySelector('.code-toolbar');
+const main=$('mrrCodeMain');
+const ew=$('editorWrap');
+if(!toolbar||!main||!ew){return;}
+const toolsEl=toolbar.querySelector('.editor-tools');
+toolbar.insertBefore(btn,toolsEl||null);
+main.insertBefore(panel,ew.nextSibling);
+document.body.appendChild(modal);
+$('mrbFxOps').innerHTML=['+','-','*','/','%','**','==','!=','<','>','<=','>=','&&','||','!','(',')','?',':'].map(o=>'<button type="button" class="mrb-op" data-op="'+esc(o)+'">'+esc(o)+'</button>').join('');
+/* ---------- события ---------- */
+$('mrbSearch').addEventListener('input',filterPalette);
+$('mrbShowCode').addEventListener('click',()=>setActive(false));
+$('mrbApply').addEventListener('click',()=>applyNow());
+$('mrbRestore').addEventListener('click',restoreCode);
+$('mrbUndo').addEventListener('click',()=>{
+ const s=undo.pop();if(!s)return;
+ model=JSON.parse(s);
+ selected={parentId:model.scripts[0]&&model.scripts[0].id,slot:'body'};
+ renderScripts();applyNow();
+});
+$('mrbStage').addEventListener('click',onPanelClick);
+$('mrbScripts').addEventListener('input',onPanelInput);
+$('mrbScripts').addEventListener('change',onPanelChange);
+$('mrbPalList').addEventListener('click',onPalClick);
+$('mrbPalList').addEventListener('dragstart',onDragStart);
+$('mrbScripts').addEventListener('dragstart',onDragStart);
+$('mrbStage').addEventListener('dragover',onDragOver);
+$('mrbStage').addEventListener('drop',onDrop);
+document.addEventListener('dragend',()=>{
+ drag=null;
+ document.querySelectorAll('.mrb-dragging,.mrb-over').forEach(el=>el.classList.remove('mrb-dragging','mrb-over'));
+});
+btn.addEventListener('click',()=>setActive(!active));
+
+modal.addEventListener('click',e=>{
+ if(e.target===modal){closeFx();return;}
+ const tab=e.target.closest('[data-fxtab]');
+ if(tab){fxTab=tab.dataset.fxtab;renderFxTabs();renderFxList();}
+});
+$('mrbFxClose').addEventListener('click',closeFx);
+$('mrbFxCancel').addEventListener('click',closeFx);
+$('mrbFxOk').addEventListener('click',()=>{
+ if(!fx)return;
+ const v=$('mrbFxInput').value.trim();
+ if(!v||!checkExpr(v).ok){updateFxPreview();return;}
+ fx.set(v);closeFx();
+});
+$('mrbFxInput').addEventListener('input',updateFxPreview);
+$('mrbFxInput').addEventListener('keydown',e=>{
+ if(e.key==='Escape'){e.preventDefault();closeFx();}
+ else if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();$('mrbFxOk').click();}
+});
+$('mrbFxSearch').addEventListener('input',e=>{
+ fxSearch=e.target.value;
+ if(fxTab!=='fn'){fxTab='fn';renderFxTabs();}
+ renderFxList();
+});
+$('mrbFxOps').addEventListener('click',e=>{
+ const b=e.target.closest('[data-op]');if(!b)return;
+ const o=b.dataset.op;
+ insertFx(o==='('||o===')'||o==='!'?o:' '+o+' ');
+});
+$('mrbFxList').addEventListener('click',e=>{
+ const fn=e.target.closest('[data-fn]');
+ if(fn){
+  const info=API[fn.dataset.fn];
+  const args=info?info.params.map(p=>p.optional?'':defExpr(p)).filter(Boolean).join(', '):'';
+  insertFx(fn.dataset.fn+'('+args+')');return;
+ }
+ const ins=e.target.closest('[data-ins]');
+ if(ins)insertFx(ins.dataset.ins);
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('mrbFormula').hidden)closeFx();});
+
+/* ---------- старт ---------- */
+buildPalette();
+const fnEl=$('codeFileName');
+if(fnEl)new MutationObserver(()=>{if(active)setTimeout(()=>{if(curFile()!==file)loadModel();},0);}).observe(fnEl,{childList:true,subtree:true,characterData:true});
+setInterval(()=>{if(active&&curFile()!==file)loadModel();},900);
+window.addEventListener('beforeunload',persist);
+})();
+
 </script>
 </body></html>
