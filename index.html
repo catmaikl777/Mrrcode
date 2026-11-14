@@ -5050,6 +5050,7 @@ body.mrr-light .mrb-hat{box-shadow:inset 0 1px rgba(255,255,255,.55)}
     <span class="c">// 3. нарисовать новый кадр</span>
 }</pre>
 <p><code>start()</code> вызывается один раз после успешного запуска. <code>update(dt)</code> вызывается каждый кадр. <code>dt</code> — время между кадрами в секундах.</p>
+<p>Переменные, объявленные через <code>let</code>/<code>const</code> напрямую в теле <code>start</code>, становятся переменными игры: их видят <code>update</code>, обработчики ввода и другие функции. Объявления внутри <code>if</code>/циклов остаются блочными.</p>
 <p><code>start</code>, <code>update</code>, <code>pointerDown</code>, <code>pointerMove</code>, <code>pointerUp</code> — не встроенные функции, а <b>имена обработчиков</b>. Их нужно объявлять через <code>function</code>; движок вызывает их сам. Вызов <code>pointerDown()</code> из кода допустим только после такого объявления.</p>
 <p><b>Важно:</b> внутри <code>function update(dt)</code> <code>dt</code> — уже число. Пиши <code>x += speed * dt</code>, а не <code>dt()</code>. Вызов <code>dt()</code> допустим вне функции, когда имя <code>dt</code> не затенено локальным параметром.</p>
 <p>Ввод-события можно объявить в <code>main.mrr</code>:</p>
@@ -7200,7 +7201,13 @@ function callFunc(f,args,ctx,line){
     if(v===undefined&&p&&typeof p==='object'&&p.def)v=evalNode(p.def,fe,ctx);
     fe.vars.set(pname,v===undefined?null:v);
   }
-  try{evalNode(f.body,fe,ctx);}
+  try{
+    if(f.name==='start'&&f.body&&f.body.n==='Block'){
+      for(const st of f.body.body)evalNode(st,f.closure,ctx);
+    }else{
+      evalNode(f.body,fe,ctx);
+    }
+  }
   catch(s){
     ctx.depth--;
     if(s instanceof Signal){
@@ -11318,8 +11325,17 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
   const mmWrap = document.getElementById('editorMinimap');
   if (!input || !area || !lineEl || !mm || !mmWrap) return;
 
-  const LINE = 26;
-  const PAD = 14;
+  let LINE = 26;
+  let PAD = 14;
+  function refreshMetrics(){
+    const cs = getComputedStyle(input);
+    const lh = parseFloat(cs.lineHeight);
+    if (isFinite(lh) && lh > 0) LINE = lh;
+    const pt = parseFloat(cs.paddingTop);
+    if (isFinite(pt)) PAD = pt;
+    lineEl.style.height = LINE + 'px';
+  }
+  refreshMetrics();
   let frame = 0;
   let dragging = false;
   let linesKey = null, linesVal = null;
@@ -11436,7 +11452,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 
   ['input','keyup','click','select','focus'].forEach(name => input.addEventListener(name, schedule));
   input.addEventListener('scroll', schedule, { passive: true });
-  window.addEventListener('mrrcode-themechange', schedule);
+  window.addEventListener('mrrcode-themechange', () => { refreshMetrics(); schedule(); });
   document.addEventListener('selectionchange', () => {
     if (document.activeElement === input) schedule();
   });
@@ -11454,10 +11470,11 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
   window.addEventListener('pointercancel', () => { dragging = false; });
 
   if (window.ResizeObserver) new ResizeObserver(schedule).observe(area);
-  window.addEventListener('resize', schedule);
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => setTimeout(schedule, 60)));
+  window.addEventListener('resize', () => { refreshMetrics(); schedule(); });
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => setTimeout(() => { refreshMetrics(); schedule(); }, 60)));
   window.addEventListener('load', schedule);
-  setTimeout(schedule, 100);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { refreshMetrics(); schedule(); });
+  setTimeout(() => { refreshMetrics(); schedule(); }, 100);
 })();
 </script>
 
@@ -15998,13 +16015,19 @@ function parseCodeToModel(src){
   if(EV[name])return{id:uid(),type:'event',event:name,params,body};
   return{id:uid(),type:'function',name,params,body};
  }
- const scripts=[];let pending=[];
+ const scripts=[];let pending=[];const globals=[];
  while(!eof()){
   const t=at();
   if(t.t==='comment'){take();pending.push({id:uid(),type:'comment',text:t.v.replace(/^\/\/\s?/,'')});continue;}
-   if(t.t==='rawcomment'){take();pending.push({id:uid(),type:'raw',code:t.v});continue;}
-   if(is('punc',';')){take();continue;}
-   if(is('kw','function')){
+  if(t.t==='rawcomment'){take();pending.push({id:uid(),type:'raw',code:t.v});continue;}
+  if(is('punc',';')){take();continue;}
+  if(is('kw','let')||is('kw','const')){
+   const b=parseLet();
+   if(pending.length){globals.push.apply(globals,pending);pending=[];}
+   if(b)globals.push(b);
+   continue;
+  }
+  if(is('kw','function')){
    const fn=parseFunction();
    if(pending.length){fn.body=pending.concat(fn.body);pending=[];}
    scripts.push(fn);continue;
@@ -16012,8 +16035,16 @@ function parseCodeToModel(src){
   const tk=at();
   throw new Error('Строка '+tk.line+': код вне function нельзя представить блоками');
  }
- if(pending.length&&scripts.length)scripts[scripts.length-1].body=scripts[scripts.length-1].body.concat(pending);
- if(!scripts.length)throw new Error('В коде нет объявлений function');
+ if(globals.length){
+  let s=scripts.find(x=>x.type==='event'&&x.event==='start');
+  if(!s){s={id:uid(),type:'event',event:'start',body:[]};scripts.unshift(s);}
+  s.body=globals.concat(s.body);
+ }
+ if(pending.length){
+  if(scripts.length)scripts[scripts.length-1].body=scripts[scripts.length-1].body.concat(pending);
+  else if(globals.length)globals.push.apply(globals,pending);
+ }
+ if(!scripts.length)throw new Error('В коде нет объявлений function и переменных');
  return{scripts};
 }
 /* ---------- палитра ---------- */
