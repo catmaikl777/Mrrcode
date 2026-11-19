@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mrrcode-studio-v17';
+﻿const CACHE_NAME = 'mrrcode-studio-v54';
 const APP_SHELL = ['./', './studio-ui.css', './studio-ui.js', './manifest.webmanifest', './mrrcode-icon-192.png', './mrrcode-icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
@@ -22,3 +22,5 @@ self.addEventListener('fetch', event => {
     return response;
   })));
 });
+
+
