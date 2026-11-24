@@ -24,7 +24,9 @@
   document.querySelector('.tabs').setAttribute('role', 'tablist');
   document.querySelector('.tabs').setAttribute('aria-label', 'Разделы студии');
   tabs.forEach((tab, i) => {
-    tab.textContent = names[tab.dataset.tab];
+    const label = tab.querySelector('.tab-label');
+    if (label) label.textContent = names[tab.dataset.tab];
+    else tab.textContent = names[tab.dataset.tab];
     tab.id = 'nav-' + tab.dataset.tab;
     const panel = $('tab-' + tab.dataset.tab);
     panel.setAttribute('role', 'tabpanel');
@@ -85,7 +87,7 @@
   more.innerHTML = '<summary>Инструменты</summary><div class="editor-tools-menu"></div>';
   const menu = more.querySelector('div');
   // Move the original controls so their engine handlers and state are preserved.
-  document.querySelectorAll('.code-toolbar > button').forEach(button => menu.appendChild(button));
+  document.querySelectorAll('.code-toolbar > button, .code-toolbar > .tool-sep').forEach(control => menu.appendChild(control));
   menu.appendChild(document.querySelector('.code-toolbar > .color-tool'));
   document.querySelector('.code-toolbar').appendChild(more);
   menu.addEventListener('click', event => {
@@ -103,12 +105,19 @@
       more.querySelector('summary').focus();
     }
   });
+  function setHeaderLabel(id, text) {
+    const el = $(id);
+    if (!el) return;
+    const label = el.querySelector('.btn-label');
+    if (label) label.textContent = text;
+    else el.textContent = text;
+  }
   function headerLabels() {
     if (!mq.matches) setFocusMode(false);
     ['btnExportPxl','btnImportPxl','btnDebug','btnColorPicker'].forEach(id => { $(id).textContent = labels[id]; });
-    $('btnAI').textContent = mq.matches ? 'ИИ' : 'ИИ-агент';
-    $('btnRun').textContent = mq.matches ? '▶' : '▶ Запуск';
-    $('btnStop').textContent = mq.matches ? '■' : 'Стоп';
+    setHeaderLabel('btnAI', 'ИИ-агент');
+    setHeaderLabel('btnRun', 'Запуск');
+    setHeaderLabel('btnStop', 'Стоп');
   }
   // Run after the existing mobile labels handler on resize.
   mq.addEventListener('change', headerLabels);
@@ -164,4 +173,27 @@
   }
   new MutationObserver(simplifyEmptyState).observe(sprites, {childList:true});
   simplifyEmptyState();
+
+  const sceneLayout = document.querySelector('#tab-scene .scene-layout');
+  const sceneProps = $('propsPanel');
+  if (sceneLayout && sceneProps && !sceneLayout.querySelector('.scene-props')) {
+    const side = sceneLayout.querySelector('.scene-side');
+    const host = document.createElement('aside');
+    host.className = 'panel scene-props';
+    host.setAttribute('aria-label', 'Свойства объекта');
+    const head = document.createElement('div');
+    head.className = 'panel-head';
+    head.innerHTML = '<b>Свойства</b><span>объект</span>';
+    host.append(head, sceneProps);
+    sceneLayout.appendChild(host);
+    sceneLayout.classList.add('mrr-layout-3');
+    const objList = $('objList');
+    const objTitle = objList && objList.previousElementSibling;
+    const objActions = objList && objList.nextElementSibling;
+    if (side && objList && objTitle && objTitle.tagName === 'H3' && objActions && objActions.classList.contains('row-btns')) {
+      side.prepend(objActions);
+      side.prepend(objList);
+      side.prepend(objTitle);
+    }
+  }
 })();

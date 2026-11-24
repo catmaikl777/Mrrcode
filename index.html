@@ -5115,6 +5115,22 @@ body.mrr-settings-open{overflow:hidden}
 #gameStage.mrr-dev-square #gameCanvas{width:min(100%,440px);height:auto;aspect-ratio:1;object-fit:contain;margin:0 auto;background:#04060d}
 #gameStage:fullscreen .mrr-preview-bar,#gameStage:-webkit-full-screen .mrr-preview-bar{display:none}
 </style>
+<style id="mrr-layout-3">
+@media (min-width:900px){
+  #tab-scene .scene-layout.mrr-layout-3{display:grid;grid-template-columns:clamp(200px,18vw,260px) minmax(0,1fr) clamp(240px,22vw,320px);grid-template-areas:"side main props";align-items:start;gap:12px}
+  #tab-scene .mrr-layout-3>.scene-side{grid-area:side;position:sticky;top:12px;max-height:calc(100dvh - 132px);overflow:auto}
+  #tab-scene .mrr-layout-3>.scene-main{grid-area:main;min-width:0}
+  #tab-scene .mrr-layout-3>.scene-props{grid-area:props;padding:0;position:sticky;top:12px;max-height:calc(100dvh - 132px);overflow:auto}
+  #tab-scene .scene-props .props{border-top:0;padding:12px}
+  #tab-scene .scene-props .panel-head{margin:0}
+  #tab-scene .scene-side>h3:first-child{margin-top:0}
+}
+@media (max-width:899px){
+  #tab-scene .mrr-layout-3>.scene-main{order:1}
+  #tab-scene .mrr-layout-3>.scene-side{order:2}
+  #tab-scene .mrr-layout-3>.scene-props{order:3}
+}
+</style>
 </head>
 <body>
 <header>
