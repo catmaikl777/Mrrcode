@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="ru"><head>
 <meta charset="utf-8"/>
@@ -1331,7 +1331,7 @@ main{
   gap:10px;
   min-height:46px;
   padding:11px 16px;
-  background:rgba(9,30,29,.55);
+  background:var(--mrr-head-tint);
   border-bottom:1px solid var(--border-soft);
   font-size:13.5px;
   color:var(--text);
@@ -1522,7 +1522,7 @@ select.sel:focus{border-color:var(--accent);box-shadow:var(--focus-ring);outline
   display:flex;
   height:clamp(320px,50vh,620px);
   position:relative;
-  background:#0a1f1e;
+  background:var(--mrr-editor-bg,#0a1f1e);
   border:1px solid var(--border);
   border-radius:14px;
   overflow:hidden;
@@ -1548,7 +1548,7 @@ select.sel:focus{border-color:var(--accent);box-shadow:var(--focus-ring);outline
   user-select:none;
   font-variant-numeric:tabular-nums;
 }
-.editor-area{position:relative;flex:1;min-width:0;background:#0b2321}
+.editor-area{position:relative;flex:1;min-width:0;background:var(--mrr-editor-bg,#0b2321)}
 .hl,#codeInput{
   font:16px/28px var(--font-code);
   font-variant-numeric:tabular-nums;
@@ -1858,7 +1858,7 @@ select.sel:focus{border-color:var(--accent);box-shadow:var(--focus-ring);outline
   gap:8px;
   align-items:flex-end;
   padding:10px 14px calc(12px + env(safe-area-inset-bottom));
-  background:rgba(9,30,29,.6);
+  background:var(--mrr-status-bg);
   border-top:1px solid var(--border-soft);
 }
 .ai-input textarea{
@@ -1883,7 +1883,7 @@ select.sel:focus{border-color:var(--accent);box-shadow:var(--focus-ring);outline
 #tab-scene .scene-layout{display:flex;flex-direction:column;align-items:stretch;gap:14px;width:100%}
 #tab-scene .scene-main,#tab-scene .scene-side{width:100%;min-width:0;max-width:none}
 #tab-scene .scene-main .preview-wrap{width:100%;padding:10px 12px}
-#tab-scene #sceneCanvas{width:100%;height:auto;aspect-ratio:16/9;background:#0a2321;border-radius:12px;box-shadow:0 0 0 1px #2b4847,0 12px 34px rgba(0,0,0,.28)}
+#tab-scene #sceneCanvas{width:100%;height:auto;aspect-ratio:16/9;background:var(--mrr-editor-bg,#0a2321);border-radius:12px;box-shadow:0 0 0 1px var(--border),0 12px 34px rgba(0,0,0,.28)}
 #tab-scene .scene-main > .row-btns{padding:12px 12px 0;margin:0 0 0!important}
 .scene-side{padding:14px 12px;display:flex;flex-direction:column;gap:10px}
 .scene-side h3{
@@ -1955,7 +1955,7 @@ select.sel:focus{border-color:var(--accent);box-shadow:var(--focus-ring);outline
 .pf input{
   width:100%;
   padding:9px 10px;
-  background:#0a1f1e;
+  background:var(--mrr-filechip-bg,rgba(11,34,34,.72));
   border:1px solid #2a4443;
   border-radius:10px;
   color:var(--text);
@@ -1997,7 +1997,7 @@ select.sel:focus{border-color:var(--accent);box-shadow:var(--focus-ring);outline
 .fr-name{font:600 13px var(--font-code);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .file-row.active .fr-name{color:var(--text-strong)}
 .fr-meta{color:var(--muted-2);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fr-thumb{width:38px;height:38px;object-fit:contain;background:#0a1f1e;border-radius:8px;border:1px solid #2a4544;flex:none}
+.fr-thumb{width:38px;height:38px;object-fit:contain;background:var(--mrr-filechip-bg,rgba(11,34,34,.72));border-radius:8px;border:1px solid var(--border);flex:none}
 .file-row .btn.mini{flex:none}
 .empty-note{
   color:var(--muted-2);
@@ -2635,7 +2635,7 @@ body.tour-open{overflow:hidden}
 
 /* ===== вкладки открытых файлов ===== */
 .file-tabs{display:flex;align-items:flex-end;gap:4px;overflow-x:auto;scrollbar-width:none;
-  margin-top:10px;padding:6px 6px 0;background:#0a1f1e;border:1px solid var(--border);border-bottom:0;
+  margin-top:10px;padding:6px 6px 0;background:var(--mrr-editor-bg,#0a1f1e);border:1px solid var(--border);border-bottom:0;
   border-radius:12px 12px 0 0;min-height:38px}
 .file-tabs::-webkit-scrollbar{display:none}
 .file-tabs .ft-empty{color:var(--muted);font-size:12px;padding:6px 8px}
@@ -2764,7 +2764,7 @@ body.tour-open{overflow:hidden}
 #sceneZoomBar .zlabel{font:12px var(--font-code);color:var(--muted);min-width:52px;text-align:center}
 #sceneCanvas{transform-origin:top left}
 .preview-wrap{overflow:auto}
-.ruler{position:relative;height:16px;background:#0a1f1e;border:1px solid var(--border);border-radius:5px;
+.ruler{position:relative;height:16px;background:var(--mrr-status-bg);border:1px solid var(--border);border-radius:5px;
   overflow:hidden;margin-bottom:4px}
 .ruler canvas{display:block;width:100%;height:16px}
 .obj-tools{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
@@ -3406,6 +3406,8 @@ body.mrr-light.mrr-mist .mrr-side-file .sf-badge{background:var(--accent-soft);b
   display:none
 }
 .mrr-theme-menu.open{display:block;animation:mrrThemeIn .16s ease-out}
+/* рельс-режим: палитра тем выезжает от левого рельса, а не от шапки */
+body.mrr-rail .mrr-theme-menu{top:auto;bottom:calc(14px + env(safe-area-inset-bottom));left:calc(var(--mrr-rail-w) + 10px);right:auto;max-height:calc(100dvh - 28px)}
 @keyframes mrrThemeIn{from{opacity:0;transform:translateY(-5px) scale(.985)}to{opacity:1;transform:none}}
 .mrr-theme-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:3px 5px 9px}
 .mrr-theme-head b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -3437,6 +3439,261 @@ body.mrr-light.mrr-mist .mrr-side-file .sf-badge{background:var(--accent-soft);b
   .mrr-theme-menu.open{animation:none}
   .mrr-theme-option,.mrr-theme-check{transition:none}
 }
+</style>
+<style id="mrr-rail-dark">
+/* ==========================================================================
+   Rail Dark — рельс-кокпит: вертикальный рельс как единственная хром-зона,
+   шапка уходит в оверлей по требованию. Только визуальный слой: разметка
+   рабочих экранов и id/class не меняются. Тема не задаёт литеральных цветов —
+   только токены (--mrr-header-*, --mrr-rail-*), поэтому работает во всех темах.
+   ========================================================================== */
+:root{--mrr-rail-w:82px}
+@media (max-width:1179px){
+  body.mrr-rail header{min-width:0}
+  body.mrr-rail .run-controls{flex-wrap:wrap;min-width:0;max-width:100%}
+}
+
+/* ---------- база: полный рельс ---------- */
+body.mrr-rail{
+  padding-left:calc(var(--mrr-rail-w) + env(safe-area-inset-left));
+  background-attachment:fixed;
+}
+body.mrr-rail main{padding-left:12px;padding-right:12px}
+
+/* бренд-плашка коты: та же градиентка, что у .logo-mark */
+body.mrr-rail #mrrRailBrand{
+  display:grid;place-items:center;
+  position:fixed;left:calc((var(--mrr-rail-w) - 42px)/2);top:calc(12px + env(safe-area-inset-top));
+  width:42px;height:42px;z-index:260;
+  border-radius:13px;
+  background:var(--mrr-logo-grad);color:var(--mrr-primary-ink);
+  font:800 19px/1 var(--font-ui);
+  box-shadow:var(--mrr-logo-shadow);
+}
+
+/* рельс: вкладки-иконки с названиями */
+body.mrr-rail header{
+  position:fixed;top:0;left:0;bottom:0;z-index:250;
+  width:calc(var(--mrr-rail-w) + env(safe-area-inset-left));
+  padding:0;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,var(--mrr-rail-1),var(--mrr-rail-2));
+  border-right:1px solid var(--border);border-bottom:0;
+  backdrop-filter:blur(14px);
+}
+body.mrr-rail header>.logo{display:none}
+body.mrr-rail .tabs{
+  position:absolute;left:0;top:calc(66px + env(safe-area-inset-top));bottom:84px;right:0;
+  display:flex;flex-direction:column;align-items:stretch;gap:4px;
+  padding:0 9px;background:transparent;border:0;overflow-y:auto;scrollbar-width:none;
+}
+body.mrr-rail .tabs::-webkit-scrollbar{display:none}
+body.mrr-rail .tab-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  width:100%;min-height:58px;padding:8px 4px;
+  border:1px solid transparent;border-radius:12px;background:transparent;
+  color:var(--mrr-tab-ink);font:600 11px/1.05 var(--font-ui);letter-spacing:.01em;
+}
+body.mrr-rail .tab-btn:hover{background:var(--mrr-tab-hover);border-color:var(--border-soft)}
+body.mrr-rail .tab-btn.active{
+  background:linear-gradient(180deg,var(--mrr-tab-bg-1),var(--mrr-tab-bg-2));
+  border-color:var(--mrr-tab-edge);color:var(--mrr-tab-ink);
+  box-shadow:0 0 0 1px var(--mrr-tab-edge) inset,0 10px 24px -18px var(--mrr-tab-glow);
+}
+body.mrr-rail .tab-btn.active::before{
+  content:"";position:absolute;left:-9px;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;
+  background:var(--accent);
+}
+body.mrr-rail .tab-btn{position:relative}
+body.mrr-rail .tab-btn .mrr-ic{width:21px;height:21px}
+body.mrr-rail .tab-btn .tab-label{display:block;font-size:11px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* контролы запуска: вертикальный столбик над строкой статуса */
+body.mrr-rail .run-controls{
+  position:absolute;left:0;right:0;bottom:calc(58px + 18px);z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:8px 9px 0;background:transparent;
+}
+body.mrr-rail .run-controls>#saveStatus,
+body.mrr-rail .run-controls>#runStatus{display:none}
+body.mrr-rail .run-controls .btn{
+  width:100%;height:38px;padding:0;gap:0;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:11px;border:1px solid var(--border);
+  background:linear-gradient(180deg,var(--mrr-btn-top),var(--mrr-btn-bot));
+}
+body.mrr-rail .run-controls .btn .mrr-ic{width:18px;height:18px}
+body.mrr-rail .run-controls .btn .btn-label{display:none}
+body.mrr-rail .run-controls #btnRun{height:46px;background:linear-gradient(180deg,var(--accent-hi),var(--accent));color:var(--mrr-primary-ink);border-color:var(--accent)}
+body.mrr-rail .run-controls #btnRun .mrr-ic{width:22px;height:22px}
+body.mrr-rail #mrrRailStatus{
+  position:absolute;left:0;right:0;bottom:0;z-index:3;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  height:58px;padding-bottom:env(safe-area-inset-bottom);
+  border-top:1px solid var(--border);background:var(--mrr-status-bg);
+  font:600 10px/1 var(--font-ui);color:var(--muted);
+}
+body.mrr-rail #mrrRailStatus .mrs-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(61,220,132,.16)}
+body.mrr-rail #mrrRailStatus.is-running .mrs-dot{background:var(--accent);box-shadow:0 0 0 3px var(--mrr-tab-glow)}
+body.mrr-rail #mrrRailStatus.is-running .mrs-run{color:var(--accent-hi)}
+
+/* шапка-оверлей: выезжает по наведению мыши на рельс, по фокусу или по Ctrl+Alt+H */
+body.mrr-rail .mrr-header-context{
+  position:fixed;top:calc(64px + env(safe-area-inset-top));left:10px;z-index:260;
+  display:none;padding:7px 12px;border:1px solid var(--border);border-radius:12px;
+  background:var(--panel);box-shadow:var(--shadow-lg);max-width:calc(var(--mrr-rail-w) + 190px);
+}
+@media(hover:hover){
+  body.mrr-rail header:hover .mrr-header-context{display:flex}
+}
+body.mrr-rail.header-open .mrr-header-context{display:flex;animation:mrrThemeIn .16s ease-out}
+body.mrr-rail.header-open .mrr-header-context{top:calc(var(--mrr-header-h,64px) + 8px)}
+
+/* «Сохранено» и «Стоп»-статус живут в рельсе, а не в шапке */
+body.mrr-rail.header-open header{height:auto;bottom:auto}
+
+/* ---------- без шапки: контент начинается сверху ---------- */
+body.mrr-rail main{padding-top:calc(12px + env(safe-area-inset-top))}
+
+/* ---------- панель проекта в «Код»: инструменты редактора живут там ---------- */
+body.mrr-rail .rail-tools{margin-top:2px}
+body.mrr-rail .rail-tools>summary{width:100%}
+body.mrr-rail .rail-tools .editor-tools-menu{
+  position:static;width:100%;max-height:none;box-shadow:none;padding:6px 0;
+}
+body.mrr-rail .code-toolbar>.editor-tools{display:none}
+
+/* ---------- главный контур работает как канвас приложения ---------- */
+body.mrr-rail header{overflow:visible}
+body.mrr-rail .tabs{z-index:1}
+
+@media(prefers-reduced-motion:reduce){
+  body.mrr-rail .mrr-header-context{animation:none}
+}
+
+/* ---------- 1180–1360: узкие подписи в рельсе ---------- */
+@media(min-width:1180px) and (max-width:1360px){
+  :root{--mrr-rail-w:74px}
+  body.mrr-rail .tab-btn{min-height:54px;font-size:10.5px}
+}
+
+/* ---------- 641–1179: рельс компактный (только иконки), шапка-строка остаётся ---------- */
+@media(max-width:1179px){
+  body.mrr-rail{padding-left:0}
+  body.mrr-rail header{position:sticky;top:0;left:auto;bottom:auto;width:auto;height:auto;
+    background:rgba(10,14,26,.94);border-right:0;border-bottom:1px solid var(--border)}
+  body.mrr-rail header>.logo{display:flex}
+  body.mrr-rail #mrrRailBrand{display:none}
+  body.mrr-rail .tabs{position:static;flex-direction:row;bottom:auto;top:auto;padding:4px;overflow:visible;background:var(--panel2);border-radius:12px}
+  body.mrr-rail .tab-btn{flex-direction:row;width:auto;min-height:0;padding:7px 10px;border-radius:9px}
+  body.mrr-rail .tab-btn .tab-label{display:inline}
+  body.mrr-rail .tab-btn .mrr-ic{width:16px;height:16px}
+  body.mrr-rail .tab-btn.active::before{display:none}
+  body.mrr-rail .run-controls{position:static;flex-direction:row;padding:0;gap:8px}
+  body.mrr-rail .run-controls .btn{width:auto;height:auto;padding:8px 12px}
+  body.mrr-rail .run-controls .btn .btn-label{display:inline}
+  body.mrr-rail .run-controls>#saveStatus,
+  body.mrr-rail .run-controls>#runStatus{display:flex}
+  body.mrr-rail #mrrRailStatus{display:none}
+  body.mrr-rail .mrr-header-context{display:none!important}
+  body.mrr-rail main{padding-top:12px}
+  body.mrr-rail .code-toolbar>.editor-tools{display:block}
+  body.mrr-rail .mrr-theme-menu{top:calc(var(--mrr-header-h,64px) + 8px);left:auto;right:16px;bottom:auto;max-height:calc(100dvh - var(--mrr-header-h,64px) - 28px)}
+}
+
+/* ---------- до 640: рельс превращается в нижнее меню-таб-бар ---------- */
+@media(max-width:640px){
+  body.mrr-rail{padding-left:0;padding-bottom:calc(60px + env(safe-area-inset-bottom))}
+  body.mrr-rail header{position:sticky;top:0;padding:6px 10px;gap:6px}
+  body.mrr-rail header>.logo{display:flex}
+  body.mrr-rail header>.logo small{display:none}
+  body.mrr-rail .tabs{
+    position:fixed;left:0;right:0;bottom:0;top:auto;z-index:250;
+    flex-direction:row;justify-content:space-around;align-items:stretch;gap:0;
+    padding:4px 4px calc(4px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,var(--mrr-rail-1),var(--mrr-rail-2));
+    border-top:1px solid var(--border);border-radius:0;
+    box-shadow:0 -12px 28px -20px rgba(0,0,0,.7);
+  }
+  body.mrr-rail .tab-btn{flex:1 1 0;min-height:48px;padding:6px 2px;gap:3px;border-radius:10px}
+  body.mrr-rail .tab-btn .tab-label{display:block;font-size:10px}
+  body.mrr-rail .tab-btn .mrr-ic{width:20px;height:20px}
+  body.mrr-rail .run-controls{gap:6px}
+  body.mrr-rail .run-controls .btn{padding:6px 9px}
+  body.mrr-rail .run-controls #btnRun{min-width:44px}
+  body.mrr-rail .run-controls .btn .btn-label{display:none}
+  body.mrr-rail .run-controls .btn .mrr-ic{width:18px;height:18px}
+  body.mrr-rail #mrrSideEls{display:none}
+}
+</style>
+<style id="mrr-theme-carbon-surface">
+/* «Карбон» — новая тема: поверхности чуть глубже остальных тёмных, без «зелени». */
+body.mrr-carbon{
+  --mrr-header-1:rgba(18,22,28,.96);
+  --mrr-header-2:rgba(10,13,18,.94);
+  --mrr-rail-1:rgba(16,20,26,.96);
+  --mrr-rail-2:rgba(8,10,14,.98);
+  --mrr-seg-bg:rgba(8,10,14,.66);
+  --mrr-panel-top:#20262f;
+  --mrr-panel-mid:#1a1f27;
+  --mrr-panel-bot:#161a21;
+  --mrr-head-tint:linear-gradient(180deg,rgba(255,255,255,.045),rgba(0,0,0,.1));
+  --mrr-btn-top:#262d37;
+  --mrr-btn-bot:#1b2028;
+  --mrr-btn-top-hi:#313a46;
+  --mrr-btn-bot-hi:#232a33;
+  --mrr-btn-edge:#4d5866;
+  --mrr-primary-ink:#071014;
+  --mrr-ai-ink:#061418;
+  --mrr-ai-bg:linear-gradient(180deg,#b9e4e0,#82c4bd);
+  --mrr-console-bg:linear-gradient(180deg,#0b0f14,#07090d);
+  --mrr-palette-bg:linear-gradient(180deg,rgba(26,31,39,.94),rgba(18,22,28,.94));
+  --mrr-filechip-bg:rgba(22,26,33,.74);
+  --mrr-filetabs-bg:rgba(12,15,20,.6);
+  --mrr-status-bg:rgba(10,13,18,.62);
+  --mrr-canvas-bg:linear-gradient(180deg,#20262f,#181d24);
+  --mrr-soft:rgba(12,16,21,.44);
+  --mrr-veil:rgba(12,16,21,.36);
+  --mrr-gutter-ink:#5d6875;
+  --mrr-sys-ink:#96c9c4;
+  --mrr-tab-ink:#e8eef2;
+  --mrr-tab-hover:rgba(143,209,201,.07);
+  --mrr-tab-bg-1:rgba(143,209,201,.26);
+  --mrr-tab-bg-2:rgba(143,209,201,.1);
+  --mrr-tab-edge:rgba(143,209,201,.34);
+  --mrr-tab-glow:rgba(143,209,201,.55);
+  --mrr-ftab-1:rgba(143,209,201,.16);
+  --mrr-ftab-2:rgba(143,209,201,.04);
+  --mrr-sel:rgba(143,209,201,.28);
+  --mrr-logo-grad:linear-gradient(152deg,#c8ece7,#8fd1c9 46%,#4f8f8a);
+  --mrr-logo-shadow:inset 0 1px rgba(255,255,255,.5),inset 0 -1px rgba(20,50,48,.35),0 6px 16px -8px rgba(143,209,201,.75);
+  --mrr-dot:rgba(232,238,242,.55);
+  --bg:#0c1014;
+  --bg-deep:#070a0d;
+  --panel:#1a1f27;
+  --panel2:#151a21;
+  --surface:#222a33;
+  --surface-2:#28313c;
+  --surface-3:#313c49;
+  --border:#2b333d;
+  --border-soft:#232a33;
+  --border-strong:#3c4754;
+  --text:#e8eef2;
+  --text-strong:#f4f8fa;
+  --muted:#a7b3bf;
+  --muted-2:#8c98a6;
+  --accent-soft:rgba(232,164,125,.15);
+  --accent-softer:rgba(232,164,125,.075);
+  --bg-glow:rgba(143,209,201,.09);
+  --bg-glow-2:rgba(232,164,125,.05);
+  --bg-top:#101519;
+  --bg-mid:#0c1014;
+  --bg-bottom:#080b0e;
+}
+/* поле кода и сцена следуют теме, а не базовому зелёному */
+body.mrr-midnight{--mrr-editor-bg:#0b1427;--mrr-editor-line:rgba(120,170,255,.08)}
+body.mrr-carbon{--mrr-editor-bg:#161b22;--mrr-editor-line:rgba(143,209,201,.07)}
+body.mrr-light{--mrr-editor-bg:#fffdf9;--mrr-editor-line:rgba(178,97,44,.07)}
+body.mrr-light.mrr-mist{--mrr-editor-bg:#ffffff;--mrr-editor-line:rgba(47,143,122,.07)}
 </style>
 <style id="mrr-refinement">
 /* ==========================================================================
@@ -3765,6 +4022,8 @@ body.mrr-light .palette{background:linear-gradient(180deg,#faf4ea,#f3ebdd)}
   --mrr-panel-mid:#102626;
   --mrr-panel-bot:#0e2323;
   --mrr-head-tint:linear-gradient(180deg,rgba(255,255,255,.035),rgba(0,0,0,.06));
+  --mrr-editor-bg:#0b2321;
+  --mrr-editor-line:rgba(240,178,138,.06);
 
   --mrr-btn-top:#1f3d3e;
   --mrr-btn-bot:#152d2e;
@@ -3859,6 +4118,8 @@ body.mrr-graphite{
   --mrr-panel-mid:#181b1f;
   --mrr-panel-bot:#14171a;
   --mrr-head-tint:linear-gradient(180deg,rgba(255,255,255,.04),rgba(0,0,0,.08));
+  --mrr-editor-bg:#111416;
+  --mrr-editor-line:rgba(240,180,106,.07);
 
   --mrr-btn-top:#272c31;
   --mrr-btn-bot:#1c2125;
@@ -3923,6 +4184,8 @@ body.mrr-sunset{
   --mrr-filetabs-bg:rgba(18,10,15,.62);
   --mrr-status-bg:rgba(18,10,15,.62);
   --mrr-canvas-bg:linear-gradient(180deg,#2a1822,#22131b);
+  --mrr-editor-bg:#1b1017;
+  --mrr-editor-line:rgba(255,159,127,.07);
   --mrr-soft:rgba(18,10,15,.5);
   --mrr-veil:rgba(18,10,15,.42);
 
@@ -4423,6 +4686,8 @@ body.mrr-compact .doc-code-actions .btn{height:26px;min-height:26px}
 
 /* нижний «M» в потоке мешал: бренд остаётся только в шапке */
 #mrrRailBrand{display:none!important}
+/* Rail Dark: в рельс-режиме бренд возвращается в рельс */
+body.mrr-rail #mrrRailBrand{display:grid!important}
 </style>
 
 <style id="mrrcode-blocks-style">
@@ -5131,6 +5396,18 @@ body.mrr-settings-open{overflow:hidden}
   #tab-scene .mrr-layout-3>.scene-props{order:3}
 }
 </style>
+<style id="mrr-rail-off">
+/* Рельс выключен: на широком экране обычная верхняя шапка с горизонтальными вкладками. */
+#mrrRailBrand,#mrrRailStatus{display:none!important}
+@media (min-width:1180px){
+  body{padding-left:0}
+  .logo{display:flex}
+  #mrrHeaderContext{display:none}
+  .tabs{position:static;left:auto;top:auto;bottom:auto;width:auto;max-width:none;flex:0 1 auto;flex-direction:row;align-items:center;gap:2px;padding:5px;overflow:visible;border:1px solid var(--border);border-radius:14px;background:var(--panel2);z-index:auto}
+  .tab-btn{width:auto;height:auto;min-height:38px;flex:0 0 auto;flex-direction:row;gap:7px;padding:7px 12px;font-size:13px;line-height:1.2;white-space:nowrap;border-radius:10px}
+  .tab-btn .mrr-ic{width:17px;height:17px}
+}
+</style>
 </head>
 <body>
 <header>
@@ -5371,12 +5648,13 @@ body.mrr-settings-open{overflow:hidden}
 <div class="scene-layout">
 <div class="panel scene-main">
 <div class="panel-head"><b>Редактор сцены</b><span>Перетаскивай объекты пальцем</span></div>
-<div class="row-btns" style="margin:0 0 8px"><button aria-pressed="true" class="btn mini" id="sceneGridToggle">▦ Сетка: вкл.</button><button aria-pressed="false" class="btn mini" id="sceneSnapToggle">🧲 Привязка: выкл.</button><button aria-pressed="true" class="btn mini" id="sceneResizeToggle">↘ Размер: вкл.</button></div>
+<div class="row-btns" style="margin:0 0 8px"><button aria-pressed="true" class="btn mini" id="sceneGridToggle">▦ Сетка: вкл.</button><button aria-pressed="false" class="btn mini" id="sceneSnapToggle">🧲 Привязка: выкл.</button><button aria-pressed="true" class="btn mini" id="sceneResizeToggle">↘ Размер: вкл.</button><button aria-pressed="false" class="btn mini" id="scenePanToggle">✋ Рука: выкл.</button></div>
 <div id="sceneZoomBar">
 <button class="btn mini" id="sceneZoomOut" type="button" aria-label="Уменьшить масштаб">−</button>
 <span class="zlabel" id="sceneZoomLabel">100%</span>
 <button class="btn mini" id="sceneZoomIn" type="button" aria-label="Увеличить масштаб">+</button>
 <button class="btn mini ghost" id="sceneZoomReset" type="button">100%</button>
+<button class="btn mini ghost" id="sceneZoomFit" type="button" title="Вписать сцену в окно">⤢ Вписать</button>
 <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)">Шаг
 <select class="sel" id="sceneGridStep" aria-label="Шаг сетки" style="padding:5px 8px">
 <option value="10">10 px</option>
@@ -9167,12 +9445,26 @@ function drawSceneObj(c,o){
     const fw=sp&&sp.img&&sp.img.naturalWidth?sp.img.naturalWidth/cols:0,fh=sp&&sp.img&&sp.img.naturalHeight?sp.img.naturalHeight/rows:0;
     for(let r=0;r<(o.rows||0);r++){
       for(let q=0;q<(o.cols||0);q++){
-        const v=o.tiles&&o.tiles[r*(o.cols||0)+q];
+        const cell=r*(o.cols||0)+q;
+        const v=o.tiles&&o.tiles[cell];
         if(v==null)continue;
+        const dx=o.x+q*t,dy=o.y+r*t;
+        const rot=o.tileRot?(((Number(o.tileRot[cell])||0)%4)+4)%4:0;
+        const fx=o.tileFlipX&&o.tileFlipX[cell]?1:0;
+        const fy=o.tileFlipY&&o.tileFlipY[cell]?1:0;
         if(sp&&sp.img&&sp.img.complete&&sp.img.naturalWidth){
           const idx=Number(v)||0,sx=(idx%cols)*fw,sy=Math.floor(idx/cols)*fh;
-          c.drawImage(sp.img,sx,sy,fw,fh,o.x+q*t,o.y+r*t,t,t);
-        }else{c.fillStyle=String(v);c.fillRect(o.x+q*t,o.y+r*t,t,t);}
+          if(rot||fx||fy){
+            c.save();
+            c.translate(dx+t/2,dy+t/2);
+            if(rot)c.rotate(rot*Math.PI/2);
+            c.scale(fx?-1:1,fy?-1:1);
+            c.drawImage(sp.img,sx,sy,fw,fh,-t/2,-t/2,t,t);
+            c.restore();
+          }else{
+            c.drawImage(sp.img,sx,sy,fw,fh,dx,dy,t,t);
+          }
+        }else{c.fillStyle=String(v);c.fillRect(dx,dy,t,t);}
       }
     }
     return;
@@ -9425,7 +9717,8 @@ function startGame(){
   Engine.warnedSprites.clear();
   Engine.modules=new Map();Engine.loadingModules=new Set();
   const _vis=new Set(state.layers.filter(l=>l.visible!==false).map(l=>l.id));
-  Engine.hiddenLayers=_vis;Engine.runtimeScene=state.scene.filter(o=>_vis.has(o.layer||state.layers[0].id)&&o.visible!==false).sort((a,b)=>sceneLayerIndex(a.layer)-sceneLayerIndex(b.layer)).map(o=>Object.assign({},o));
+  Engine.hiddenLayers=new Set(state.layers.filter(l=>l.visible===false).map(l=>l.id));
+  Engine.runtimeScene=state.scene.filter(o=>_vis.has(o.layer||state.layers[0].id)&&o.visible!==false).sort((a,b)=>sceneLayerIndex(a.layer)-sceneLayerIndex(b.layer)).map(o=>Object.assign({},o));
   Engine.handlers={};
   Engine.baseEnv=buildGlobalEnv();
   Engine.env=createEnv(Engine.baseEnv);
@@ -9889,7 +10182,7 @@ function pushEditSnapshot(){if(restoringEdit)return;const v=codeInput.value;if(e
 function scheduleEditSnapshot(){clearTimeout(editTimer);editTimer=setTimeout(pushEditSnapshot,300);}
 function undoEdit(){if(editUndo.length<2)return;const cur=editUndo.pop();editRedo.push(cur);restoringEdit=true;codeInput.value=editUndo[editUndo.length-1];restoringEdit=false;saveCode();refreshEditor();updateAC(true);updateHint();}
 function redoEdit(){if(!editRedo.length)return;const v=editRedo.pop();editUndo.push(v);restoringEdit=true;codeInput.value=v;restoringEdit=false;saveCode();refreshEditor();updateAC(true);updateHint();}
-function projectData(){syncCodeToFile();return {app:'MrrCode',format:'mrrcode-project',version:11,layers:state.layers,activeLayer:state.activeLayer,blocks:(typeof window.mrrBlocksBundle==='function'?window.mrrBlocksBundle():null),entryFile:ENTRY_FILE,activeFile:state.activeFile,files:state.files,sprites:state.sprites.map(s=>({name:s.name,dataUrl:s.dataUrl})),scene:state.scene.map(o=>{const c=Object.assign({},o);delete c.id;return c;})};}
+function projectData(){syncCodeToFile();return {app:'MrrCode',format:'mrrcode-project',version:11,layers:state.layers,activeLayer:state.activeLayer,blocks:(typeof window.mrrBlocksBundle==='function'?window.mrrBlocksBundle():null),entryFile:ENTRY_FILE,activeFile:state.activeFile,files:state.files,sprites:state.sprites.map(s=>({name:s.name,dataUrl:s.dataUrl,frames:s.frames||null})),scene:state.scene.map(o=>{const c=Object.assign({},o);delete c.id;return c;})};}
 function saveProjectLocal(){try{localStorage.setItem('mrrcode-project-v2',JSON.stringify(projectData()));setNote('Проект сохранён в браузере.');logConsole('[MrrCode] Автосохранение выполнено.','sys');}catch(err){setNote('Не удалось сохранить проект: '+err.message);}}
 function restoreProjectLocal(){if(window.__MRRCODE_STANDALONE__)return false;try{const raw=localStorage.getItem('mrrcode-project-v2');if(!raw)return false;const data=JSON.parse(raw);if(!data||!data.files)return false;state.layers=Array.isArray(data.layers)&&data.layers.length?data.layers:[{id:'layer1',name:'Слой 1',visible:true}];state.activeLayer=state.layers.some(l=>l.id===data.activeLayer)?data.activeLayer:state.layers[0].id;state.files={};for(const k of Object.keys(data.files))state.files[k]=String(data.files[k]);restoreEntryFile(data);state.activeFile=Object.prototype.hasOwnProperty.call(state.files,data.activeFile)?data.activeFile:ENTRY_FILE;if(typeof window.mrrBlocksRestore==='function')window.mrrBlocksRestore(data.blocks);state.sprites=(data.sprites||[]).map(s=>{const img=new Image();img.src=s.dataUrl;return {name:String(s.name),dataUrl:s.dataUrl,img,sizeKb:Math.max(1,Math.round((s.dataUrl||'').length*.75/1024))};});state.scene=sanitizeScene(data.scene||[]);codeInput.value=state.files[state.activeFile];document.getElementById('codeFileName').textContent=state.activeFile;renderObjList();renderProps();renderScenePreview();renderFiles();return true;}catch(_){return false;}}
 /* автосейв только при реальных изменениях: не сериализуем PNG-проект каждые 15 секунд вхолостую */
@@ -10956,19 +11249,49 @@ function sanitizeScene(arr){
     if(o.type==='rect'){base.w=numArg(o.w,80);base.h=numArg(o.h,50);}
     if(o.type==='circle'){base.r=numArg(o.r,30);}
     if(o.type==='text'){base.text=o.text==null?'Текст':String(o.text);base.size=numArg(o.size,20);}
-    if(o.type==='tilemap'){base.cols=Math.max(1,Math.min(80,numArg(o.cols,20)||20));base.rows=Math.max(1,Math.min(60,numArg(o.rows,10)||10));base.tile=Math.max(4,Math.min(128,numArg(o.tile,32)||32));base.tileColor=String(o.tileColor||'#ff8844');base.tileset=String(o.tileset||'');base.tileIndex=Math.max(0,Math.floor(numArg(o.tileIndex,0)));const n=base.cols*base.rows;base.tiles=Array.isArray(o.tiles)?o.tiles.slice(0,n).map(v=>v==null?null:String(v)):Array(n).fill(null);while(base.tiles.length<n)base.tiles.push(null);}
+    if(o.type==='tilemap'){base.cols=Math.max(1,Math.min(80,numArg(o.cols,20)||20));base.rows=Math.max(1,Math.min(60,numArg(o.rows,10)||10));base.tile=Math.max(4,Math.min(128,numArg(o.tile,32)||32));base.tileColor=String(o.tileColor||'#ff8844');base.tileset=String(o.tileset||'');base.tileIndex=Math.max(0,Math.floor(numArg(o.tileIndex,0)));const n=base.cols*base.rows;base.tiles=Array.isArray(o.tiles)?o.tiles.slice(0,n).map(v=>v==null?null:String(v)):Array(n).fill(null);while(base.tiles.length<n)base.tiles.push(null);
+      const rr=Array.isArray(o.tileRot)?o.tileRot:[],fx=Array.isArray(o.tileFlipX)?o.tileFlipX:[],fy=Array.isArray(o.tileFlipY)?o.tileFlipY:[];
+      base.tileRot=Array.from({length:n},(_,i)=>(((Math.floor(numArg(rr[i],0))%4)+4)%4));
+      base.tileFlipX=Array.from({length:n},(_,i)=>fx[i]?1:0);
+      base.tileFlipY=Array.from({length:n},(_,i)=>fy[i]?1:0);
+      base.brushRot=(((Math.floor(numArg(o.brushRot,0))%4)+4)%4);
+      base.brushFlipX=o.brushFlipX?1:0;base.brushFlipY=o.brushFlipY?1:0;}
     return base;
   });
 }
 let sceneShowGrid=true,sceneSnap=false,sceneResize=true,sceneGridStep=50,sceneZoom=1,scenePaint=false;
+/* Вид сцены как в Unity: холст показывает рабочее пространство, а игровой экран 800×450 — рамка внутри него. */
+let scenePanX=0,scenePanY=0;
+const SCENE_W=800,SCENE_H=450;
+function sceneViewZoom(){return Math.max(0.25,Math.min(4,Number(sceneZoom)||1));}
+function sceneIsLight(){return document.body.classList.contains('mrr-light');}
+function sceneVisibleRect(){const z=sceneViewZoom();return {x:scenePanX,y:scenePanY,w:SCENE_W/z,h:SCENE_H/z,z:z};}
 const TILE_PALETTE=['#ff8844','#70d6ff','#7ef0b2','#ffd166','#ff6b9d','#a78bfa','#f4efe6','#26364f'];
 function renderScenePreview(){
   const c=sctx;
-  c.imageSmoothingEnabled=false;
+  const z=sceneViewZoom(),vx=scenePanX,vy=scenePanY,vw=SCENE_W/z,vh=SCENE_H/z;
   c.setTransform(1,0,0,1,0,0);
-  c.clearRect(0,0,800,450);
-  c.fillStyle=document.body.classList.contains('mrr-light')?'#fffdf9':'#0a2321';c.fillRect(0,0,800,450);
-  if(sceneShowGrid){c.strokeStyle=document.body.classList.contains('mrr-light')?'rgba(120,90,50,0.14)':'rgba(239,210,166,0.09)';c.lineWidth=1;for(let x=0;x<=800;x+=sceneGridStep){c.beginPath();c.moveTo(x,0);c.lineTo(x,450);c.stroke();}for(let y=0;y<=450;y+=sceneGridStep){c.beginPath();c.moveTo(0,y);c.lineTo(800,y);c.stroke();}}
+  c.imageSmoothingEnabled=false;
+  c.clearRect(0,0,SCENE_W,SCENE_H);
+  const bg=getComputedStyle(document.body).getPropertyValue('--mrr-editor-bg').trim()||(sceneIsLight()?'#fffdf9':'#0a2321');
+  c.fillStyle=bg;c.fillRect(0,0,SCENE_W,SCENE_H);
+  c.save();
+  c.scale(z,z);
+  c.translate(-vx,-vy);
+  if(sceneShowGrid){
+    const step=sceneGridStep;
+    c.strokeStyle=sceneIsLight()?'rgba(120,90,50,0.14)':'rgba(239,210,166,0.09)';
+    c.lineWidth=1/z;
+    const x0=Math.floor(vx/step)*step,x1=vx+vw,y0=Math.floor(vy/step)*step,y1=vy+vh;
+    for(let x=x0;x<=x1;x+=step){c.beginPath();c.moveTo(x,vy);c.lineTo(x,vy+vh);c.stroke();}
+    for(let y=y0;y<=y1;y+=step){c.beginPath();c.moveTo(vx,y);c.lineTo(vx+vw,y);c.stroke();}
+  }
+  /* Игровая зона: всё, что попадёт в игру, — этот прямоугольник; вокруг можно ставить объекты. */
+  c.fillStyle=sceneIsLight()?'rgba(255,255,255,.45)':'rgba(255,255,255,.03)';
+  c.fillRect(0,0,SCENE_W,SCENE_H);
+  c.strokeStyle=sceneIsLight()?'rgba(120,84,40,.5)':'rgba(239,210,166,.55)';
+  c.lineWidth=2/z;
+  c.strokeRect(0,0,SCENE_W,SCENE_H);
 
   // Сначала рисуем все объекты сцены, иначе превью показывало только сетку.
   const visible=new Set(state.layers.filter(l=>l.visible!==false).map(l=>l.id));
@@ -10978,8 +11301,19 @@ function renderScenePreview(){
   const sel=state.scene.find(o=>o.id===state.selectedId);
   if(sel){
     const b=objBounds(sel);
-    c.save();c.strokeStyle='#f0b28a';c.setLineDash([6,4]);c.lineWidth=2;
-    c.strokeRect(b.x-4,b.y-4,b.w+8,b.h+8);if(sceneResize&&sel.type==='rect'){c.setLineDash([]);c.fillStyle='#f0b28a';c.fillRect(b.x+b.w-5,b.y+b.h-5,10,10);}c.restore();
+    c.save();c.strokeStyle='#f0b28a';c.setLineDash([6/z,4/z]);c.lineWidth=2/z;
+    c.strokeRect(b.x-4/z,b.y-4/z,b.w+8/z,b.h+8/z);
+    if(sceneResize&&sel.type==='rect'){c.setLineDash([]);c.fillStyle='#f0b28a';c.fillRect(b.x+b.w-6/z,b.y+b.h-6/z,12/z,12/z);}
+    c.restore();
+  }
+  c.restore();
+  const frameTop=(0-vy)*z;
+  if(frameTop>=20){
+    c.save();
+    c.font='600 12px system-ui,sans-serif';
+    c.fillStyle=sceneIsLight()?'rgba(90,64,30,.8)':'rgba(239,210,166,.75)';
+    c.fillText('Экран 800×450',6,frameTop-7);
+    c.restore();
   }
   document.getElementById('sceneCount').textContent=state.scene.length?'('+state.scene.length+')':'';
 }
@@ -11020,7 +11354,12 @@ function deleteObject(id){
 }
 function tileSetOptions(sel){
   const cur=String(sel.tileset||'');
-  return '<option value="">Цвета</option>'+state.sprites.map(sp=>'<option value="'+escapeHtml(sp.name)+'"'+(sp.name===cur?' selected':'')+'>'+escapeHtml(sp.name)+'</option>').join('');
+  const opts=state.sprites.map(sp=>{
+    const w=sp.img&&sp.img.naturalWidth?sp.img.naturalWidth:0,h=sp.img&&sp.img.naturalHeight?sp.img.naturalHeight:0;
+    const grid=sp.frames&&sp.frames.cols?(' · '+sp.frames.cols+'×'+sp.frames.rows):(w?(' · '+w+'×'+h):'');
+    return '<option value="'+escapeHtml(sp.name)+'"'+(sp.name===cur?' selected':'')+'>'+escapeHtml(sp.name)+grid+'</option>';
+  }).join('');
+  return '<option value="">Цвета</option>'+opts;
 }
 function tilePaletteMarkup(sel){
   if(sel.tileset){
@@ -11031,9 +11370,37 @@ function tilePaletteMarkup(sel){
       for(let i=0;i<n;i++)out+='<button type="button" class="mrr-tile-swatch'+(Number(sel.tileIndex)===i?' on':'')+'" data-tile-index="'+i+'" style="background-image:url('+sp.dataUrl+');background-size:'+(cols*100)+'% '+(rows*100)+'%;background-position:'+(cols>1?(i%cols)/(cols-1)*100:0)+'% '+(rows>1?Math.floor(i/cols)/(rows-1)*100:0)+'%" title="Тайл '+i+'" aria-label="Тайл '+i+'"></button>';
       return out+'</div>';
     }
-    return '<div class="empty-note" style="margin:8px 0">У спрайта нет сетки. Нажми ⚙ у PNG во вкладке «Файлы»: 4×2 или другой размер.</div>';
+    return '<div class="empty-note" style="margin:8px 0">У картинки нет сетки тайлов. Нажми «✂ Нарезать» выше или ⚙ у PNG во вкладке «Файлы».</div>';
   }
   return '<div class="mrr-tile-palette" aria-label="Палитра тайлов">'+TILE_PALETTE.map(c=>'<button type="button" data-tile-color="'+c+'" style="background:'+c+'" title="'+c+'" aria-label="Цвет '+c+'"></button>').join('')+'</div>';
+}
+function tileSourcePx(sel){
+  const sp=spriteByName(sel.tileset||'');
+  const cols=sp&&sp.frames&&sp.frames.cols?Number(sp.frames.cols):0;
+  if(sp&&sp.img&&sp.img.naturalWidth&&cols)return Math.max(1,Math.round(sp.img.naturalWidth/cols));
+  return 16;
+}
+function tileSourceMarkup(sel){
+  const sp=spriteByName(sel.tileset||'');
+  const w=sp&&sp.img?sp.img.naturalWidth:0,h=sp&&sp.img?sp.img.naturalHeight:0;
+  const cols=sp&&sp.frames?Number(sp.frames.cols)||0:0,rows=sp&&sp.frames?Number(sp.frames.rows)||0:0;
+  const info=sp?('<b>'+escapeHtml(sp.name)+'</b> — '+w+'×'+h+' px · '+(cols&&rows?('сетка '+cols+'×'+rows):'сетка не задана')):'Выбери картинку во вкладке «Файлы» или импортируй её здесь.';
+  return '<div class="row-btns" style="margin:8px 0 0">'+
+    '<button class="btn mini ghost" type="button" id="btnTileImg">🖼 Картинка тайлов</button>'+
+    '<label class="pf" style="flex:1;min-width:104px">Тайл, px<input type="number" id="tileSlicePx" min="1" max="512" step="1" value="'+tileSourcePx(sel)+'"></label>'+
+    '<button class="btn mini" type="button" id="btnSliceTiles">✂ Нарезать</button>'+
+  '</div>'+
+  '<div class="props-tip" id="tileSliceInfo">'+info+'</div>'+
+  '<input type="file" id="tileImgInput" accept="image/png,image/*" hidden>';
+}
+function tileBrushMarkup(sel){
+  const rot=(((Number(sel.brushRot)||0)%4)+4)%4;
+  return '<div class="row-btns" style="margin:8px 0 0">'+
+    '<button class="btn mini" type="button" id="btnBrushRot" title="Повернуть кисть (R)">⟳ '+(rot*90)+'°</button>'+
+    '<button class="btn mini'+(sel.brushFlipX?'':' ghost')+'" type="button" id="btnBrushFlipX" aria-pressed="'+(sel.brushFlipX?'true':'false')+'" title="Отразить по X (X)">⇋ X</button>'+
+    '<button class="btn mini'+(sel.brushFlipY?'':' ghost')+'" type="button" id="btnBrushFlipY" aria-pressed="'+(sel.brushFlipY?'true':'false')+'" title="Отразить по Y (Y)">⇅ Y</button>'+
+  '</div>'+
+  '<div class="props-tip" style="margin-top:6px">Кисть ставит тайл с поворотом и отражением. Клавиши: R — поворот, X и Y — отражение.</div>';
 }
 function renderProps(){
   const sel=state.scene.find(o=>o.id===state.selectedId);
@@ -11082,7 +11449,7 @@ function renderProps(){
           '<input data-k="'+escapeHtml(f.k)+'" type="'+f.type+'" value="'+escaped+'"></label>';
       }).join('')+
     '</div>'+
-    (sel.type==='tilemap'?'<label class="pf mrr-tile-set">Тайлсет<select id="tileTileset">'+tileSetOptions(sel)+'</select></label>'+tilePaletteMarkup(sel):'')+
+    (sel.type==='tilemap'?'<label class="pf mrr-tile-set">Тайлсет<select id="tileTileset">'+tileSetOptions(sel)+'</select></label>'+tileSourceMarkup(sel)+tilePaletteMarkup(sel)+tileBrushMarkup(sel):'')+
     '<div class="row-btns">'+
       (sel.type==='tilemap'?'<button class="btn ghost" id="btnPaintTiles">🖌 Красить: '+(scenePaint?'вкл':'выкл')+'</button><button class="btn ghost" id="btnFillTiles">Залить</button><button class="btn ghost" id="btnClearTiles">Очистить тайлы</button>':'')+
       '<button class="btn ghost" id="btnDupObj">⧉ Дублировать</button>'+
@@ -11104,14 +11471,103 @@ function renderProps(){
 
   p.querySelectorAll('[data-tile-color]').forEach(b=>b.addEventListener('click',()=>{sel.tileColor=b.dataset.tileColor;const inp=p.querySelector('input[data-k="tileColor"]');if(inp)inp.value=sel.tileColor;}));
   p.querySelectorAll('[data-tile-index]').forEach(b=>b.addEventListener('click',()=>{sel.tileIndex=Number(b.dataset.tileIndex)||0;p.querySelectorAll('[data-tile-index]').forEach(x=>x.classList.toggle('on',x===b));}));
+  function resetCellArrays(){
+    const n=(sel.cols||20)*(sel.rows||10);
+    sel.tiles=Array(n).fill(null);
+    sel.tileRot=Array(n).fill(0);
+    sel.tileFlipX=Array(n).fill(0);
+    sel.tileFlipY=Array(n).fill(0);
+  }
   const tilesetSel=p.querySelector('#tileTileset');
-  if(tilesetSel)tilesetSel.addEventListener('change',()=>{sel.tileset=tilesetSel.value;sel.tileIndex=0;sel.tiles=Array((sel.cols||20)*(sel.rows||10)).fill(null);renderProps();renderScenePreview();});
+  if(tilesetSel)tilesetSel.addEventListener('change',()=>{
+    sel.tileset=tilesetSel.value;sel.tileIndex=0;resetCellArrays();
+    const sp=spriteByName(sel.tileset);
+    if(sp&&sp.img&&sp.img.naturalWidth&&!(sp.frames&&sp.frames.cols)){
+      /* Картинка из «Файлов» без сетки: режем по значению поля «Тайл, px», чтобы сразу рисовать. */
+      const sliceEl=document.getElementById('tileSlicePx');
+      const px=Math.max(1,Math.floor(Number(sliceEl&&sliceEl.value)||16));
+      sp.frames={cols:Math.max(1,Math.round(sp.img.naturalWidth/px)),rows:Math.max(1,Math.round(sp.img.naturalHeight/px))};
+      setNote('Сетка «'+sp.name+'»: '+sp.frames.cols+'×'+sp.frames.rows+' по '+px+' px.');
+    }
+    renderProps();renderScenePreview();
+  });
   const fillTiles=document.getElementById('btnFillTiles');
-  if(fillTiles)fillTiles.addEventListener('click',()=>{sel.tiles=Array((sel.cols||20)*(sel.rows||10)).fill(sel.tileset?(Number(sel.tileIndex)||0):(sel.tileColor||'#ff8844'));renderScenePreview();});
+  if(fillTiles)fillTiles.addEventListener('click',()=>{
+    const n=(sel.cols||20)*(sel.rows||10);
+    sel.tiles=Array(n).fill(sel.tileset?(Number(sel.tileIndex)||0):(sel.tileColor||'#ff8844'));
+    const rr=(((Number(sel.brushRot)||0)%4)+4)%4;
+    sel.tileRot=Array(n).fill(rr);
+    sel.tileFlipX=Array(n).fill(sel.brushFlipX?1:0);
+    sel.tileFlipY=Array(n).fill(sel.brushFlipY?1:0);
+    renderScenePreview();
+  });
   const paint=document.getElementById('btnPaintTiles');
   if(paint)paint.addEventListener('click',()=>{scenePaint=!scenePaint;paint.textContent='🖌 Красить: '+(scenePaint?'вкл':'выкл');});
   const clearTiles=document.getElementById('btnClearTiles');
-  if(clearTiles)clearTiles.addEventListener('click',()=>{sel.tiles=Array((sel.cols||20)*(sel.rows||10)).fill(null);renderScenePreview();});
+  if(clearTiles)clearTiles.addEventListener('click',()=>{resetCellArrays();renderScenePreview();});
+
+  /* Кисть: поворот и отражение */
+  const brushRotBtn=document.getElementById('btnBrushRot');
+  if(brushRotBtn)brushRotBtn.addEventListener('click',()=>{sel.brushRot=((((Number(sel.brushRot)||0)+1)%4)+4)%4;renderProps();});
+  const brushFxBtn=document.getElementById('btnBrushFlipX');
+  if(brushFxBtn)brushFxBtn.addEventListener('click',()=>{sel.brushFlipX=sel.brushFlipX?0:1;renderProps();});
+  const brushFyBtn=document.getElementById('btnBrushFlipY');
+  if(brushFyBtn)brushFyBtn.addEventListener('click',()=>{sel.brushFlipY=sel.brushFlipY?0:1;renderProps();});
+
+  /* Импорт картинки тайлов и нарезка на сетку */
+  const slicePx=document.getElementById('tileSlicePx');
+  const sliceBtn=document.getElementById('btnSliceTiles');
+  const imgBtn=document.getElementById('btnTileImg');
+  const imgInput=document.getElementById('tileImgInput');
+  function applySlice(name){
+    const sp=spriteByName(name||sel.tileset||'');
+    if(!sp||!sp.img||!sp.img.naturalWidth)return false;
+    const px=Math.max(1,Math.min(512,Math.floor(Number(slicePx&&slicePx.value)||tileSourcePx(sel))));
+    const cols=Math.max(1,Math.round(sp.img.naturalWidth/px));
+    const rows=Math.max(1,Math.round(sp.img.naturalHeight/px));
+    sp.frames={cols:cols,rows:rows};
+    sel.tileset=sp.name;
+    sel.tileIndex=Math.min(Number(sel.tileIndex)||0,cols*rows-1);
+    resetCellArrays();
+    renderProps();renderFiles();renderScenePreview();
+    setNote('Тайлсет «'+sp.name+'»: '+cols+'×'+rows+' тайлов по '+px+' px.');
+    logConsole('[Сцена] Тайлсет «'+sp.name+'»: '+cols+'×'+rows+', тайл '+px+' px.','sys');
+    return true;
+  }
+  if(sliceBtn)sliceBtn.addEventListener('click',()=>{if(!applySlice())setNote('Выбери картинку тайлсета во вкладке «Файлы» или нажми «Картинка тайлов».');});
+  if(imgBtn&&imgInput)imgBtn.addEventListener('click',()=>imgInput.click());
+  if(imgInput)imgInput.addEventListener('change',ev=>{
+    const f=ev.target.files&&ev.target.files[0];
+    ev.target.value='';
+    if(!f)return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const dataUrl=String(reader.result);
+      const img=new Image();
+      img.onload=()=>{
+        const base=(f.name||'tiles').replace(/\.[^.]+$/,'').replace(/[^\wА-Яа-яЁё$-]/g,'_')||'tiles';
+        let nm=base,n=2;
+        while(state.sprites.some(s=>s.name===nm)&&spriteByName(nm)&&spriteByName(nm).dataUrl!==dataUrl){nm=base+'_'+(n++);}
+        const existing=spriteByName(nm);
+        if(existing){existing.img=img;existing.dataUrl=dataUrl;}
+        else state.sprites.push({name:nm,dataUrl:dataUrl,img:img,sizeKb:Math.max(1,Math.round(dataUrl.length*0.75/1024))});
+        const px=Math.max(1,Math.min(512,Math.floor(Number(slicePx&&slicePx.value)||16)));
+        const cols=Math.max(1,Math.round(img.naturalWidth/px));
+        const rows=Math.max(1,Math.round(img.naturalHeight/px));
+        const sp=spriteByName(nm);
+        if(sp)sp.frames={cols:cols,rows:rows};
+        sel.tileset=nm;sel.tileIndex=0;
+        resetCellArrays();
+        renderProps();renderFiles();renderScenePreview();
+        setNote('Картинка «'+nm+'» нарезана: '+cols+'×'+rows+' тайлов по '+px+' px.');
+        logConsole('[Сцена] Картинка тайлов «'+nm+'» импортирована: '+cols+'×'+rows+'.','sys');
+      };
+      img.onerror=()=>setNote('Не удалось прочитать изображение.');
+      img.src=dataUrl;
+    };
+    reader.onerror=()=>setNote('Не удалось прочитать файл.');
+    reader.readAsDataURL(f);
+  });
   const dup=document.getElementById('btnDupObj');
   if(dup)dup.addEventListener('click',()=>{
     const copy=Object.assign({},sel,{id:uid()});
@@ -11133,7 +11589,8 @@ document.getElementById('sceneSnapToggle').addEventListener('click',e=>{sceneSna
 document.getElementById('sceneResizeToggle').addEventListener('click',e=>{sceneResize=!sceneResize;e.currentTarget.textContent='↘ Размер: '+(sceneResize?'вкл.':'выкл.');renderScenePreview();});
 function sceneCoords(e){
   const r=sceneCanvas.getBoundingClientRect();
-  return {x:(e.clientX-r.left)*(800/r.width),y:(e.clientY-r.top)*(450/r.height)};
+  const z=sceneViewZoom();
+  return {x:scenePanX+(e.clientX-r.left)*(SCENE_W/z)/r.width,y:scenePanY+(e.clientY-r.top)*(SCENE_H/z)/r.height};
 }
 function topObjectAt(x,y){
   for(let i=state.scene.length-1;i>=0;i--){
@@ -11147,13 +11604,8 @@ sceneCanvas.addEventListener('pointerdown',e=>{
   const p=sceneCoords(e);
   const obj=topObjectAt(p.x,p.y);
   selectObject(obj?obj.id:null);
-  if(obj&&obj.type==='tilemap'&&scenePaint){
-    const t=obj.tile||32,c=Math.floor((p.x-obj.x)/t),r=Math.floor((p.y-obj.y)/t);
-    if(c>=0&&c<(obj.cols||0)&&r>=0&&r<(obj.rows||0)){
-      obj.tiles[r*(obj.cols||0)+c]=obj.tiles[r*(obj.cols||0)+c]!=null?null:(obj.tileset?(Number(obj.tileIndex)||0):(obj.tileColor||'#ff8844'));
-      renderScenePreview();return;
-    }
-  }
+  /* Кисть тайлов живёт в слое улучшений сцены: протяжка, поворот и отражение. */
+  if(obj&&obj.type==='tilemap'&&scenePaint)return;
   if(obj){
     const b=objBounds(obj),resizeHit=sceneResize&&obj.type==='rect'&&p.x>=b.x+b.w-12&&p.y>=b.y+b.h-12;
     dragInfo={id:obj.id,mode:resizeHit?'resize':'move',ox:p.x-obj.x,oy:p.y-obj.y,startX:p.x,startY:p.y,startW:obj.w,startH:obj.h};
@@ -11186,7 +11638,7 @@ document.querySelectorAll('[data-add]').forEach(btn=>{
     if(type==='rect'){o.w=120;o.h=70;}
     if(type==='circle'){o.r=40;}
     if(type==='text'){o.text='Привет!';o.size=24;}
-    if(type==='tilemap'){o.cols=20;o.rows=10;o.tile=32;o.tileColor='#ff8844';o.tileset='';o.tileIndex=0;o.tiles=Array(200).fill(null);}
+    if(type==='tilemap'){o.cols=20;o.rows=10;o.tile=32;o.tileColor='#ff8844';o.tileset='';o.tileIndex=0;o.tiles=Array(200).fill(null);o.tileRot=Array(200).fill(0);o.tileFlipX=Array(200).fill(0);o.tileFlipY=Array(200).fill(0);o.brushRot=0;o.brushFlipX=0;o.brushFlipY=0;}
     state.scene.push(o);
     selectObject(o.id);
   });
@@ -11426,6 +11878,29 @@ function renderFiles(){
       saveProjectLocal();renderFiles();refreshEditor();setNote('Спрайт переименован: «'+previous+'» → «'+next+'». Ссылки в коде обновлены.');
     });
     row.appendChild(rename);
+    const gridBtn=document.createElement('button');
+    gridBtn.className='btn mini';gridBtn.textContent='⚙';gridBtn.title='Сетка тайлов: колонок×строк или размер тайла';
+    gridBtn.setAttribute('aria-label','Сетка тайлов: '+s.name);
+    gridBtn.addEventListener('click',()=>{
+      const w=s.img.naturalWidth||0,h=s.img.naturalHeight||0;
+      const cur=s.frames&&s.frames.cols?(s.frames.cols+'×'+s.frames.rows):'';
+      const answer=prompt('Сетка тайлов «'+s.name+'» ('+w+'×'+h+' px).\nФормат: колонок×строк (4×2) или размер тайла в px (16)',cur||'16');
+      if(answer===null)return;
+      const txt=String(answer).trim();
+      let cols=0,rows=0;
+      const m=/^(\d+)\s*[x×х*]\s*(\d+)$/i.exec(txt);
+      if(m){cols=Math.max(1,parseInt(m[1],10));rows=Math.max(1,parseInt(m[2],10));}
+      else{
+        const px=Math.max(1,parseInt(txt,10)||16);
+        cols=Math.max(1,Math.round(w/px));rows=Math.max(1,Math.round(h/px));
+      }
+      s.frames={cols:cols,rows:rows};
+      renderFiles();
+      const selObj=state.scene.find(o=>o.id===state.selectedId);
+      if(selObj&&selObj.type==='tilemap'&&String(selObj.tileset)===s.name)renderProps();
+      setNote('Сетка «'+s.name+'»: '+cols+'×'+rows+'.');
+    });
+    row.appendChild(gridBtn);
     const del=document.createElement('button');
     del.className='btn mini danger';del.textContent='✕';
     del.addEventListener('click',()=>{
@@ -11489,6 +11964,8 @@ document.getElementById('pngInput').addEventListener('change',e=>{
   (async()=>{
     for(const f of filesArr)await handleOne(f);
     renderFiles();
+    const selNow=state.scene.find(o=>o.id===state.selectedId);
+    if(selNow&&selNow.type==='tilemap')renderProps();
     setNote('Импорт завершён: добавлено '+added+', заменено (дубликаты) '+replaced+'. Имена доступны в sprite("имя", …) и ИИ-агенту.');
     logConsole('[Файлы] Импорт спрайтов: +'+added+', заменено '+replaced+'.','sys');
   })();
@@ -11514,7 +11991,7 @@ document.getElementById('projInput').addEventListener('change',e=>{
       restoreEntryFile(data);
       if(typeof window.mrrBlocksRestore==='function')window.mrrBlocksRestore(data.blocks,true);
       state.activeFile=Object.prototype.hasOwnProperty.call(state.files,data.activeFile)?data.activeFile:ENTRY_FILE;
-      state.sprites=(data.sprites||[]).map(s=>{const img=new Image();img.src=s.dataUrl;return {name:String(s.name),dataUrl:s.dataUrl,img,sizeKb:Math.max(1,Math.round((s.dataUrl||'').length*0.75/1024))};});
+      state.sprites=(data.sprites||[]).map(s=>{const img=new Image();img.src=s.dataUrl;return {name:String(s.name),dataUrl:s.dataUrl,img,frames:s.frames&&s.frames.cols&&s.frames.rows?{cols:Number(s.frames.cols)||1,rows:Number(s.frames.rows)||1}:null,sizeKb:Math.max(1,Math.round((s.dataUrl||'').length*0.75/1024))};});
       state.scene=sanitizeScene(data.scene||[]);
       state.selectedId=null;
       codeInput.value=state.files[state.activeFile];
@@ -11928,9 +12405,16 @@ function renderScene(){
       const t=Number(o.tile)||32,im=o.tileset?spriteImage(o.tileset):null,fr=(o.tileset&&spriteFrames[o.tileset])||{cols:1,rows:1};
       const cols=Math.max(1,fr.cols||1),rows=Math.max(1,fr.rows||1),fw=im&&im.naturalWidth?im.naturalWidth/cols:0,fh=im&&im.naturalHeight?im.naturalHeight/rows:0;
       for(let r=0;r<(Number(o.rows)||0);r++)for(let q=0;q<(Number(o.cols)||0);q++){
-        const v=o.tiles&&o.tiles[r*(Number(o.cols)||0)+q];if(v==null)continue;
-        if(im&&im.complete&&im.naturalWidth){const idx=Number(v)||0,sx=(idx%cols)*fw,sy=Math.floor(idx/cols)*fh;ctx.drawImage(im,sx,sy,fw,fh,x+q*t-cx,y+r*t-cy,t,t);}
-        else{ctx.fillStyle=String(v);ctx.fillRect(x+q*t-cx,y+r*t-cy,t,t);}
+        const cell=r*(Number(o.cols)||0)+q;
+        const v=o.tiles&&o.tiles[cell];if(v==null)continue;
+        const dx=x+q*t-cx,dy=y+r*t-cy;
+        const rot=Array.isArray(o.tileRot)?(((Number(o.tileRot[cell])||0)%4)+4)%4:0;
+        const fx=Array.isArray(o.tileFlipX)&&o.tileFlipX[cell]?1:0;
+        const fy=Array.isArray(o.tileFlipY)&&o.tileFlipY[cell]?1:0;
+        if(im&&im.complete&&im.naturalWidth){const idx=Number(v)||0,sx=(idx%cols)*fw,sy=Math.floor(idx/cols)*fh;
+          if(rot||fx||fy){ctx.save();ctx.translate(dx+t/2,dy+t/2);if(rot)ctx.rotate(rot*Math.PI/2);ctx.scale(fx?-1:1,fy?-1:1);ctx.drawImage(im,sx,sy,fw,fh,-t/2,-t/2,t,t);ctx.restore();}
+          else ctx.drawImage(im,sx,sy,fw,fh,dx,dy,t,t);}
+        else{ctx.fillStyle=String(v);ctx.fillRect(dx,dy,t,t);}
       }
       continue;
     }
@@ -16514,7 +16998,8 @@ window.mrrOpenCommandPalette=openCommandPalette;
   const ACCENTS = [
     { id: 'violet', label: 'Фиолет', color: '#7c6cff', hi: '#a99fff' },
     { id: 'cyan', label: 'Циан', color: '#38d6ff', hi: '#8ceaff' },
-    { id: 'amber', label: 'Янтарь', color: '#ffb35c', hi: '#ffd39b' }
+    { id: 'amber', label: 'Янтарь', color: '#ffb35c', hi: '#ffd39b' },
+    { id: 'lime', label: 'Лайм', color: '#a6f05a', hi: '#c8ff8c' }
   ];
   const THEMES = [
     { id: 'night', label: 'Ночь', note: 'Тёплый тёмный · по умолчанию', dark: true, meta: '#071517', sw: ['#061a19', '#12292a', '#cf7f57'] },
@@ -16522,7 +17007,8 @@ window.mrrOpenCommandPalette=openCommandPalette;
     { id: 'graphite', label: 'Графит', note: 'Нейтральный тёмный · янтарь', dark: true, meta: '#14171a', sw: ['#101214', '#1a1d20', '#f0b46a'] },
     { id: 'sunset', label: 'Закат', note: 'Тёплый тёмный · коралл', dark: true, meta: '#1a1016', sw: ['#1a1016', '#2a1822', '#ff9f7f'] },
     { id: 'paper', label: 'Бумага', note: 'Тёплый светлый', dark: false, meta: '#f4efe6', sw: ['#f4efe6', '#fffdf9', '#cf7f57'] },
-    { id: 'mist', label: 'Мята', note: 'Прохладный светлый', dark: false, meta: '#eaf2f1', sw: ['#eaf2f1', '#ffffff', '#2f8f7a'] }
+    { id: 'mist', label: 'Мята', note: 'Прохладный светлый', dark: false, meta: '#eaf2f1', sw: ['#eaf2f1', '#ffffff', '#2f8f7a'] },
+    { id: 'carbon', label: 'Карбон', note: 'Тёмный нейтральный · мята', dark: true, meta: '#0a0d11', sw: ['#0c1014', '#20262f', '#8fd1c9'] }
   ];
   const themeById = id => THEMES.find(theme => theme.id === id) || THEMES[0];
   const normalizeTheme = value => value === 'light' ? 'paper' : value === 'dark' ? 'night' : (THEMES.some(theme => theme.id === value) ? value : 'night');
@@ -16599,12 +17085,13 @@ window.mrrOpenCommandPalette=openCommandPalette;
 
   function applyTheme(id, opts) {
     const theme = themeById(normalizeTheme(id));
-    document.body.classList.remove('mrr-light', 'mrr-midnight', 'mrr-mist', 'mrr-graphite', 'mrr-sunset');
+    document.body.classList.remove('mrr-light', 'mrr-midnight', 'mrr-mist', 'mrr-graphite', 'mrr-sunset', 'mrr-carbon');
     if (!theme.dark) document.body.classList.add('mrr-light');
     if (theme.id === 'midnight') document.body.classList.add('mrr-midnight');
     if (theme.id === 'mist') document.body.classList.add('mrr-mist');
     if (theme.id === 'graphite') document.body.classList.add('mrr-graphite');
     if (theme.id === 'sunset') document.body.classList.add('mrr-sunset');
+    if (theme.id === 'carbon') document.body.classList.add('mrr-carbon');
     document.body.dataset.theme = theme.id;
     document.documentElement.style.colorScheme = theme.dark ? 'dark' : 'light';
     write(THEME_KEY, theme.id);
@@ -16674,6 +17161,11 @@ window.mrrOpenCommandPalette=openCommandPalette;
       });
       list.appendChild(option);
       if (theme.dark && THEMES[index + 1] && !THEMES[index + 1].dark) {
+        const groupDivider = document.createElement('div');
+        groupDivider.className = 'mrr-theme-divider';
+        list.appendChild(groupDivider);
+      }
+      if (theme.id === 'sunset') {
         const groupDivider = document.createElement('div');
         groupDivider.className = 'mrr-theme-divider';
         list.appendChild(groupDivider);
@@ -17366,21 +17858,63 @@ window.mrrOpenCommandPalette=openCommandPalette;
     document.body.appendChild(brand);
   }
 
+  /* Reльс-режим: компактная строка состояния внизу рельса */
+  if (!$('mrrRailStatus')) {
+    const railStatus = document.createElement('div');
+    railStatus.id = 'mrrRailStatus';
+    railStatus.setAttribute('aria-hidden', 'true');
+    railStatus.innerHTML = '<span class="mrs-dot"></span><span class="mrs-run" id="mrrRailRun">Готово</span>';
+    document.body.appendChild(railStatus);
+  }
+
+  /* Rail-режим: ярлыки инструментов редактора переезжают в панель проекта */
+  window.addEventListener('DOMContentLoaded', function () {
+    const railTabs = document.querySelector('.tabs');
+    const railMore = document.querySelector('.editor-tools');
+    if (!railTabs || !railMore) return;
+    railTabs.setAttribute('role', 'tablist');
+    railTabs.setAttribute('aria-label', 'Разделы студии');
+    const railCodeSidebar = $('mrrCodeSidebar');
+    const railCodeList = $('mrrSideFiles');
+    if (railCodeSidebar && railCodeList && railCodeList.parentElement && !railCodeSidebar.querySelector('.editor-tools')) {
+      const fold = document.createElement('details');
+      fold.className = 'editor-tools rail-tools';
+      const summary = railMore.querySelector('summary');
+      fold.innerHTML = '<summary>' + (summary ? summary.textContent : 'Инструменты') + '</summary>';
+      while (railMore.firstChild) fold.appendChild(railMore.firstChild);
+      railMore.replaceWith(fold);
+      railCodeList.parentElement.insertAdjacentElement('afterend', fold);
+    }
+  });
+
+
   const tabsBar = document.querySelector('.tabs');
   const mainEl = document.querySelector('main');
   const railMq = window.matchMedia('(min-width:1180px)');
   function placeTabs() {
     if (!tabsBar) return;
-    if (railMq.matches) {
-      if (mainEl && tabsBar.parentElement !== document.body) document.body.insertBefore(tabsBar, mainEl);
-    } else if (header && tabsBar.parentElement !== header) {
+    if (header && tabsBar.parentElement !== header) {
       const controls = document.querySelector('.run-controls');
       header.insertBefore(tabsBar, controls || null);
     }
-    tabsBar.setAttribute('aria-orientation', railMq.matches ? 'vertical' : 'horizontal');
+    tabsBar.setAttribute('aria-orientation', 'horizontal');
   }
   placeTabs();
   railMq.addEventListener('change', placeTabs);
+  window.addEventListener('resize', placeTabs);
+
+  /* Рельс включён по умолчанию: нижняя строка состояния отражает запуск игры */
+  (function () {
+    const rs = $('mrrRailStatus'), run = $('mrrRailRun');
+    if (!rs || !run) return;
+    const set = on => {
+      rs.classList.toggle('is-running', !!on);
+      run.textContent = on ? 'Игра' : 'Готово';
+    };
+    const runBtn = $('btnRun'), stopBtn = $('btnStop');
+    if (runBtn) runBtn.addEventListener('click', () => setTimeout(() => set(true), 0));
+    if (stopBtn) stopBtn.addEventListener('click', () => setTimeout(() => set(false), 0));
+  })();
 
   function syncHeaderHeight() {
     if (header) document.documentElement.style.setProperty('--mrr-header-h', header.offsetHeight + 'px');
@@ -18740,6 +19274,229 @@ window.addEventListener('beforeunload',persist);
     }
     if (typeof window.showToast === 'function') window.showToast('Справка: ' + word, 'ok');
   });
+})();
+</script>
+<script id="mrr-scene-enhance">
+/* Сцена как рабочее пространство: панорама за пределы экрана, зум колесом,
+   «рука», сетка тайлов, рисование протяжкой, вращение и отражение тайлов.
+   Данные проекта и движок не меняются. */
+(function(){
+  'use strict';
+  if (window.__mrrSceneEnhance) return;
+  var cv = document.getElementById('sceneCanvas');
+  if (!cv) return;
+  window.__mrrSceneEnhance = true;
+  var $ = function(id){ return document.getElementById(id); };
+  var ZMIN = 0.25, ZMAX = 4;
+  var panMode = false, spaceHeld = false, panDrag = null, paintDrag = null;
+
+  function zoom(){ return Math.max(ZMIN, Math.min(ZMAX, Number(sceneZoom) || 1)); }
+
+  function updateLabel(){
+    var label = $('sceneZoomLabel');
+    if (label) label.textContent = Math.round(zoom() * 100) + '%';
+  }
+  function redraw(){ updateLabel(); try { renderScenePreview(); } catch (_) {} }
+
+  function selectedTilemap(){
+    try {
+      var s = state.scene.find(function(o){ return o.id === state.selectedId; });
+      return s && s.type === 'tilemap' ? s : null;
+    } catch (_) { return null; }
+  }
+
+  function setZoomAt(nz, cx, cy){
+    var z0 = zoom(), z1 = Math.max(ZMIN, Math.min(ZMAX, nz));
+    if (Math.abs(z1 - z0) < 1e-4) return;
+    var r = cv.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    var wx = scenePanX + (cx - r.left) * (800 / z0) / r.width;
+    var wy = scenePanY + (cy - r.top) * (450 / z0) / r.height;
+    sceneZoom = z1;
+    scenePanX = wx - (cx - r.left) * (800 / z1) / r.width;
+    scenePanY = wy - (cy - r.top) * (450 / z1) / r.height;
+    redraw();
+  }
+
+  function centerPoint(){
+    var r = cv.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+
+  function fitView(){
+    var wrap = cv.parentElement;
+    var avail = Math.max(160, (wrap ? wrap.clientWidth : 800) - 28);
+    var z = Math.max(ZMIN, Math.min(1, avail / 800));
+    sceneZoom = z;
+    scenePanX = (800 - 800 / z) / 2;
+    scenePanY = (450 - 450 / z) / 2;
+    redraw();
+  }
+
+  function resetView(){ sceneZoom = 1; scenePanX = 0; scenePanY = 0; redraw(); }
+
+  function wantPan(e){
+    return panMode || spaceHeld || e.button === 1 || e.button === 2 || (e.altKey && e.button === 0);
+  }
+
+  function scenePoint(e){
+    var r = cv.getBoundingClientRect();
+    var z = zoom();
+    return {
+      x: scenePanX + (e.clientX - r.left) * (800 / z) / r.width,
+      y: scenePanY + (e.clientY - r.top) * (450 / z) / r.height
+    };
+  }
+
+  function tileCell(o, p){
+    var t = o.tile || 32;
+    var col = Math.floor((p.x - o.x) / t), row = Math.floor((p.y - o.y) / t);
+    var cols = o.cols || 0, rows = o.rows || 0;
+    if (col < 0 || row < 0 || col >= cols || row >= rows) return null;
+    return { col: col, row: row, idx: row * cols + col };
+  }
+
+  function ensureBrush(o){
+    var n = (o.cols || 0) * (o.rows || 0);
+    if (!Array.isArray(o.tileRot)) o.tileRot = [];
+    if (!Array.isArray(o.tileFlipX)) o.tileFlipX = [];
+    if (!Array.isArray(o.tileFlipY)) o.tileFlipY = [];
+    while (o.tileRot.length < n) o.tileRot.push(0);
+    while (o.tileFlipX.length < n) o.tileFlipX.push(0);
+    while (o.tileFlipY.length < n) o.tileFlipY.push(0);
+    o.brushRot = ((Number(o.brushRot) || 0) % 4 + 4) % 4;
+    o.brushFlipX = o.brushFlipX ? 1 : 0;
+    o.brushFlipY = o.brushFlipY ? 1 : 0;
+  }
+
+  function brushValue(o){ return o.tileset ? (Number(o.tileIndex) || 0) : (o.tileColor || '#ff8844'); }
+
+  function cellMatchesBrush(o, i){
+    var cur = o.tiles ? o.tiles[i] : null;
+    if (cur == null) return false;
+    return String(cur) === String(brushValue(o)) &&
+      (Number(o.tileRot[i]) || 0) === (Number(o.brushRot) || 0) &&
+      (o.tileFlipX[i] ? 1 : 0) === (o.brushFlipX ? 1 : 0) &&
+      (o.tileFlipY[i] ? 1 : 0) === (o.brushFlipY ? 1 : 0);
+  }
+
+  function applyCell(o, i, erase){
+    ensureBrush(o);
+    if (erase) {
+      o.tiles[i] = null;
+      o.tileRot[i] = 0;
+      o.tileFlipX[i] = 0;
+      o.tileFlipY[i] = 0;
+    } else {
+      o.tiles[i] = brushValue(o);
+      o.tileRot[i] = Number(o.brushRot) || 0;
+      o.tileFlipX[i] = o.brushFlipX ? 1 : 0;
+      o.tileFlipY[i] = o.brushFlipY ? 1 : 0;
+    }
+  }
+
+  cv.addEventListener('wheel', function(e){
+    e.preventDefault();
+    setZoomAt(zoom() * (e.deltaY < 0 ? 1.12 : 1 / 1.12), e.clientX, e.clientY);
+  }, { passive: false });
+
+  cv.addEventListener('pointerdown', function(e){
+    if (!wantPan(e)) return;
+    e.preventDefault(); e.stopPropagation();
+    panDrag = { id: e.pointerId, x: e.clientX, y: e.clientY, px: scenePanX, py: scenePanY };
+    try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    cv.style.cursor = 'grabbing';
+  }, true);
+
+  cv.addEventListener('pointermove', function(e){
+    var z = zoom();
+    var r = cv.getBoundingClientRect();
+    if (panDrag && panDrag.id === e.pointerId){
+      e.preventDefault(); e.stopPropagation();
+      scenePanX = panDrag.px - (e.clientX - panDrag.x) * (800 / z) / r.width;
+      scenePanY = panDrag.py - (e.clientY - panDrag.y) * (450 / z) / r.height;
+      redraw();
+      return;
+    }
+    if (!paintDrag) return;
+    var cell = tileCell(paintDrag.obj, scenePoint(e));
+    if (!cell || cell.idx === paintDrag.last) return;
+    paintDrag.last = cell.idx;
+    applyCell(paintDrag.obj, cell.idx, paintDrag.mode === 'erase');
+    renderScenePreview();
+  }, true);
+
+  function endPan(e){
+    if (panDrag && e && panDrag.id !== e.pointerId) return;
+    panDrag = null;
+    cv.style.cursor = panMode ? 'grab' : (scenePaint ? 'crosshair' : '');
+  }
+  cv.addEventListener('pointerup', function(e){ endPan(e); }, true);
+  cv.addEventListener('pointercancel', function(e){ endPan(e); }, true);
+  cv.addEventListener('contextmenu', function(e){ if (panMode) e.preventDefault(); });
+
+  document.addEventListener('keydown', function(e){
+    if (document.body.dataset.page !== 'scene') return;
+    var t = document.activeElement;
+    if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    var c = centerPoint();
+    if (e.key === '+' || e.key === '=') { setZoomAt(zoom() * 1.12, c.x, c.y); e.preventDefault(); }
+    else if (e.key === '-') { setZoomAt(zoom() / 1.12, c.x, c.y); e.preventDefault(); }
+    else if (e.key === '0') { resetView(); e.preventDefault(); }
+    else if (e.code === 'Space') { spaceHeld = true; cv.style.cursor = 'grab'; e.preventDefault(); }
+    else if (e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') {
+      var s1 = selectedTilemap();
+      if (s1) { ensureBrush(s1); s1.brushRot = ((Number(s1.brushRot) || 0) + 1) % 4; if (typeof renderProps === 'function') renderProps(); e.preventDefault(); }
+    }
+    else if (e.key === 'x' || e.key === 'X' || e.key === 'ч' || e.key === 'Ч') {
+      var s2 = selectedTilemap();
+      if (s2) { ensureBrush(s2); s2.brushFlipX = s2.brushFlipX ? 0 : 1; if (typeof renderProps === 'function') renderProps(); e.preventDefault(); }
+    }
+    else if (e.key === 'y' || e.key === 'Y' || e.key === 'н' || e.key === 'Н') {
+      var s3 = selectedTilemap();
+      if (s3) { ensureBrush(s3); s3.brushFlipY = s3.brushFlipY ? 0 : 1; if (typeof renderProps === 'function') renderProps(); e.preventDefault(); }
+    }
+  });
+  document.addEventListener('keyup', function(e){
+    if (e.code === 'Space') { spaceHeld = false; cv.style.cursor = panMode ? 'grab' : (scenePaint ? 'crosshair' : ''); }
+  });
+
+  var fitBtn = $('sceneZoomFit');
+  if (fitBtn) fitBtn.addEventListener('click', function(){ setTimeout(fitView, 0); });
+  ['sceneZoomIn','sceneZoomOut'].forEach(function(id){
+    var b = $(id);
+    if (b) b.addEventListener('click', function(){ setTimeout(redraw, 0); });
+  });
+  var resetBtn = $('sceneZoomReset');
+  if (resetBtn) resetBtn.addEventListener('click', function(){ setTimeout(resetView, 0); });
+  var panBtn = $('scenePanToggle');
+  if (panBtn) panBtn.addEventListener('click', function(){
+    panMode = !panMode;
+    panBtn.textContent = '✋ Рука: ' + (panMode ? 'вкл.' : 'выкл.');
+    panBtn.setAttribute('aria-pressed', String(panMode));
+    cv.style.cursor = panMode ? 'grab' : (scenePaint ? 'crosshair' : '');
+  });
+
+  cv.addEventListener('pointerdown', function(e){
+    if (!scenePaint || wantPan(e)) return;
+    var sel = selectedTilemap();
+    if (!sel) return;
+    var cell = tileCell(sel, scenePoint(e));
+    if (!cell) return;
+    ensureBrush(sel);
+    paintDrag = { obj: sel, mode: cellMatchesBrush(sel, cell.idx) ? 'erase' : 'paint', last: cell.idx };
+    applyCell(sel, cell.idx, paintDrag.mode === 'erase');
+    renderScenePreview();
+  });
+
+  window.addEventListener('pointerup', function(){ paintDrag = null; });
+  window.addEventListener('pointercancel', function(){ paintDrag = null; });
+
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    b.addEventListener('click', function(){ if (document.body.dataset.page === 'scene') setTimeout(redraw, 30); });
+  });
+  window.addEventListener('resize', function(){ setTimeout(redraw, 90); });
+  setTimeout(function(){ updateLabel(); }, 300);
 })();
 </script>
 </body></html>
