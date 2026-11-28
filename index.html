@@ -334,7 +334,6 @@ select.sel{background:var(--panel);border:1px solid var(--border);color:var(--te
   .tab-btn{padding:9px 10px;font-size:12.5px}
   .run-controls{order:2;width:auto;flex:1;justify-content:flex-end}
   #btnRun,#btnStop{padding:9px 11px;font-size:12.5px}
-  #btnAI{padding:9px 10px}
   #runStatus{display:none}
   main{padding:9px 9px calc(40px + env(safe-area-inset-bottom))}
   .btn{padding:9px 11px;font-size:12.5px;border-radius:10px}
@@ -422,6 +421,35 @@ html[data-safe-area-side="left"] #game-ui{
   padding-left:max(6px,var(--safe-left));
 }
 
+
+/* Агент — полноценная адаптивная вкладка, а не модальное окно */
+#tab-ai{min-height:0}
+#tab-ai.active{display:flex;flex-direction:column}
+.ai-tab-panel{
+  width:100%;max-width:100%;height:calc(100dvh - 190px);min-height:320px;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+#tab-ai .sheet-head{flex:none;flex-wrap:wrap}
+#tab-ai .ai-settings{flex:none;max-height:38dvh;overflow:auto;-webkit-overflow-scrolling:touch}
+#tab-ai .ai-chat{flex:1 1 auto;min-height:80px;max-height:none;overflow-y:auto;overscroll-behavior:contain}
+#tab-ai .ai-templates,#tab-ai .ai-context{flex:none;max-width:100%;overflow-x:auto}
+#tab-ai .ai-input{flex:none;position:sticky;bottom:0;background:var(--panel);padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+#tab-ai .ai-input textarea{min-width:0;max-height: min(22dvh,120px)}
+@media(max-width:640px){
+  #tab-ai .ai-tab-panel{height:calc(100dvh - 154px);min-height:280px;border-radius:12px}
+  #tab-ai .sheet-head{padding:9px 10px;align-items:flex-start}
+  #tab-ai .sheet-head .sh-btns{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
+  #tab-ai .sheet-head .sh-btns .btn{padding:6px 8px;font-size:11px}
+  #tab-ai .ai-settings{max-height:34dvh;padding:9px}
+  #tab-ai .ai-chat{padding:9px;gap:7px}
+  #tab-ai .ai-msg{max-width:96%;font-size:13px}
+  #tab-ai .ai-templates{padding:5px 8px}
+  #tab-ai .ai-input{gap:6px;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+  #tab-ai .ai-send{width:44px;height:44px}
+}
+@media(min-width:641px) and (max-width:920px){
+  #tab-ai .ai-tab-panel{height:calc(100dvh - 180px)}
+}
 </style>
 <style id="mrr-cat-decor">
   /* MrrCode: subtle decorative cat details; existing theme is untouched. */
@@ -4643,7 +4671,7 @@ header{flex-wrap:nowrap;gap:10px}
 
 @media(max-width:640px){
   .run-controls{gap:6px}
-  #btnAI,#btnRun,#btnStop{min-width:44px;width:44px;min-height:44px;height:44px;padding:0}
+  #btnRun,#btnStop{min-width:44px;width:44px;min-height:44px;height:44px;padding:0}
 }
 
 @media(min-width:1180px){
@@ -5417,11 +5445,12 @@ body.mrr-settings-open{overflow:hidden}
 <button class="tab-btn" data-tab="code" aria-label="Код"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M8.2 6 4.4 10l3.8 4M11.8 6l3.8 4-3.8 4"/></svg><span class="tab-label">Код</span></button>
 <button class="tab-btn" data-tab="scene" aria-label="Сцена"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><rect x="3.4" y="3.4" width="13.2" height="13.2" rx="2"/><path d="M3.4 9.6h13.2M9.6 3.4v13.2"/></svg><span class="tab-label">Сцена</span></button>
 <button class="tab-btn active" data-tab="files" aria-label="Файлы"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3.4 6.4a2 2 0 0 1 2-2h2.5l1.4 2h5.3a2 2 0 0 1 2 2v5.2a2 2 0 0 1-2 2H5.4a2 2 0 0 1-2-2Z"/></svg><span class="tab-label">Файлы</span></button>
+<button class="tab-btn" data-tab="ai" aria-label="ИИ-агент"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M10 3.4l1.35 3.25L14.6 8l-3.25 1.35L10 12.6 8.65 9.35 5.4 8l3.25-1.35L10 3.4Z"/><path d="M15.1 12.3l.62 1.48 1.48.62-.62 1.48-.62-1.48-1.48-.62 1.48-.62.62-1.48Z"/></svg><span class="tab-label">Агент</span></button>
 <button class="tab-btn" data-tab="help" aria-label="Справка"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6.9"/><path d="M8.1 7.6a2 2 0 1 1 2.6 1.9c-.55.2-.8.6-.8 1.2v.35"/><circle cx="10" cy="13.8" r=".85" fill="currentColor" stroke="none"/></svg><span class="tab-label">Справка</span></button>
 </nav>
 <div class="run-controls">
 <span aria-live="polite" class="save-status saved" id="saveStatus" title="Проект сохранён в браузере"><i aria-hidden="true"></i><span class="save-text">Сохранено</span></span>
-<button class="btn ai" id="btnAI" title="ИИ-агент: открыть панель" aria-label="ИИ-агент"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M10 3.4l1.35 3.25L14.6 8l-3.25 1.35L10 12.6 8.65 9.35 5.4 8l3.25-1.35L10 3.4Z"/><path d="M15.1 12.3l.62 1.48 1.48.62-1.48.62-.62 1.48-.62-1.48-1.48-.62 1.48-.62.62-1.48Z"/></svg><span class="btn-label">ИИ-агент</span></button>
+
 <button class="btn primary" id="btnRun" title="Запуск main.mrr на весь экран" aria-label="Запуск"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M6.9 4.6v10.8L15.5 10 6.9 4.6Z"/></svg><span class="btn-label">Запуск</span></button>
 <button class="btn stop" disabled="" id="btnStop" aria-label="Стоп"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><rect x="5.5" y="5.5" width="9" height="9" rx="1.6"/></svg><span class="btn-label">Стоп</span></button>
 <button class="btn" id="btnReplay" title="Запустить игру снова" aria-label="Повторить"><svg class="mrr-ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M15.6 8.2A6.2 6.2 0 1 0 16 11.4"/><path d="M15.8 4.4v3.9h-3.9"/></svg><span class="btn-label">Повторить</span></button>
@@ -5732,7 +5761,7 @@ body.mrr-settings-open{overflow:hidden}
 <p><b>Как это работает</b></p>
 <p><b>Главный файл — точка входа:</b> после «Переименовать» нажми «Сделать главным» у нужного исходника. «Запуск» и HTML-сборка используют его. По умолчанию выбран main.mrr; выбор сохраняется вместе с проектом.</p>
 <p><b>Связывай файлы импортами:</b> создай <code>player.mrr</code> с функцией <code>spawnPlayer()</code>, а в main.mrr напиши <code>from "player" import spawnPlayer;</code></p>
-<p><b>🤖 ИИ-агент</b> умеет сам создавать файлы и менять сцену — кнопка «🤖 ИИ» в шапке.</p>
+<p><b>🤖 ИИ-агент</b> умеет сам создавать файлы и менять сцену — вкладка «Агент» в основной панели.</p>
 <p>Имя PNG без расширения = имя ресурса для <code>sprite("имя", x, y, w, h)</code>. Повторный импорт того же файла заменяет спрайт (без дубликатов).</p>
 <p>Данные хранятся в памяти страницы — экспортируй проект (.json), чтобы не потерять их.</p>
 </div>
@@ -6611,9 +6640,9 @@ player.x = <span class="f">lerp</span>(player.x, targetX, <span class="n">0.1</s
 <div class="sheet-list" id="sheetList"></div>
 </div>
 </div>
-<!-- ИИ-агент -->
-<div class="sheet-backdrop hidden" id="aiBackdrop">
-<div class="sheet ai-sheet">
+<!-- ================= AI AGENT ================= -->
+<section class="tab" id="tab-ai">
+<div class="panel ai-tab-panel">
 <div class="sheet-head"><b>🤖 ИИ-агент проекта</b>
 <div class="sh-btns">
 <button class="btn mini ghost" id="btnAiUndo" title="Отменить последнее изменение ИИ">↶ Отменить ИИ</button>
@@ -6674,7 +6703,7 @@ player.x = <span class="f">lerp</span>(player.x, targetX, <span class="n">0.1</s
 <button class="btn primary ai-send" id="btnAiSend">➤</button>
 </div>
 </div>
-</div>
+</section>
 <input accept="image/png,image/*" hidden="" id="pngInput" multiple="" type="file"/>
 <input accept=".mrr,text/plain,application/octet-stream" hidden="" id="mrrInput" type="file"/>
 <input accept=".json,application/json" hidden="" id="projInput" type="file"/>
@@ -10815,7 +10844,7 @@ function openAiSheet(){
   document.getElementById('aiBaseUrl').value=cfg.baseUrl;
   document.getElementById('aiApiKey').value=cfg.apiKey;
   document.getElementById('aiModel').value=cfg.model;
-  document.getElementById('aiBackdrop').classList.remove('hidden');
+  switchTab('ai');
   const chat=document.getElementById('aiChat');
   if(!chat.children.length){
     aiAdd('sys','🤖 ИИ-агент MrrCode. Он может создавать и изменять файлы .mrr и объекты сцены (прямоугольники, круги, текст), а также просить импортировать нужные PNG. Изменения файлов и сцены автоматически сохраняются в проекте браузера.');
@@ -10825,7 +10854,7 @@ function openAiSheet(){
     }
   }
 }
-function closeAiSheet(){document.getElementById('aiBackdrop').classList.add('hidden');}
+function closeAiSheet(){switchTab('code');}
 function setAiSendState(busy){
   const btn=document.getElementById('btnAiSend');
   const input=document.getElementById('aiPrompt');
@@ -12271,12 +12300,8 @@ document.getElementById('sheetBackdrop').addEventListener('click',e=>{
 });
 document.getElementById('sheetSearch').addEventListener('input',e=>renderSheet(e.target.value));
 /* ИИ */
-document.getElementById('btnAI').addEventListener('click',openAiSheet);
 document.getElementById('btnAiCode').addEventListener('click',openAiSheet);
 document.getElementById('btnAiClose').addEventListener('click',closeAiSheet);
-document.getElementById('aiBackdrop').addEventListener('click',e=>{
-  if(e.target===document.getElementById('aiBackdrop'))closeAiSheet();
-});
 document.getElementById('btnAiSettings').addEventListener('click',()=>{
   document.getElementById('aiSettingsPanel').classList.toggle('hidden');
 });
@@ -13997,9 +14022,9 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
       text: 'Вкладка «Код» — редактор с подсветкой, палитрой символов, автодополнением и мини-картой. «📖» открывает шпаргалку по языку.'
     },
     {
-      target: '#btnAI',
+      target: '[data-tab="ai"]',
       title: 'Подключи ИИ',
-      text: 'Кнопка «ИИ» открывает агента: опиши игру словами — он создаст файлы, сцену и код. Ключ хранится только в браузере.'
+      text: 'Вкладка «Агент»: опиши игру словами — он создаст файлы, сцену и код. Ключ хранится только в браузере.'
     }
   ];
 
